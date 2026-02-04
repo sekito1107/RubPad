@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-const WASM_API_URL = "https://cdn.jsdelivr.net/npm/@ruby/wasm-wasi@2.8.1/dist/browser.umd.js"
+const WASM_API_URL = "https://cdn.jsdelivr.net/npm/@ruby/wasm-wasi@2.8.1/dist/browser/+esm"
 const RUBY_WASM_URL = "https://cdn.jsdelivr.net/npm/@ruby/3.3-wasm-wasi@2.8.1/dist/ruby+stdlib.wasm"
 
 export default class extends Controller {
@@ -23,11 +23,8 @@ export default class extends Controller {
     try {
       this.updateOutput("// Ruby WASM initializing...")
       
-      // Load Ruby WASM API script (UMD version)
-      await this.loadScript(WASM_API_URL)
-      
-      // Get DefaultRubyVM from the global object
-      const { DefaultRubyVM } = window["ruby-wasm-wasi"]
+      // Dynamically import Ruby WASM API (ESM version)
+      const { DefaultRubyVM } = await import(WASM_API_URL)
       
       // Fetch and compile WASM module
       const response = await fetch(RUBY_WASM_URL)
@@ -42,20 +39,6 @@ export default class extends Controller {
       console.error("Failed to initialize Ruby VM:", error)
       this.updateOutput(`// Error: ${error.message}`)
     }
-  }
-
-  loadScript(src) {
-    return new Promise((resolve, reject) => {
-      if (document.querySelector(`script[src="${src}"]`)) {
-        resolve()
-        return
-      }
-      const script = document.createElement("script")
-      script.src = src
-      script.onload = resolve
-      script.onerror = reject
-      document.head.appendChild(script)
-    })
   }
 
   async run() {
