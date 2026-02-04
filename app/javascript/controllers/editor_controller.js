@@ -92,7 +92,6 @@ export default class extends Controller {
       fontFamily: "'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace"
     })
 
-    // Theme observer
     this.observer = new MutationObserver(() => {
       this.updateTheme()
     })
