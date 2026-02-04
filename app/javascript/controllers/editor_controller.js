@@ -8,8 +8,14 @@ export default class extends Controller {
   static targets = ["container"]
 
   connect() {
+    console.log("EditorController connected")
+    console.log("ace global:", typeof ace)
+    console.log("containerTarget:", this.containerTarget)
+    
     // ace is exposed globally by the import
     this.editor = ace.edit(this.containerTarget)
+    console.log("editor created:", this.editor)
+    
     this.editor.setTheme(this.currentTheme)
     this.editor.session.setMode("ace/mode/ruby")
     
@@ -23,6 +29,8 @@ export default class extends Controller {
       showPrintMargin: false,
       useWorker: false // Worker not easily supported in importmap without extra config
     })
+
+    this.editor.focus()
 
     // Observe theme changes
     this.observer = new MutationObserver(() => {
