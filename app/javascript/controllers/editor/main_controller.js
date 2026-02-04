@@ -92,13 +92,16 @@ export default class extends Controller {
       fontFamily: "'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace"
     })
 
-    this.observer = new MutationObserver(() => {
-      this.updateTheme()
-    })
     this.observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"]
     })
+
+    // Dispatch initialized event for other controllers
+    this.element.dispatchEvent(new CustomEvent("editor--main:initialized", {
+      detail: { editor: this.editor },
+      bubbles: true 
+    }))
   }
 
   updateTheme() {
