@@ -57,4 +57,8 @@ group :test do
   gem "selenium-webdriver"
 end
 
+group :development, :test do
+  gem "rspec-rails", "~> 7.0"
+end
+
 gem "view_component", "~> 4.2"
