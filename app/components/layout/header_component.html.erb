@@ -1,39 +1,43 @@
-<header class="h-14 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-between px-4 shrink-0">
+<header class="h-14 border-b border-white/5 bg-[#0D1117] flex items-center justify-between px-4 shrink-0">
   <div class="flex items-center gap-3">
     <div class="flex items-center gap-2">
       <%= inline_svg_tag "icons/ruby.svg", class: "w-6 h-6" %>
-      <span class="text-xl font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">
+      <span class="text-lg font-bold text-gray-100 tracking-tight">
         RubPad
       </span>
-      <span class="px-2 py-0.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-full">
+      <span class="ml-1 text-[10px] font-medium text-slate-500">
         v1.0 (MVP)
       </span>
     </div>
   </div>
 
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-3">
+    <%# テーマ切り替えボタン (画像にはないが機能として維持) %>
     <button
       id="theme-toggle"
-      class="p-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors"
+      class="p-2 text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-md transition-colors"
       title="テーマ切り替え"
       data-controller="theme"
       data-action="click->theme#toggle"
     >
       <span class="dark:hidden">
-        <%= inline_svg_tag "icons/moon.svg", class: "w-5 h-5" %>
+        <%= inline_svg_tag "icons/moon.svg", class: "w-4 h-4" %>
       </span>
       <span class="hidden dark:inline">
-        <%= inline_svg_tag "icons/sun.svg", class: "w-5 h-5" %>
+        <%= inline_svg_tag "icons/sun.svg", class: "w-4 h-4" %>
       </span>
     </button>
 
-    <button class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors">
+    <div class="h-4 w-px bg-white/10 mx-1"></div>
+
+    <button class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-colors border border-transparent hover:border-white/10">
       <%= inline_svg_tag "icons/share.svg", class: "w-4 h-4" %>
       <span>Share</span>
     </button>
 
-    <button class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors shadow-sm">
-      <%= inline_svg_tag "icons/play.svg", class: "w-4 h-4 fill-current" %>
+    <button class="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-semibold text-white bg-red-600/90 hover:bg-red-600 rounded-md transition-colors shadow-sm shadow-red-900/20">
+      <%# 画像ではErrorボタンになっているが、機能としてはRunボタンなのでPlayアイコンを維持 %>
+      <%= inline_svg_tag "icons/play.svg", class: "w-3 h-3 fill-current" %>
       <span>Run</span>
     </button>
   </div>
