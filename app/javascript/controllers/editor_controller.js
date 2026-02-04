@@ -1,25 +1,26 @@
 import { Controller } from "@hotwired/stimulus"
-import { basicSetup } from "codemirror"
-import { EditorView } from "@codemirror/view"
-import { ruby } from "@codemirror/lang-ruby"
-import { oneDark } from "@codemirror/theme-one-dark"
-import { Compartment } from "@codemirror/state"
+import ace from "ace-builds"
+import "ace-builds/mode/ruby"
+import "ace-builds/theme/chrome"
+import "ace-builds/theme/one_dark"
 
 export default class extends Controller {
   static targets = ["container"]
 
   connect() {
-    this.themeConfig = new Compartment()
+    this.editor = ace.edit(this.containerTarget)
+    this.editor.setTheme(this.currentTheme)
+    this.editor.session.setMode("ace/mode/ruby")
+    
+    // Initial value
+    this.editor.setValue("# Welcome to RubPad!\n# Type code here and see Rurema links appear on the right.\n\nnames = ['Ruby', 'Python', 'JavaScript']\n\nnames.select { |n| n.include?('u') }\n  .map(&:upcase)\n  .each do |n|\n    puts \"Hello, #{n}!\"\n  end\n\n# Try typing .split or .size below:\n", 1) // 1 = move cursor to end
 
-    this.editor = new EditorView({
-      doc: "# Welcome to RubPad!\n# Type code here and see Rurema links appear on the right.\n\nnames = ['Ruby', 'Python', 'JavaScript']\n\nnames.select { |n| n.include?('u') }\n  .map(&:upcase)\n  .each do |n|\n    puts \"Hello, #{n}!\"\n  end\n\n# Try typing .split or .size below:\n",
-      extensions: [
-        basicSetup,
-        ruby(),
-        this.themeConfig.of(this.currentThemeExtension),
-        EditorView.lineWrapping
-      ],
-      parent: this.containerTarget
+    // Options
+    this.editor.setOptions({
+      fontSize: "14px",
+      fontFamily: "monospace", // "Menlo", "Monaco", "Consolas", "Courier New", monospace
+      showPrintMargin: false,
+      useWorker: false // Worker not easily supported in importmap without extra config
     })
 
     // Observe theme changes
@@ -35,6 +36,7 @@ export default class extends Controller {
   disconnect() {
     if (this.editor) {
       this.editor.destroy()
+      this.editor.container.remove()
     }
     if (this.observer) {
       this.observer.disconnect()
@@ -42,13 +44,11 @@ export default class extends Controller {
   }
 
   updateTheme() {
-    this.editor.dispatch({
-      effects: this.themeConfig.reconfigure(this.currentThemeExtension)
-    })
+    this.editor.setTheme(this.currentTheme)
   }
 
-  get currentThemeExtension() {
+  get currentTheme() {
     const isDark = document.documentElement.classList.contains("dark")
-    return isDark ? oneDark : []
+    return isDark ? "ace/theme/one_dark" : "ace/theme/chrome"
   }
 }
