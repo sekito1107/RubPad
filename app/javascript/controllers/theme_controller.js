@@ -8,7 +8,9 @@ export default class extends Controller {
   }
 
   toggle() {
+    console.log("Toggle called!")
     const isDark = document.documentElement.classList.toggle("dark")
+    console.log("Dark mode:", isDark)
     localStorage.setItem("theme", isDark ? "dark" : "light")
     this.updateIcon()
   }
