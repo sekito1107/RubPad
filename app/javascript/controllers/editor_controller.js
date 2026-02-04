@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import ace from "ace-builds"
+import "ace-builds"
 import "ace-builds/mode/ruby"
 import "ace-builds/theme/chrome"
 import "ace-builds/theme/one_dark"
@@ -8,6 +8,7 @@ export default class extends Controller {
   static targets = ["container"]
 
   connect() {
+    // ace is exposed globally by the import
     this.editor = ace.edit(this.containerTarget)
     this.editor.setTheme(this.currentTheme)
     this.editor.session.setMode("ace/mode/ruby")
