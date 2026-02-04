@@ -1,18 +1,18 @@
 import { Controller } from "@hotwired/stimulus"
 import "ace-builds"
+import "ace-builds/mode/ruby"
+import "ace-builds/theme/chrome"
+import "ace-builds/theme/one_dark"
 
 export default class extends Controller {
   static targets = ["container"]
 
   connect() {
     console.log("EditorController connected")
+    console.log("ace global:", typeof ace)
+    console.log("containerTarget:", this.containerTarget)
     
-    // Explicitly set base path for Ace to find modes/themes via CDN
-    const ACE_CDN_BASE = "https://cdn.jsdelivr.net/npm/ace-builds@1.32.6/src-min-noconflict/"
-    ace.config.set("basePath", ACE_CDN_BASE)
-    ace.config.set("modePath", ACE_CDN_BASE)
-    ace.config.set("themePath", ACE_CDN_BASE)
-
+    // ace is exposed globally by the import
     this.editor = ace.edit(this.containerTarget)
     console.log("editor created:", this.editor)
     
