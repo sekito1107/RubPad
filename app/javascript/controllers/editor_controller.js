@@ -4,11 +4,11 @@ export default class extends Controller {
   static targets = ["container"]
 
   connect() {
-    console.log("Monaco EditorController connected")
     this.loadMonaco().then(() => {
       this.initEditor()
     }).catch(err => {
-      console.error("Failed to load Monaco Editor:", err)
+      // Create a fallback error message in the editor container
+      this.containerTarget.innerText = "Failed to load editor."
     })
   }
 
@@ -86,8 +86,6 @@ export default class extends Controller {
       renderLineHighlight: "all",
       fontFamily: "'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace"
     })
-
-    console.log("Monaco Editor initialized")
 
     // Theme observer
     this.observer = new MutationObserver(() => {
