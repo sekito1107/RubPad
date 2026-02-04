@@ -11,7 +11,7 @@ RSpec.describe "Code Execution", type: :system do
     visit root_path
 
     # Wait for Ruby WASM to initialize
-    expect(page).to have_content("Ruby WASM ready!", wait: 30)
+    expect(page).to have_content("Ruby WASM 準備完了！", wait: 30)
 
     # Clear editor and type code
     # Monaco editor is accessed via its model, which is complex in Capybara.
@@ -34,7 +34,7 @@ RSpec.describe "Code Execution", type: :system do
     visit root_path
 
     # Wait for Ruby WASM to initialize
-    expect(page).to have_content("Ruby WASM ready!", wait: 30)
+    expect(page).to have_content("Ruby WASM 準備完了！", wait: 30)
 
     # Set code with an error
     page.execute_script(<<~JS)
@@ -55,17 +55,17 @@ RSpec.describe "Code Execution", type: :system do
     visit root_path
 
     # Wait for Ruby WASM to initialize
-    expect(page).to have_content("Ruby WASM 準備完了！", wait: 30)
+    expect(page).to have_content("Ruby WASM ready!", wait: 30)
 
     # Output something to terminal (init message is already there)
     # Use execute_script to simulate run or just use what's there.
-    # The init message "// Ruby WASM 準備完了！" should be present.
+    # The init message "// Ruby WASM ready!" should be present.
 
     # Click Clear button
     click_button "Clear"
 
     # Verify terminal is empty (or at least doesn't have the init message)
-    expect(page).not_to have_content("Ruby WASM 準備完了！")
+    expect(page).not_to have_content("Ruby WASM ready!")
     expect(page).not_to have_content("//")
   end
 end

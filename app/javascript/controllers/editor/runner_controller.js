@@ -21,7 +21,7 @@ export default class extends Controller {
 
   async initializeVM() {
     try {
-      this.updateOutput("// Ruby WASM を初期化中...")
+      this.updateOutput("// Ruby WASM initializing...")
       
       // Ruby WASM API を動的インポート (ESM版)
       const { DefaultRubyVM } = await import(WASM_API_URL)
@@ -34,10 +34,10 @@ export default class extends Controller {
       const { vm } = await DefaultRubyVM(module)
       this.vm = vm
       
-      this.updateOutput("// Ruby WASM 準備完了！ Run ボタンで実行できます。")
+      this.updateOutput("// Ruby WASM ready! Click Run to execute code.")
     } catch (error) {
       console.error("Ruby VM の初期化に失敗しました:", error)
-      this.updateOutput(`// エラー: Ruby VM の初期化に失敗しました: ${error.message}`)
+      this.updateOutput(`// Error: Failed to initialize Ruby VM: ${error.message}`)
     }
   }
 
@@ -57,12 +57,12 @@ export default class extends Controller {
 
   async run() {
     if (!this.vm) {
-      this.updateOutput("// Ruby VM の準備がまだできていません。少々お待ちください...")
+      this.updateOutput("// Ruby VM is not ready yet. Please wait...")
       return
     }
 
     if (!this.editor) {
-      this.updateOutput("// エディタが見つかりません。")
+      this.updateOutput("// Editor not available.")
       return
     }
 
@@ -87,10 +87,10 @@ export default class extends Controller {
       if (output.trim()) {
         this.updateOutput(output)
       } else {
-        this.updateOutput("// (出力なし)")
+        this.updateOutput("// (no output)")
       }
     } catch (error) {
-      this.updateOutput(`実行エラー: ${error.message}`)
+      this.updateOutput(`Error: ${error.message}`)
     }
   }
 
