@@ -6,16 +6,20 @@ puts "Ruby Version: #{RUBY_VERSION}"
 puts "\n$LOAD_PATH:"
 puts $LOAD_PATH
 
-puts "\nChecking prime.rb:"
-found = false
-$LOAD_PATH.each do |path|
-  file = File.join(path, "prime.rb")
-  if File.exist?(file)
-    puts "Found: #{file}"
-    found = true
+puts "\nChecking /usr/local/lib/ruby/4.0.0:"
+begin
+  entries = Dir.entries("/usr/local/lib/ruby/4.0.0")
+  puts "Entries found: #{entries.size}"
+  puts entries.first(20).join(", ")
+  
+  if entries.include?("prime.rb")
+    puts "prime.rb exists in directory!"
+  else
+    puts "prime.rb NOT found in directory."
   end
+rescue => e
+  puts "Error listing dir: #{e.message}"
 end
-puts "Not found in any path" unless found
 
 begin
   require 'prime'
