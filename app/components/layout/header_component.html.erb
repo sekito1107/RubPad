@@ -1,11 +1,9 @@
 <header class="h-14 border-b border-slate-200 dark:border-white/5 bg-white dark:bg-[#0D1117] flex items-center justify-between px-4 shrink-0 transition-colors">
   <div class="flex items-center gap-3">
-    <div class="flex items-center gap-2">
-    <div class="flex items-center gap-2">
-      <%# ロゴ画像を表示。白背景の画像なので、ダークモード時は mix-blend-mode 等の調整が必要かもしれないが、まずはそのまま表示 %>
-      <%= image_tag "rubpad_logo.png", class: "h-8 w-auto", alt: "RubPad" %>
-      <%# RubPadテキストは画像に含まれるため削除 %>
-      <span class="ml-1 text-[10px] font-medium text-slate-500">
+    <div class="flex items-center gap-3">
+      <%= image_tag "rubpad_logo_icon.png", class: "h-8 w-auto", alt: "" %>
+      <%= image_tag "rubpad_logo_text.png", class: "h-6 w-auto dark:invert mt-0.5", alt: "RubPad" %>
+      <span class="ml-1 text-[10px] font-medium text-slate-500 self-end mb-1">
         v1.0 (MVP)
       </span>
     </div>
