@@ -72,10 +72,7 @@ class Server
   def initialize
     @read_msg = nil
     @error = nil
-    setup
-  end
 
-  def setup
     # TypeProfコアの初期化
     @core = TypeProf::Core::Service.new({})
     
@@ -90,21 +87,6 @@ class Server
       log("Chdir failed: " + err.message)
     end
     
-    # RBS environment verification
-    begin
-        require "rbs"
-        loader = RBS::EnvironmentLoader.new
-        dirs = []
-        loader.each_dir { |d| dirs << d }
-        if dirs.empty?
-            log("WARNING: RBS EnvironmentLoader found no directories! Type definitions may be missing.")
-        else
-            log("RBS EnvironmentLoader has dirs: " + dirs.take(3).join(", "))
-        end
-    rescue => e
-        log("RBS check failed: " + e.message)
-    end
-
     nil
   end
 
@@ -269,4 +251,3 @@ class Server
   end
 end
 
-$server = Server.new
