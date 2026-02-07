@@ -66,7 +66,7 @@ export default class extends Controller {
     } catch (err) {
       console.error("URLからのコード復元に失敗しました:", err)
     } finally {
-      // 復元成功・失敗に関わらず、URLハッシュをクリアする 
+      // 復元成功・失敗に関わらず、URLハッシュをクリアする
       // これにより、ユーザーが編集後にリロードしても
       // LocalStorageの内容が優先されるようになる
       const urlObj = new URL(window.location.href)
