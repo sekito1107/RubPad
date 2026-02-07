@@ -136,7 +136,6 @@ export default class extends Controller {
         }
       })
     })
-    // Summary click propagation prevention logic handles itself by structure (input sibling to summary)
 
     searchContainer.appendChild(searchInput)
 
