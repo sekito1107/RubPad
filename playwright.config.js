@@ -2,14 +2,16 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  timeout: 40000,
+  fullyParallel: false,
+  forbidOnly: false,
+  retries: 0,
+  workers: process.env.CI ? 1 : 2,
+  reporter: process.env.CI ? [['list'], ['html']] : 'html',
   use: {
-    baseURL: 'http://localhost:5173',
-    trace: 'on-first-retry',
+    baseURL: 'http://127.0.0.1:4173',
+    trace: 'on',
+    actionTimeout: 15000,
   },
   projects: [
     {
@@ -18,8 +20,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
+    command: 'npm run preview',
+    url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
+    stdout: 'pipe',
+    stderr: 'pipe',
+    timeout: 60000,
   },
 });

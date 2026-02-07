@@ -6,12 +6,12 @@ test.describe('RubPad E2E Tests', () => {
   });
 
   test('Rubyコードを実行して結果を表示する', async ({ page }) => {
-    // Ruby WASM の初期化を待機
-    await expect(page.locator('body')).toContainText('Ruby WASM ready!', { timeout: 30000 });
+    // Ruby WASM の初期化を待機（ターミナルの出力を確認）
+    await expect(page.locator('[data-editor--console-target="output"]')).toContainText('Ruby WASM ready!', { timeout: 30000 });
 
     // エディタにコードをセット
     await page.evaluate(() => {
-      const editor = window.monaco?.editor?.getEditors()[0];
+      const editor = window.monacoEditor;
       if (editor) {
         editor.setValue('puts "Hello from WASM!"');
       }
@@ -25,10 +25,10 @@ test.describe('RubPad E2E Tests', () => {
   });
 
   test('Rubyのエラーを適切にハンドリングする', async ({ page }) => {
-    await expect(page.locator('body')).toContainText('Ruby WASM ready!', { timeout: 30000 });
+    await expect(page.locator('[data-editor--console-target="output"]')).toContainText('Ruby WASM ready!', { timeout: 30000 });
 
     await page.evaluate(() => {
-      const editor = window.monaco?.editor?.getEditors()[0];
+      const editor = window.monacoEditor;
       if (editor) {
         editor.setValue('undefined_variable');
       }
@@ -40,7 +40,7 @@ test.describe('RubPad E2E Tests', () => {
   });
 
   test('ターミナルの出力をクリアする', async ({ page }) => {
-    await expect(page.locator('body')).toContainText('Ruby WASM ready!', { timeout: 30000 });
+    await expect(page.locator('[data-editor--console-target="output"]')).toContainText('Ruby WASM ready!', { timeout: 30000 });
 
     await page.getByRole('button', { name: 'Clear' }).click();
 
@@ -48,11 +48,12 @@ test.describe('RubPad E2E Tests', () => {
   });
 
   test('ShareボタンでコードをURLに保存・復元できる', async ({ page, context }) => {
-    await expect(page.locator('body')).toContainText('Ruby WASM ready!', { timeout: 30000 });
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await expect(page.locator('[data-editor--console-target="output"]')).toContainText('Ruby WASM ready!', { timeout: 30000 });
 
     const targetCode = 'puts "Share Flow Test"';
     await page.evaluate((code) => {
-      const editor = window.monaco?.editor?.getEditors()[0];
+      const editor = window.monacoEditor;
       if (editor) {
         editor.setValue(code);
       }
@@ -72,12 +73,11 @@ test.describe('RubPad E2E Tests', () => {
     // 新しいページで開く
     const newPage = await context.newPage();
     await newPage.goto(urlWithHash);
-
-    await expect(newPage.locator('body')).toContainText('Ruby WASM ready!', { timeout: 30000 });
+    await expect(newPage.locator('[data-editor--console-target="output"]')).toContainText('Ruby WASM ready!', { timeout: 30000 });
 
     // コードが復元されているか確認
     const restoredCode = await newPage.evaluate(() => {
-      const editor = window.monaco?.editor?.getEditors()[0];
+      const editor = window.monacoEditor;
       return editor ? editor.getValue() : "";
     });
     expect(restoredCode).toBe(targetCode);
@@ -87,11 +87,11 @@ test.describe('RubPad E2E Tests', () => {
   });
 
   test('編集内容がlocalStorageに保存され永続化される', async ({ page }) => {
-    await expect(page.locator('body')).toContainText('Ruby WASM ready!', { timeout: 30000 });
+    await expect(page.locator('[data-editor--console-target="output"]')).toContainText('Ruby WASM ready!', { timeout: 30000 });
 
     const editedCode = 'puts "Persistence Test"';
     await page.evaluate((code) => {
-      const editor = window.monaco?.editor?.getEditors()[0];
+      const editor = window.monacoEditor;
       if (editor) {
         editor.setValue(code);
       }
@@ -102,11 +102,10 @@ test.describe('RubPad E2E Tests', () => {
 
     // リロード
     await page.reload();
-
-    await expect(page.locator('body')).toContainText('Ruby WASM ready!', { timeout: 30000 });
+    await expect(page.locator('[data-editor--console-target="output"]')).toContainText('Ruby WASM ready!', { timeout: 30000 });
 
     const reloadedCode = await page.evaluate(() => {
-      const editor = window.monaco?.editor?.getEditors()[0];
+      const editor = window.monacoEditor;
       return editor ? editor.getValue() : "";
     });
     expect(reloadedCode).toBe(editedCode);

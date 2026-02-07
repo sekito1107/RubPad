@@ -6,7 +6,13 @@ export default defineConfig({
   root: '.', 
   plugins: [
     tailwindcss(),
+    tailwindcss(),
   ],
+  preview: {
+    host: '127.0.0.1',
+    port: 4173,
+    strictPort: true,
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
