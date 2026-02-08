@@ -44,7 +44,6 @@ export default class extends Controller {
       this.dispatchToast("URL copied to clipboard!", "success")
 
     } catch (err) {
-      console.error("共有処理でエラーが発生しました:", err)
       this.dispatchToast("Failed to copy URL", "error")
     }
   }
@@ -64,7 +63,7 @@ export default class extends Controller {
         localStorage.setItem("rubpad_content", code)
       }
     } catch (err) {
-      console.error("URLからのコード復元に失敗しました:", err)
+      // failed silently
     } finally {
       // 復元成功・失敗に関わらず、URLハッシュをクリアする
       // これにより、ユーザーが編集後にリロードしても

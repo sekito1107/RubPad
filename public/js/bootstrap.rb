@@ -89,7 +89,6 @@ class Server
     # TypeProfコアの初期化
     # 明示的に stdlib.rbs を読み込むように設定
     rbs_list = File.exist?("/workspace/stdlib.rbs") ? ["/workspace/stdlib.rbs"] : []
-    puts "[Ruby] Initializing TypeProf (RBS available: #{!rbs_list.empty?})"
     @core = TypeProf::Core::Service.new(rbs_files: rbs_list)
     
     # ユーザーコード実行用のBindingを作成 (ローカル変数を保持するため)
@@ -97,11 +96,6 @@ class Server
 
     # ウォームアップ: 巨大なRBSの解析を事前にトリガー
     begin
-      puts "[Ruby] Warming up RBS engine (Array, String, Hash)..."
-      # デバッグ: 利用可能な定数を確認
-      # puts "[Ruby] TypeProf constants: #{TypeProf.constants}"
-      # puts "[Ruby] TypeProf::Core constants: #{TypeProf::Core.constants}"
-
       # TypeProf 0.30.1 以降では TypeProf::Core::ISeq かもしれない
       iseq_klass = defined?(TypeProf::Core::ISeq) ? TypeProf::Core::ISeq : (defined?(TypeProf::ISeq) ? TypeProf::ISeq : nil)
       
@@ -111,14 +105,9 @@ class Server
       end
 
       if iseq_klass
-        puts "[Ruby] Using #{iseq_klass} for warm-up."
         iseq_klass.compile("Array.new; 'str'.upcase; {a: 1}.keys").each { |iseq| @core.add_iseq(iseq) }
-      else
-        puts "[Ruby] Warm-up skipped: ISeq class not found. (TP constants: #{TypeProf.constants.take(5)}...)"
       end
-      puts "[Ruby] Warm-up finished."
     rescue => e
-      puts "[Ruby] Warm-up warning: #{e.message}"
     end
 
     nil
@@ -156,9 +145,39 @@ class Server
     end
     if json[:method] == "textDocument/didChange"
       changes = json[:params][:contentChanges]
-      # Full Text Syncなので changes[0][:text] を使用
-      if changes && changes[0] && changes[0][:text]
-        File.write("/workspace/main.rb", changes[0][:text])
+      if changes
+        current_text = File.read("/workspace/main.rb") rescue ""
+        changes.each do |change|
+          if change[:range]
+            # インクリメンタル同期
+            start_pos = change[:range][:start]
+            end_pos = change[:range][:end]
+            new_text = change[:text]
+
+            lines = current_text.split("\n", -1)
+            
+            # 開始・終了行のテキストを取得
+            start_line = lines[start_pos[:line]] || ""
+            end_line = lines[end_pos[:line]] || ""
+            
+            # 置換対象の前の部分
+            prefix = start_line[0...start_pos[:character]] || ""
+            # 置換対象の後の部分
+            suffix = end_line[end_pos[:character]..-1] || ""
+            
+            # 行の置換
+            # start_pos[:line] から end_pos[:line] までの行を削除し、
+            # prefix + new_text + suffix を挿入する
+            mid = prefix + (new_text || "") + suffix
+            lines[start_pos[:line]..end_pos[:line]] = mid.split("\n", -1)
+            
+            current_text = lines.join("\n")
+          else
+            # フル同期
+            current_text = change[:text]
+          end
+        end
+        File.write("/workspace/main.rb", current_text)
       end
     end
 

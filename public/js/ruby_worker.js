@@ -26,7 +26,7 @@ self.onmessage = async (event) => {
          vm.eval(`$server.add_msg(JS.global[:_tmpLspMsg].to_s)`)
          self._tmpLspMsg = null
        } catch (e) {
-         console.error("LSP Error:", e)
+         // failed silently
        }
        break
   }
@@ -71,21 +71,14 @@ async function initializeVM(wasmUrl) {
             const mode = (i === 0) ? 'wb' : 'ab';
             vm.eval(`File.open('/workspace/stdlib.rbs', '${mode}') { |f| f.write(['${hexChunk}'].pack('H*')) }`);
           }
-        } else {
-          // 失敗時のフォールバックは現状行わない
         }
       } catch (e) {
-        // エラー時はコンソールに出力
-        console.error('RBS fetch error:', e);
+        // failed silently
       }
 
       // ブートストラップ実行
     } catch (e) {
-      // 失敗した場合の詳細ログ（デバッグ用）
-      const firstChars = new Uint8Array(buffer.slice(0, 100));
-      const text = new TextDecoder().decode(firstChars);
-      const msg = `WASM Compile Error: ${e.message}\nStatus: ${response.status}\nContent-Type: ${response.headers.get('Content-Type')}\nBody start: ${text}`;
-      throw new Error(msg);
+      throw e;
     }
 
     // bootstrap.rb (Polyfills & LSP Server) をロードする
@@ -130,7 +123,6 @@ async function initializeVM(wasmUrl) {
     postMessage({ type: "output", payload: { text: "// Ruby WASM ready!" } })
     postMessage({ type: "ready", payload: { version: vm.eval("RUBY_VERSION").toString() } })
   } catch (error) {
-    console.error("Worker Init Error:", error)
     postMessage({ type: "error", payload: { message: error.message } })
     postMessage({ type: "output", payload: { text: `// Error: ${error.message}` } })
   }
@@ -155,7 +147,6 @@ function runCode(code) {
         const result = vm.eval(wrappedCode)
         postMessage({ type: "output", payload: { text: result.toString() } })
       } catch (error) {
-        console.error("Ruby execution error:", error)
         postMessage({ type: "output", payload: { text: `Error: ${error.toString()}` } })
       }
 }

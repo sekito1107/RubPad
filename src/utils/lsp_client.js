@@ -109,7 +109,7 @@ export class LSPClient {
           }
         }
       } catch (e) {
-        console.error("Failed to parse LSP message", e)
+        // failed silently
       }
     }
   }

@@ -122,7 +122,6 @@ export class LSPInteractor {
             ]
           }
         } catch (e) {
-          console.error("[LSP] Hover error:", e)
           return null
         }
       }
@@ -145,7 +144,7 @@ export class LSPInteractor {
              }
         })
       } catch (e) {
-        console.error("[LSP] Measure Value failed:", e)
+        // failed silently
       }
     })
   }
@@ -258,9 +257,7 @@ export class LSPInteractor {
 
       // 解析を LSPResponseParser に委譲
       return LSPResponseParser.parseClassNameFromHover(markdownContent)
-
     } catch (e) {
-      console.error("[LSP] getTypeAtPosition error:", e)
       return null
     }
   }
