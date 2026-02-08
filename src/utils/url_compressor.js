@@ -28,7 +28,6 @@ export default class UrlCompressor {
       // URLセーフに置換 (+ -> -, / -> _, = 削除)
       return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
     } catch (e) {
-      console.error("Compression failed:", e)
       return ""
     }
   }
@@ -64,7 +63,6 @@ export default class UrlCompressor {
       // バイト配列を文字列に戻す (UTF-8)
       return new TextDecoder().decode(decompressed)
     } catch (e) {
-      console.error("Decompression failed:", e)
       return null
     }
   }

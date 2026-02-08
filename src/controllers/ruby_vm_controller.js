@@ -1,6 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 import { LSPClient } from "utils/lsp_client"
 import { LSPInteractor } from "interactors/lsp_interactor"
+import { RuremaInteractor } from "interactors/rurema_interactor"
+import { AnalysisCoordinator } from "interactors/analysis_coordinator"
 
 const RUBY_WASM_URL = "/js/rubpad.wasm"
 // Rails 8 / Importmap: Workerのパス解決が必要
@@ -16,11 +18,18 @@ export default class extends Controller {
     this.lspClient = null
     this.editor = null
     this.interactor = null
+    this.rurema = null
+    this.analysis = null
 
     // エディタの初期化イベントを監視
     this.boundHandleEditorInitialized = this.handleEditorInitialized.bind(this)
     window.addEventListener("editor--main:initialized", this.boundHandleEditorInitialized)
     
+    // 既にエディタが初期化済みの場合は即座にハンドリング
+    if (window.monacoEditor) {
+      this.handleEditorInitialized({ detail: { editor: window.monacoEditor } })
+    }
+
     // まだ準備ができていない場合、バックグラウンドでVMを初期化する
     if (!window.__rubyVMInitializing && !window.__rubyVMReady) {
       window.__rubyVMInitializing = true
@@ -53,7 +62,6 @@ export default class extends Controller {
       })
 
     } catch (error) {
-      console.error("Worker Init Error:", error)
       this.dispatchOutput(`// Error starting worker: ${error.message}`)
     }
   }
@@ -110,12 +118,20 @@ export default class extends Controller {
     this.tryActivateInteractor()
   }
 
-  tryActivateInteractor() {
+  async tryActivateInteractor() {
     // VMが準備完了(ready)し、かつエディタも初期化されている場合のみアクティブ化する
     if (this.lspClient && this.editor && !this.interactor && window.__rubyVMReady) {
       this.interactor = new LSPInteractor(this.lspClient, this.editor)
       this.interactor.activate()
       window.rubpadLSPInteractor = this.interactor
+
+      // 解析コーディネーターの初期化
+      this.rurema = new RuremaInteractor()
+      await this.rurema.loadIndex()
+      
+      this.analysis = new AnalysisCoordinator(this.editor, this.interactor, this.rurema)
+      this.analysis.start()
+      window.rubpadAnalysisCoordinator = this.analysis
       
       // LSPの準備完了を他のコントローラーに通知
       window.dispatchEvent(new CustomEvent("rubpad:lsp-ready"))
@@ -149,7 +165,7 @@ export default class extends Controller {
       
       this.tryActivateInteractor()
     } catch (e) {
-      console.error("LSP Verification Failed:", e)
+      // failed silently
     }
   }
 }

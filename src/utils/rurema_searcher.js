@@ -32,7 +32,6 @@ class RuremaSearcher {
 
       await this.loadingPromise
     } catch (error) {
-      console.error("るりまインデックスの読み込みに失敗しました:", error)
       this.index = {}
     }
   }

@@ -17,7 +17,6 @@ export default class extends Controller {
 
   async download() {
     if (!this.editor) {
-      console.warn("Editor not initialized yet")
       return
     }
 
@@ -39,8 +38,7 @@ export default class extends Controller {
         return
       } catch (err) {
         if (err.name === 'AbortError') return // User cancelled
-        console.error('SaveFilePicker failed:', err)
-        // Fallback to method 2
+        // failed silently
       }
     }
 
