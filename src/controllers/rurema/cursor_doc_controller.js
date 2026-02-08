@@ -1,18 +1,17 @@
 import { Controller } from "@hotwired/stimulus"
-import { RuremaInteractor } from "interactors/rurema_interactor"
-import { ResolutionInteractor } from "interactors/resolution_interactor"
 
+/**
+ * カーソル位置のコンテキスト（型）に基づいたドキュメントを表示するコントローラー
+ * AnalysisCoordinator のリゾルバを共有して使用する
+ */
 export default class extends Controller {
   static targets = [ "contextualList", "contextualLoader", "cardTemplate", "linkTemplate" ]
 
-  async connect() {
-    this.rurema = new RuremaInteractor()
-    await this.rurema.loadIndex()
-
+  connect() {
     this.editor = null
-    this.resolution = null
     this.debounceTimer = null
     this.CONTEXT_DEBOUNCE_MS = 300
+    this.lastType = null
 
     this.boundHandleEditorInit = (e) => {
       this.editor = e.detail.editor
@@ -20,7 +19,7 @@ export default class extends Controller {
     }
     document.addEventListener("editor--main:initialized", this.boundHandleEditorInit)
 
-    // 解析完了を監視
+    // 解析完了を監視（型が変わった可能性があるため）
     this.boundHandleAnalysisFinished = () => this.updateContextualList()
     window.addEventListener("rubpad:lsp-analysis-finished", this.boundHandleAnalysisFinished)
 
@@ -36,18 +35,14 @@ export default class extends Controller {
     window.removeEventListener("rubpad:lsp-analysis-finished", this.boundHandleAnalysisFinished)
   }
 
-  initInteractors() {
-    if (window.rubpadLSPInteractor) {
-        this.resolution = new ResolutionInteractor(window.rubpadLSPInteractor)
-    }
-  }
-
   setupListeners() {
     if (!this.editor) return
     this.editor.onDidChangeCursorPosition(() => this.updateContextualList())
-    if (window.rubpadLSPInteractor) this.initInteractors()
   }
 
+  /**
+   * コンテキストリストの更新をスケジュール
+   */
   updateContextualList() {
     if (!this.editor) return
     this.toggleContextLoader(true)
@@ -59,26 +54,31 @@ export default class extends Controller {
     }, this.CONTEXT_DEBOUNCE_MS)
   }
 
+  /**
+   * 現在のカーソル位置の型を解決し、ドキュメントを表示する
+   */
   async performContextualUpdate() {
     if (!this.hasContextualListTarget || !this.editor) return
 
-    if (!window.rubpadLSPInteractor || !window.__rubyLSPInitialAnalysisFinished) {
+    // 解析エンジンの準備待ち
+    const analysis = window.rubpadAnalysisCoordinator
+    if (!analysis) {
         this.contextualListTarget.innerHTML = `
             <div class="text-xs text-slate-500 dark:text-slate-600 text-center py-4">
-               <span class="animate-pulse">Waiting for analysis engine...</span>
+               <span class="animate-pulse">Initializing analysis engine...</span>
             </div>
         `
         return
     }
 
-    if (!this.resolution) this.initInteractors()
-    if (!this.resolution) return
-
     const position = this.editor.getPosition()
     if (!position) return
 
-    // ResolutionInteractor にリトライとフォールバック（ドット除去など）を委譲
-    const type = await this.resolution.resolveWithFallback(this.editor, position)
+    // AnalysisCoordinator のリゾルバを使用して型を特定
+    const type = await analysis.resolution.resolveWithFallback(this.editor, position)
+
+    if (type === this.lastType) return // 変化がなければ描画をスキップ
+    this.lastType = type
 
     this.contextualListTarget.innerHTML = ""
 
@@ -91,7 +91,8 @@ export default class extends Controller {
       return
     }
 
-    const methods = this.rurema.getMethodsWithInfo(type)
+    // AnalysisCoordinator のるりまリゾルバを使用してメソッド情報を取得
+    const methods = analysis.rurema.getMethodsWithInfo(type)
 
     if (methods.length === 0) {
       this.contextualListTarget.innerHTML = `
@@ -109,7 +110,7 @@ export default class extends Controller {
     // アコーディオン構築
     const container = document.createElement("details")
     container.className = "group"
-    container.open = false
+    container.open = false // デフォルトで閉じる
 
     const summary = document.createElement("summary")
     summary.className = "flex items-center cursor-pointer p-2 list-none select-none text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-white/5 rounded hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
@@ -122,29 +123,27 @@ export default class extends Controller {
     `
     container.appendChild(summary)
 
-    // 検索ボックス
+    // 簡易フィルタ
     const searchContainer = document.createElement("div")
     searchContainer.className = "px-2 py-1 border-b border-slate-200 dark:border-white/10"
-
     const searchInput = document.createElement("input")
     searchInput.type = "text"
     searchInput.placeholder = "Filter methods..."
     searchInput.className = "w-full px-2 py-1 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:border-blue-500 text-slate-700 dark:text-slate-300 placeholder-slate-400"
+    
+    // リストコンテナ
+    const listContainer = document.createElement("div")
+    listContainer.className = "pl-2 pt-2 space-y-1"
 
-    // 検索イベント
     searchInput.addEventListener("input", (e) => {
       const query = e.target.value.toLowerCase()
-      const cards = listContainer.querySelectorAll('[data-role="method-card"]')
-      cards.forEach(card => {
+      listContainer.querySelectorAll('[data-role="method-card"]').forEach(card => {
         const methodName = card.getAttribute("data-method-name").toLowerCase()
         card.style.display = methodName.includes(query) ? "" : "none"
       })
     })
 
     searchContainer.appendChild(searchInput)
-
-    const listContainer = document.createElement("div")
-    listContainer.className = "pl-2 pt-2 space-y-1"
 
     methods.forEach(item => {
       const card = this.createContextualMethodCard(item)

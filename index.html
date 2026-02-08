@@ -451,7 +451,7 @@
           <!-- Rurema::SidebarComponent -->
           <aside
             class="w-80 border-l border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-[#0D1117] flex flex-col shrink-0"
-            data-controller="rurema--global rurema--contextual">
+            data-controller="rurema--method-list rurema--cursor-doc">
             <div
               class="h-10 border-b border-slate-200 dark:border-white/5 flex items-center justify-between px-4 bg-slate-100 dark:bg-white/5">
               <div class="flex items-center gap-2">
@@ -478,10 +478,10 @@
                   class="px-3 py-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center justify-between">
                   <span>Contextual</span>
                   <span class="text-blue-500 dark:text-blue-400 opacity-0 transition-opacity"
-                    data-rurema--contextual-target="contextualLoader">●</span>
+                    data-rurema--cursor-doc-target="contextualLoader">●</span>
                 </div>
                 <div class="px-3 pb-2 space-y-2 max-h-[400px] overflow-y-auto"
-                  data-rurema--contextual-target="contextualList">
+                  data-rurema--cursor-doc-target="contextualList">
                   <div class="text-xs text-slate-400 dark:text-slate-600 text-center py-2 italic">
                     Hover to see methods...
                   </div>
@@ -494,16 +494,17 @@
                   class="px-3 py-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-50 dark:bg-[#0D1117] z-10">
                   Global
                 </div>
-                <div class="flex-1 px-3 pb-3 overflow-y-auto space-y-3" data-rurema--global-target="globalList">
-                  <div class="text-xs text-slate-500 dark:text-slate-600 text-center py-4">
-                    No methods detected
+                <div class="flex-1 px-3 pb-3 overflow-y-auto space-y-3" data-rurema--method-list-target="globalList">
+                  <div class="flex items-center justify-center py-8 opacity-40 animate-pulse">
+                    <div class="w-2 h-2 bg-slate-400 rounded-full mr-2"></div>
+                    <span class="text-xs text-slate-500 dark:text-slate-600">Initializing analysis engine...</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Templates -->
-            <template data-rurema--global-target="cardTemplate" data-rurema--contextual-target="cardTemplate">
+            <template data-rurema--method-list-target="cardTemplate" data-rurema--cursor-doc-target="cardTemplate">
               <div
                 class="bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/5 rounded-md overflow-hidden shadow-sm dark:shadow-none mb-3">
                 <div
@@ -517,7 +518,7 @@
               </div>
             </template>
 
-            <template data-rurema--global-target="linkTemplate" data-rurema--contextual-target="linkTemplate">
+            <template data-rurema--method-list-target="linkTemplate" data-rurema--cursor-doc-target="linkTemplate">
               <a href="#" target="_blank" rel="noopener noreferrer"
                 class="block text-xs text-slate-600 dark:text-slate-400 font-mono hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 <span data-role="className"></span><span class="text-red-500 dark:text-red-400"
@@ -525,7 +526,7 @@
               </a>
             </template>
 
-            <template data-rurema--global-target="searchTemplate">
+            <template data-rurema--method-list-target="searchTemplate">
               <a href="#" target="_blank" rel="noopener noreferrer"
                 class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
                 Search in Rurema
