@@ -14,7 +14,6 @@ def File.readable?(...) = File.file?(...)
 
 # ワークスペースのセットアップ
 # TypeProfは /workspace などのディレクトリ構造を期待している可能性があるため
-# リファレンス実装(typeprof.wasm)に合わせて /workspace を作成する
 if !Dir.exist?("/workspace")
   Dir.mkdir("/workspace")
 end
@@ -116,12 +115,6 @@ class Server
   # ユーザーコードを実行し、ローカル変数を保持する
   def run_code(code)
     eval(code, @user_binding)
-  end
-
-  def log(msg)
-    JS.global[:console].call(:log, "[Ruby] " + msg.to_s)
-  rescue
-    # 無視
   end
 
   def start(post_message)
