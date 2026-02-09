@@ -6,7 +6,6 @@ export default defineConfig({
   root: '.', 
   plugins: [
     tailwindcss(),
-    tailwindcss(),
   ],
   preview: {
     host: '127.0.0.1',
@@ -29,8 +28,12 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       'utils': path.resolve(__dirname, './src/utils'),
-      'interactors': path.resolve(__dirname, './src/interactors'),
       'controllers': path.resolve(__dirname, './src/controllers'),
+      'lsp': path.resolve(__dirname, './src/lsp'),
+      'analysis': path.resolve(__dirname, './src/analysis'),
+      'rurima': path.resolve(__dirname, './src/rurima'),
+      'runtime': path.resolve(__dirname, './src/runtime'),
+      'persistence': path.resolve(__dirname, './src/persistence'),
     },
   },
 })
