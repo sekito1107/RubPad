@@ -86,8 +86,27 @@ class Server
     @error = nil
 
     # TypeProfコアの初期化
-    # 明示的に stdlib.rbs を読み込むように設定
-    rbs_list = File.exist?("/workspace/stdlib.rbs") ? ["/workspace/stdlib.rbs"] : []
+    # puts Integer における誤報（オーバーロード解決失敗）を抑制するためのパッチ
+    # Integer#to_s の多重定義が _ToS インターフェースと不整合を起こすのを解決する
+    custom_patch_path = "/workspace/custom_patch.rbs"
+    File.write(custom_patch_path, <<RBS)
+interface _ToS
+  def to_s: (*untyped) -> String
+end
+
+module Kernel
+  def self?.puts: (*untyped) -> void
+end
+
+class Object
+  def puts: (*untyped) -> void
+end
+RBS
+
+    rbs_list = []
+    rbs_list << "/workspace/stdlib.rbs" if File.exist?("/workspace/stdlib.rbs")
+    rbs_list << custom_patch_path
+    
     @core = TypeProf::Core::Service.new(rbs_files: rbs_list)
     
     # ユーザーコード実行用のBindingを作成 (ローカル変数を保持するため)
