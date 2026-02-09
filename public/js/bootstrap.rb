@@ -86,27 +86,21 @@ class Server
     @error = nil
 
     # TypeProfコアの初期化
-    # puts Integer における誤報（オーバーロード解決失敗）を抑制するためのパッチ
-    # Integer#to_s の多重定義が _ToS インターフェースと不整合を起こすのを解決する
-    custom_patch_path = "/workspace/custom_patch.rbs"
-    File.write(custom_patch_path, <<RBS)
-interface _ToS
-  def to_s: (*untyped) -> String
-end
+    # puts Integer における誤報（::_ToS が String に固定されている問題）を根本解決するパッチ
+    # TypeProf::Import#conv_type が _ToS を強制的に [:str] に変換するのを [:any] に変更する
+    module ::TypeProf
+      class Import
+        alias _original_conv_type conv_type
+        def conv_type(ty)
+          if defined?(::RBS::Types::Interface) && ty.is_a?(::RBS::Types::Interface) && ty.to_s == "::_ToS"
+            return [:any]
+          end
+          _original_conv_type(ty)
+        end
+      end
+    end
 
-module Kernel
-  def self?.puts: (*untyped) -> void
-end
-
-class Object
-  def puts: (*untyped) -> void
-end
-RBS
-
-    rbs_list = []
-    rbs_list << "/workspace/stdlib.rbs" if File.exist?("/workspace/stdlib.rbs")
-    rbs_list << custom_patch_path
-    
+    rbs_list = File.exist?("/workspace/stdlib.rbs") ? ["/workspace/stdlib.rbs"] : []
     @core = TypeProf::Core::Service.new(rbs_files: rbs_list)
     
     # ユーザーコード実行用のBindingを作成 (ローカル変数を保持するため)
