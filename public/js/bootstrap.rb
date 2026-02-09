@@ -86,28 +86,28 @@ class Server
     @error = nil
 
     # TypeProfコアの初期化
-    # puts Integer における誤報（::_ToS が String に固定されている問題）を根本解決するパッチ
-    # TypeProf::Import 内で _ToS インターフェース名が出てきたら強制的に any 型にする
+    # puts/print における _ToS 解決失敗の誤報を根本から抑制するパッチ
+    # 具体的な警告メッセージ "failed to resolve overload: ...#puts" などを無視するように Scratch#error を拡張する
     module ::TypeProf
-      class Import
-        alias _original_conv_type conv_type
-        def conv_type(ty)
-          return Type.any if ty.is_a?(Array) && ty == [:instance, ["::_ToS"]]
-          
-          # 文字列ベースの判定も残しておく（念のため）
-          if ty.is_a?(Array) && ty[0] == :instance && ty[1] == ["::_ToS"]
-            return Type.any
+      class Core
+        class Scratch
+          alias _original_error error
+          def error(ep, msg)
+            # puts, print, printf に関する _ToS (failed to resolve overload) 警告を無視
+            if msg.include?("failed to resolve overload") && (msg.include?("#puts") || msg.include?("#print"))
+              return
+            end
+            _original_error(ep, msg)
           end
 
-          res = _original_conv_type(ty)
-          
-          # 変換後の Type オブジェクトが _ToS を指している場合も any に倒す
-          if res.is_a?(Type::Instance) && res.klass.is_a?(Type::Class)
-             # クラス名が _ToS かどうかを厳密にチェックするのは難しいが
-             # ホバーで _ToS と出ているならこのメソッドを通っているはず
+          # conv_type のパッチも念のため残すが、error 抑制が本命
+          class Import
+            alias _original_conv_type conv_type
+            def conv_type(ty)
+              return Type.any if ty.is_a?(Array) && ty == [:instance, ["::_ToS"]]
+              _original_conv_type(ty)
+            end
           end
-          
-          res
         end
       end
     end
