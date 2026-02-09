@@ -23,7 +23,7 @@ export default defineConfig({
         }
       }
     },
-    chunkSizeWarningLimit: 2000,
+    chunkSizeWarningLimit: 4000,
   },
   resolve: {
     alias: {
