@@ -11,7 +11,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "npx playwright test",
+    "test": "npx playwright test tests/system",
     "test:unit": "vitest run"
   },
   "repository": {

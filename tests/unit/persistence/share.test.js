@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { Share } from './share'
+import { Share } from '../../../src/persistence/share'
 
 describe('Share', () => {
   let share

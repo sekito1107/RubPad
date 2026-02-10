@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { Settings } from './settings'
+import { Settings } from '../../../src/persistence/settings'
 
 describe('Settings', () => {
   let settings
