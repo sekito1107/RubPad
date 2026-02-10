@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
-import { LSPClient } from "lsp/client"
-import { LSPManager } from "lsp/manager"
-import { Rurima } from "rurima/rurima"
-import { AnalysisCoordinator } from "analysis/coordinator"
+import { LSPClient } from "../lsp/client"
+import { LSPManager } from "../lsp/manager"
+import { Reference } from "../reference"
+import { AnalysisCoordinator } from "../analysis"
 
 const RUBY_WASM_URL = "/js/rubpad.wasm"
 const WORKER_URL = "/js/ruby_worker.js" 
@@ -101,12 +101,12 @@ export default class extends Controller {
         this.lspManager.activate()
         window.rubpadLSPManager = this.lspManager
 
-        // るりまドメインの初期化
-        this.rurima = new Rurima()
-        await this.rurima.loadIndex()
+        // Reference ドメインの初期化
+        this.reference = new Reference()
+        await this.reference.loadIndex()
         
         // 解析コーディネーターの初期化
-        this.analysis = new AnalysisCoordinator(this.editor, this.lspManager, this.rurima)
+        this.analysis = new AnalysisCoordinator(this.editor, this.lspManager, this.reference)
         window.rubpadAnalysisCoordinator = this.analysis
         this.analysis.start()
         
