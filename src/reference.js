@@ -2,6 +2,10 @@ import { IndexSearcher } from "./reference/index_searcher"
 import { ResolveSignature } from "./reference/resolve_signature"
 import { FetchMethodList } from "./reference/fetch_method_list"
 
+// UIコンポーネントのエクスポート
+export { MethodListComponent } from "./reference/method-list"
+export { CursorDocComponent } from "./reference/cursor-doc"
+
 /**
  * Reference (リファレンス) ドメインの機能を統括するメインクラス
  */
