@@ -23,11 +23,4 @@ export class CodePersistence {
       return null
     }
   }
-
-  /**
-   * 保存されたコードを削除する
-   */
-  clear() {
-    localStorage.removeItem(CodePersistence.STORAGE_KEY)
-  }
 }
