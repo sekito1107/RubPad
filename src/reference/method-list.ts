@@ -1,50 +1,53 @@
 /**
  * メソッドリストコンポーネント
- * reference/method-list.js
  */
 export class MethodListComponent {
-  /**
-   * @param {HTMLElement} listElement - リスト表示要素
-   * @param {HTMLElement} loaderElement - ローダー表示要素
-   * @param {HTMLTemplateElement} cardTemplate - カードテンプレート
-   * @param {HTMLTemplateElement} linkTemplate - リンクテンプレート
-   * @param {HTMLTemplateElement} searchTemplate - 検索リンクテンプレート
-   */
-  constructor(listElement, loaderElement, cardTemplate, linkTemplate, searchTemplate) {
+  private listElement: HTMLElement | null
+  private loaderElement: HTMLElement | null
+  private cardTemplate: HTMLTemplateElement
+  private linkTemplate: HTMLTemplateElement
+  private searchTemplate: HTMLTemplateElement
+  private cardMap: Map<string, HTMLElement>
+  private boundHandleAnalysisUpdated: (e: any) => void
+  private boundInitData: () => void
+
+  constructor(
+    listElement: HTMLElement | null,
+    loaderElement: HTMLElement | null,
+    cardTemplate: HTMLTemplateElement,
+    linkTemplate: HTMLTemplateElement,
+    searchTemplate: HTMLTemplateElement
+  ) {
     this.listElement = listElement
     this.loaderElement = loaderElement
     this.cardTemplate = cardTemplate
     this.linkTemplate = linkTemplate
     this.searchTemplate = searchTemplate
     
-    this.cardMap = new Map() // { methodName: DOMElement }
+    this.cardMap = new Map()
 
-    // Bind
-    this.boundHandleAnalysisUpdated = (e) => {
+    this.boundHandleAnalysisUpdated = (e: any) => {
       this.renderMethodList(e.detail.methods, e.detail.firstScanDone)
     }
     this.boundInitData = () => {
-      if (window.rubpadAnalysisCoordinator) {
-        const { methods, firstScanDone } = window.rubpadAnalysisCoordinator.getAnalysis()
+      const g = window as any
+      if (g.rubpadAnalysisCoordinator) {
+        const { methods, firstScanDone } = g.rubpadAnalysisCoordinator.getAnalysis()
         this.renderMethodList(methods, firstScanDone)
       }
     }
 
-    // Listeners
     window.addEventListener("rubpad:analysis-updated", this.boundHandleAnalysisUpdated)
     window.addEventListener("rubpad:lsp-ready", this.boundInitData)
 
-    // Init
     this.boundInitData()
   }
 
-  renderMethodList(methods, firstScanDone) {
+  private renderMethodList(methods: any[], firstScanDone: boolean): void {
     if (!this.listElement) return
 
-    // 初期化中（初回スキャン未完了かつメソッドゼロ）なら何もせず、HTMLの初期ローダーを維持する
     if (!firstScanDone && methods.length === 0) return
 
-    // プレースホルダー（"No methods", "Initializing..."）があれば全面クリア
     if (this.loaderElement && firstScanDone) {
       this.loaderElement.classList.add("hidden")
     }
@@ -62,7 +65,6 @@ export class MethodListComponent {
           <div class="text-xs text-slate-500 dark:text-slate-600 text-center py-4">No methods detected</div>
         `
       }
-      // 既存のカードがあれば削除
       for (const card of this.cardMap.values()) card.remove()
       this.cardMap.clear()
       return
@@ -70,7 +72,6 @@ export class MethodListComponent {
 
     const currentNames = new Set(methods.map(m => m.name))
 
-    // 1. 削除されたメソッドのカードを除去
     for (const [name, card] of this.cardMap.entries()) {
       if (!currentNames.has(name)) {
         card.remove()
@@ -78,29 +79,25 @@ export class MethodListComponent {
       }
     }
 
-    // 2. 順序の調整と追加
-    // methods 配列の順序に従って appendChild することで順番を入れ替える
     methods.forEach(item => {
       let card = this.cardMap.get(item.name)
 
       if (!card) {
-        // 新規作成
-        card = this.cardTemplate.content.cloneNode(true).querySelector("div")
-        card.querySelector('[data-role="methodName"]').textContent = item.name
+        const content = this.cardTemplate.content.cloneNode(true) as DocumentFragment
+        card = content.querySelector("div") as HTMLElement
+        const nameEl = card.querySelector('[data-role="methodName"]')
+        if (nameEl) nameEl.textContent = item.name
         this.cardMap.set(item.name, card)
       }
       
-      // コンテナの末尾に移動（これにより methods 全体の順序が DOM に反映される）
-      this.listElement.appendChild(card)
-
-      // ステータスに応じた表示更新
+      this.listElement!.appendChild(card)
       this.updateCardStatus(card, item)
     })
   }
 
-  updateCardStatus(card, item) {
-    const detailsContainer = card.querySelector('[data-role="linksDetails"]')
-    const icon = card.querySelector('[data-role="icon"]')
+  private updateCardStatus(card: HTMLElement, item: any): void {
+    const detailsContainer = card.querySelector('[data-role="linksDetails"]') as HTMLElement
+    const icon = card.querySelector('[data-role="icon"]') as HTMLElement
 
     if (item.status === 'pending') {
       if (card.getAttribute('data-status') === 'pending') return
@@ -115,7 +112,6 @@ export class MethodListComponent {
     }
 
     if (item.status === 'resolved') {
-      // 型が変わった場合も更新対象にするため、className もチェック
       if (card.getAttribute('data-status') === 'resolved' && 
           card.getAttribute('data-resolved-class') === item.className) return
       
@@ -127,10 +123,11 @@ export class MethodListComponent {
       icon.classList.remove("text-slate-400", "dark:text-slate-500")
       icon.classList.add("text-blue-600", "dark:text-blue-400")
 
-      const linkNode = this.linkTemplate.content.cloneNode(true)
-      linkNode.querySelector("a").href = item.url
-      linkNode.querySelector('[data-role="className"]').textContent = item.className
-      linkNode.querySelector('[data-role="separatorMethod"]').textContent = (item.separator || ".") + item.name
+      const linkNode = this.linkTemplate.content.cloneNode(true) as DocumentFragment
+      const anchor = linkNode.querySelector("a") as HTMLAnchorElement
+      anchor.href = item.url
+      linkNode.querySelector('[data-role="className"]')!.textContent = item.className
+      linkNode.querySelector('[data-role="separatorMethod"]')!.textContent = (item.separator || ".") + item.name
       detailsContainer.appendChild(linkNode)
       return
     }
@@ -144,14 +141,15 @@ export class MethodListComponent {
       icon.classList.remove("text-blue-600", "dark:text-blue-400")
       icon.classList.add("text-slate-400", "dark:text-slate-500")
 
-      const searchNode = this.searchTemplate.content.cloneNode(true)
-      searchNode.querySelector("a").href = `https://docs.ruby-lang.org/ja/latest/search/query:${encodeURIComponent(item.name)}`
-      searchNode.querySelector("span").textContent = "Search in Reference"
+      const searchNode = this.searchTemplate.content.cloneNode(true) as DocumentFragment
+      const anchor = searchNode.querySelector("a") as HTMLAnchorElement
+      anchor.href = `https://docs.ruby-lang.org/ja/latest/search/query:${encodeURIComponent(item.name)}`
+      searchNode.querySelector("span")!.textContent = "Search in Reference"
       detailsContainer.appendChild(searchNode)
     }
   }
 
-  dispose() {
+  public dispose(): void {
     window.removeEventListener("rubpad:analysis-updated", this.boundHandleAnalysisUpdated)
     window.removeEventListener("rubpad:lsp-ready", this.boundInitData)
   }

@@ -10,6 +10,10 @@ export { CursorDocComponent } from "./reference/cursor-doc"
  * Reference (リファレンス) ドメインの機能を統括するメインクラス
  */
 export class Reference {
+  private searcher: IndexSearcher
+  private resolver: ResolveSignature
+  private fetcher: FetchMethodList
+
   constructor() {
     this.searcher = new IndexSearcher()
     this.resolver = new ResolveSignature(this.searcher)
@@ -19,21 +23,21 @@ export class Reference {
   /**
    * インデックスファイルを読み込む
    */
-  async loadIndex() {
+  async loadIndex(): Promise<void> {
     return this.searcher.load()
   }
 
   /**
    * クラス名とメソッド名から、継承関係を考慮したシグネチャ解決を行う
    */
-  resolve(className, methodName) {
+  resolve(className: string, methodName: string) {
     return this.resolver.resolve(className, methodName)
   }
 
   /**
    * 指定されたクラスに属する全メソッドと URL 情報を取得する
    */
-  fetchMethods(className) {
+  fetchMethods(className: string) {
     return this.fetcher.fetch(className)
   }
 }
