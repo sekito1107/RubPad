@@ -15,6 +15,9 @@ import { ExamplesComponent } from "./examples"
 import { ToastComponent } from "./toast"
 import { MethodListComponent, CursorDocComponent } from "./reference"
 
+// Ruby VM
+import { RubyVM } from "./ruby-vm"
+
 // Persistence
 import { Persistence } from "./persistence"
 
