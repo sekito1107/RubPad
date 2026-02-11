@@ -1,0 +1,143 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { RubyVM } from '../../src/ruby-vm';
+
+const mockLSPClient = vi.fn();
+
+// 依存関係をモック化
+vi.mock('../../src/lsp/client', () => ({
+  LSPClient: vi.fn(function() { return mockLSPClient; }),
+}));
+
+vi.mock('../../src/lsp', () => ({
+  LSP: vi.fn(),
+}));
+
+vi.mock('../../src/reference', () => ({
+  Reference: vi.fn(),
+}));
+
+vi.mock('../../src/analysis', () => ({
+  AnalysisCoordinator: vi.fn(),
+}));
+
+describe('RubyVM', () => {
+  let vm: RubyVM;
+  let mockWorker: any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    document.body.innerHTML = '';
+    
+    // グローバル状態を明示的にリセット
+    Object.defineProperty(window, '__rubyVMInitializing', { value: false, writable: true, configurable: true });
+    Object.defineProperty(window, '__rubyVMReady', { value: false, writable: true, configurable: true });
+    Object.defineProperty(window, 'rubyLSP', { value: undefined, writable: true, configurable: true });
+    Object.defineProperty(window, 'rubpadLSPManager', { value: undefined, writable: true, configurable: true });
+
+    // テスト毎に新しいWorkerモックを作成
+    mockWorker = {
+      addEventListener: vi.fn(),
+      postMessage: vi.fn(),
+      terminate: vi.fn(),
+    };
+    
+    // Workerのモックを毎回設定
+    const MockWorker = vi.fn(function() { return mockWorker; });
+    vi.stubGlobal('Worker', MockWorker);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    if (vm) {
+      vm.destroy();
+    }
+  });
+
+  it('初期化時にWorkerを起動すること', () => {
+    vm = new RubyVM();
+    expect(window.Worker).toHaveBeenCalledWith('/js/ruby_worker.js', { type: 'module' });
+    expect(mockWorker.postMessage).toHaveBeenCalledWith({
+      type: 'initialize',
+      payload: { wasmUrl: '/js/rubpad.wasm' },
+    });
+  });
+
+  it('Workerからのreadyメッセージを処理すること', () => {
+    vm = new RubyVM();
+    const onReady = vi.fn();
+    vm.onReady = onReady;
+
+    expect(mockWorker.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
+
+    const calls = mockWorker.addEventListener.mock.calls.find((call: any[]) => call[0] === 'message');
+    const messageHandler = calls[1];
+
+    messageHandler({
+      data: {
+        type: 'ready',
+        payload: { version: '3.2.0' },
+      },
+    });
+
+    expect(window.__rubyVMReady).toBe(true);
+    expect(window.__rubyVMInitializing).toBeUndefined();
+    expect(onReady).toHaveBeenCalledWith('3.2.0');
+  });
+
+  it('Workerからのoutputメッセージを処理すること', () => {
+    vm = new RubyVM();
+    const onOutput = vi.fn();
+    vm.onOutput = onOutput;
+
+    const calls = mockWorker.addEventListener.mock.calls.find((call: any[]) => call[0] === 'message');
+    if (!calls) throw new Error('message listener not registered');
+    const messageHandler = calls[1];
+
+    messageHandler({
+      data: {
+        type: 'output',
+        payload: { text: 'Hello' },
+      },
+    });
+
+    expect(onOutput).toHaveBeenCalledWith('Hello');
+  });
+
+  it('runメソッドでコードをWorkerに送信すること', () => {
+    vm = new RubyVM();
+    
+    // Worker初期化を確認
+    expect(mockWorker.postMessage).toHaveBeenCalledWith({
+       type: 'initialize',
+       payload: { wasmUrl: '/js/rubpad.wasm' },
+    });
+
+    // run呼び出し
+    vm.run('puts "Hello"');
+
+    expect(mockWorker.postMessage).toHaveBeenCalledWith({
+      type: 'run',
+      payload: { code: 'puts "Hello"' },
+    });
+  });
+
+  it('Worker未初期化時のrun呼び出しをハンドリングすること', () => {
+    // Worker初期化失敗をシミュレート
+    const ErrorWorker = vi.fn(function() {
+      throw new Error("Worker Error");
+    });
+    vi.stubGlobal('Worker', ErrorWorker);
+    
+    // 状態リセット
+    (window as any).__rubyVMInitializing = undefined;
+    (window as any).__rubyVMReady = undefined;
+    
+    const onOutput = vi.fn();
+    vm = new RubyVM();
+    vm.onOutput = onOutput;
+    
+    vm.run('test');
+    
+    expect(onOutput).toHaveBeenCalledWith(expect.stringContaining('Worker が初期化されていません'));
+  });
+});
