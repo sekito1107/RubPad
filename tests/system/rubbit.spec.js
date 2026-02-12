@@ -109,7 +109,7 @@ test.describe('Rubbit E2E Tests', () => {
   });
 
   test('ファイルをダウンロードできる', async ({ page }) => {
-    // Force fallback to legacy download by removing showSaveFilePicker
+    // showSaveFilePicker を削除して、レガシーダウンロードへのフォールバックを強制する
     await page.evaluate(() => {
         // @ts-ignore
         window.showSaveFilePicker = undefined;
@@ -204,14 +204,4 @@ test.describe('Rubbit E2E Tests', () => {
     }, { timeout: 10000 }).toContain('1.upto(100) do |i|');
   });
 
-  test('ファイルをダウンロードできる', async ({ page }) => {
-    const downloadPromise = page.waitForEvent('download');
-
-    await page.getByTitle('コードを保存').click();
-
-    const download = await downloadPromise;
-
-    expect(download.suggestedFilename()).toBe('rubbit.rb');
-    await download.path();
-  });
 });
