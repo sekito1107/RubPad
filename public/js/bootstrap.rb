@@ -237,33 +237,62 @@ class Server
       target_line = args[:line]
       
       result_str = ""
+      captured_val = nil
+      found = false
       
       begin
         # Measure Value 用に独立したBindingを作成
         measure_binding = TOPLEVEL_BINDING.eval("binding")
         
-        # 最新のコードを読み込み、対象行まで（その行を含む）を実行してコンテキストを構築する
+        # 最新のコードを読み込む
         if File.exist?("/workspace/main.rb")
           code_str = File.read("/workspace/main.rb")
-          lines = code_str.lines
           
-          # target_line が指定されている場合は、その行までを実行対象とする
-          if target_line && target_line > 0
-            lines_to_run = lines.take(target_line)
-            code_to_run = lines_to_run.join
-          else
-            code_to_run = code_str
+          # TracePoint を使用して、指定行に到達した時点での値をキャプチャする
+          # 部分実行(lines.take)はブロック内などで構文エラーになるため、全体を実行する方式に変更
+          tp = TracePoint.new(:line) do |tp|
+            if tp.lineno == target_line && tp.path == "(eval)"
+              begin
+                val = tp.binding.eval(expression)
+                captured_val = val
+                found = true
+              rescue => e
+                # 変数が未定義などの場合
+              end
+            end
           end
 
           # 標準出力を抑制しつつ実行
-          eval("require 'stringio'; $stdout = StringIO.new; " + code_to_run, measure_binding)
+          measure_binding.eval("require 'stringio'; $stdout = StringIO.new")
+          
+          begin
+            tp.enable
+            measure_binding.eval(code_str, "(eval)")
+          ensure
+            tp.disable
+          end
         end
 
-        # 対象の式を評価
-        val = eval(expression, measure_binding)
-        result_str = val.inspect
+        if found
+          result_str = captured_val.inspect
+        else
+          # 行に到達しなかった、または空行/コメント行の場合
+          # 全体実行後の状態で評価を試みる（フォールバック）
+          # ただし、実行順序的に target_line より後になっている可能性があるため注意が必要だが、
+          # 構文エラーで何も出ないよりはマシである
+          begin
+             val = measure_binding.eval(expression)
+             result_str = val.inspect
+          rescue
+             result_str = "" # 何も表示しない
+          end
+        end
       rescue => e
-        result_str = "(Error: " + e.message + ")"
+        if found
+           result_str = captured_val.inspect
+        else
+           result_str = "(Error: " + e.message + ")"
+        end
       end
       
       write(id: json[:id], result: result_str)
