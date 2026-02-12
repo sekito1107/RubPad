@@ -226,17 +226,14 @@ class Server
 
   def handle_execute_command(json)
     params = json[:params]
-    if params[:command] == "typeprof.measureValue"
-      # 引数は配列の最初の要素に入っている
-      args = params[:arguments][0]
-      expression = args[:expression]
-      # 1-based line number coming from Monaco
-      target_line = args[:line]
+    case params[:command]
+    when "typeprof.measureValue"
+      expression = json[:params][:arguments][0][:expression]
+      target_line = json[:params][:arguments][0][:line]
       
-      result_str = ""
-      captured_val = nil
-      found = false
+      CapturedValue.reset
       
+      # 実行中のバインディング
       begin
         # Measure Value 用に独立したBindingを作成
         measure_binding = TOPLEVEL_BINDING.eval("binding")
@@ -244,32 +241,18 @@ class Server
         # 最新のコードを読み込む
         if File.exist?("/workspace/main.rb")
           code_str = File.read("/workspace/main.rb")
-          
-          # TracePoint を使用して、指定行に到達した（または物理的に超えた）時点の Binding を取得する。
-          # これにより、「後で呼び出されるメソッドの中身」などの未来の値を拾わないように制限する。
+           # TracePoint を使用して、指定行に到達した（または物理的に超えた）時点の Binding を取得する。
           tp = TracePoint.new(:line, :call, :return, :class, :end, :b_call, :b_return) do |tp|
             next unless tp.path == "(eval)"
 
-            if tp.lineno == target_line
-              begin
-                val = tp.binding.eval(expression)
-                CapturedValue.set(val)
-                CapturedValue.found = true
-                raise RubPadStopExecution
-              rescue RubPadStopExecution
-                raise
-              rescue => e
-                # まだ評価できない（例: each の呼び出し直後でブロック変数がない）場合は
-                # フラグだけ立てて次のイベント（b_call 等）に期待する
-                CapturedValue.target_triggered = true
-                CapturedValue.set(e) # 予備としてエラーを保持
-              end
-            elsif CapturedValue.target_triggered
-              # ターゲット行は踏んだが成功していない場合。物理行を超えたら停止。
-              if tp.lineno > target_line
-                raise RubPadStopExecution
-              end
+            if tp.lineno == target_line && !CapturedValue.target_triggered
+              # ターゲット行に最初に到達した際はフラグを立ててスキップ。
+              # これにより、行内の代入などの実行が終わるタイミングを待つ。
+              CapturedValue.target_triggered = true
+              next
+            end
 
+            if CapturedValue.target_triggered || tp.lineno > target_line
               begin
                 val = tp.binding.eval(expression)
                 CapturedValue.set(val)
@@ -278,11 +261,13 @@ class Server
               rescue RubPadStopExecution
                 raise
               rescue => e
-                CapturedValue.set(e) # 最新のエラーを保持
+                # まだ評価できない場合(NameError等)かつターゲット行内の場合は続行。
+                # 物理行を超えていたら（ターゲット行をスキップした場合など）諦めて停止。
+                if tp.lineno > target_line
+                  CapturedValue.set(e)
+                  raise RubPadStopExecution
+                end
               end
-            elsif tp.lineno > target_line
-              # ターゲット行を一度も踏まずに通り過ぎた場合
-              raise RubPadStopExecution
             end
           end
 
