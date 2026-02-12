@@ -229,9 +229,10 @@ class Server
     case params[:command]
     when "typeprof.measureValue"
       expression = json[:params][:arguments][0][:expression]
-      target_line = json[:params][:arguments][0][:line]
+      target_line = json[:params][:arguments][0][:line] + 1
       
       CapturedValue.reset
+      max_captures = 10 # 最大キャプチャ数
       
       # 実行中のバインディング
       begin
@@ -240,32 +241,47 @@ class Server
         
         # 最新のコードを読み込む
         if File.exist?("/workspace/main.rb")
-          code_str = File.read("/workspace/main.rb")
-           # TracePoint を使用して、指定行に到達した（または物理的に超えた）時点の Binding を取得する。
+          code_str = File.read("/workspace/main.rb") + "\nnil"
+
           tp = TracePoint.new(:line, :call, :return, :class, :end, :b_call, :b_return) do |tp|
             next unless tp.path == "(eval)"
 
             if tp.lineno == target_line && !CapturedValue.target_triggered
-              # ターゲット行に最初に到達した際はフラグを立ててスキップ。
-              # これにより、行内の代入などの実行が終わるタイミングを待つ。
+              # ターゲット行に到達した際、まだ実行が終わっていないためフラグを立ててスキップし、
+              # 次のイベント（行内の実行完了後など）で値をキャプチャする。
               CapturedValue.target_triggered = true
               next
             end
 
-            if CapturedValue.target_triggered || tp.lineno > target_line
+            if CapturedValue.target_triggered && tp.lineno != target_line
+               # ターゲット行から抜けたタイミング（次の行へ移動、あるいはメソッドから戻る時など）
+               # ただし、ループ内だと同じ行に戻ってくることもあるので注意が必要。
+               # ここでは「ターゲット行でトリガーされた後、何らかの次のステップに進んだ」時点で評価を試みる。
+               
+               # 単純化: ターゲット行を実行し終えた直後（次の行へ移るか、ブロック終了など）
+               # しかし、同一行で複数回呼ばれるケース（ループ）では、
+               # tp.lineno が target_line に戻ってくることもある。
+            end
+
+            if CapturedValue.target_triggered
               begin
                 val = tp.binding.eval(expression)
-                CapturedValue.set(val)
-                CapturedValue.found = true
-                raise RubPadStopExecution
+                CapturedValue.add(val)
+                
+                # キャプチャしたらトリガーをリセットして次のループに備える
+                CapturedValue.target_triggered = false
+                
+                if CapturedValue.count >= max_captures
+                  raise RubPadStopExecution
+                end
               rescue RubPadStopExecution
                 raise
               rescue => e
                 # まだ評価できない場合(NameError等)かつターゲット行内の場合は続行。
-                # 物理行を超えていたら（ターゲット行をスキップした場合など）諦めて停止。
+                # 物理行を超えていたら（ターゲット行をスキップした場合など）諦めて記録。
                 if tp.lineno > target_line
-                  CapturedValue.set(e)
-                  raise RubPadStopExecution
+                  CapturedValue.add(e)
+                  CapturedValue.target_triggered = false
                 end
               end
             end
@@ -279,31 +295,42 @@ class Server
               measure_binding.eval(code_str, "(eval)")
             end
           rescue RubPadStopExecution
-            # 正常停止
+            # 正常停止（制限に達したなど）
           rescue => e
-            # 実行時エラーがあればそれも記録（ただしfoundではない可能性あり）
-            CapturedValue.set(e) unless CapturedValue.found
+            # 実行時エラーがあればそれも記録
+            CapturedValue.add(e) unless CapturedValue.found?
           end
         end
 
-        if CapturedValue.found
-          val = CapturedValue.get
-          result_str = val.is_a?(Exception) ? "(#{val.class}: #{val.message})" : val.inspect
-        else
-          # 行に到達しなかった場合、または最終的なエラー
-          if CapturedValue.get.is_a?(Exception)
-            e = CapturedValue.get
-            result_str = "(#{e.class}: #{e.message})"
-          else
-            result_str = ""
+        if CapturedValue.found?
+          results = CapturedValue.get_all.map do |val|
+            if val.is_a?(Exception)
+              "(#{val.class}: #{val.message})"
+            else
+              # 評価結果の inspect 文字列を取得
+              result_str = val.inspect.to_s
+              limit = 200
+              if result_str.length > limit
+                result_str = result_str[0...limit] + "..."
+              end
+              result_str
+            end
           end
+          # 結果を連結して返す
+          result_str = results.join(", ")
+        else
+          # 行に到達しなかった場合
+          result_str = ""
         end
       rescue => e
-        if CapturedValue.found
-           result_str = CapturedValue.get.inspect
+        if CapturedValue.found?
+           # 部分的に取得できた場合
+           results = CapturedValue.get_all.map { |v| v.inspect }
+           result_str = results.join(", ")
         else
            if e.message == "RubPad::StopExecution"
-             result_str = CapturedValue.get.inspect
+             results = CapturedValue.get_all.map { |v| v.inspect }
+             result_str = results.join(", ")
            else
              result_str = "(Error: " + e.message + ")"
            end
@@ -321,20 +348,29 @@ class Server
 
   # 値の受け渡し用クラス
   class CapturedValue
-    @val = nil
-    @found = false
+    @vals = []
     @target_triggered = false
     class << self
-      attr_accessor :found, :target_triggered
-      def set(v)
-        @val = v
+      attr_accessor :target_triggered
+      
+      def add(v)
+        @vals << v
       end
-      def get
-        @val
+      
+      def get_all
+        @vals
       end
+      
+      def found?
+        !@vals.empty?
+      end
+      
+      def count
+        @vals.size
+      end
+
       def reset
-        @val = nil
-        @found = false
+        @vals = []
         @target_triggered = false
       end
     end
