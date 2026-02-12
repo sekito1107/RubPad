@@ -112,5 +112,15 @@ describe('Scanner', () => {
       expect(line2).toHaveLength(1)
       expect(line2[0].name).toBe('p')
     })
+
+    it('式展開 (#{...}) 内のメソッドを抽出できること', () => {
+      const code = '"Hello, #{name.upcase}!"'
+      const model = createMockModel(code)
+      const results = scanner.scanLines(model, [0])
+
+      const line1 = results.get(0)!
+      expect(line1).toHaveLength(1)
+      expect(line1[0].name).toBe('upcase')
+    })
   })
 })

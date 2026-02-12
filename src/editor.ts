@@ -77,8 +77,15 @@ export class EditorComponent {
         "#    変数にマウスを乗せて「値を確認」をクリックすると、",
         "#    行末に値が浮かび上がります。",
         "",
-        "greeting = \"Hello, Rubbit!\"",
-        "puts greeting"
+        "langs = %w[ruby python javascript]",
+        "",
+        "messages = []",
+        "langs.each_with_index do |lang, i|",
+        "  messages << \"#{i + 1}: Hello, #{lang.capitalize}!\"",
+        "end",
+        "",
+        "# ↑ 上の `messages` 変数にマウスを乗せて「値を確認」してみてください",
+        "puts messages"
       ].join("\n"),
       language: "ruby",
       theme: this.currentTheme,

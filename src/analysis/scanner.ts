@@ -29,7 +29,8 @@ export class Scanner {
 
     lineIndices.forEach(idx => {
       // コメントを除去しつつインデックスを維持するため、空白で置換する
-      const lineContent = model.getLineContent(idx + 1).replace(/#.*$/, m => " ".repeat(m.length))
+      // # から行末までを置換するが、#{ (式展開) は除外する
+      const lineContent = model.getLineContent(idx + 1).replace(/#(?!\{).*$/g, m => " ".repeat(m.length))
       const matches: ScannedMethod[] = []
       let match: RegExpExecArray | null
 
