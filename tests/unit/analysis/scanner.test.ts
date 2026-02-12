@@ -97,5 +97,20 @@ describe('Scanner', () => {
       expect(line2.some(m => m.name === 'select')).toBe(true)
       expect(line2.some(m => m.name === 'odd?')).toBe(true)
     })
+
+
+    it('ホワイトリストに含まれる暗黙的なメソッド (puts, p) を抽出できること', () => {
+      const code = 'puts "Hello"\np 123'
+      const model = createMockModel(code)
+      const results = scanner.scanLines(model, [0, 1])
+
+      const line1 = results.get(0)!
+      expect(line1).toHaveLength(1)
+      expect(line1[0].name).toBe('puts')
+
+      const line2 = results.get(1)!
+      expect(line2).toHaveLength(1)
+      expect(line2[0].name).toBe('p')
+    })
   })
 })
