@@ -14,7 +14,6 @@ vi.mock('../../src/runtime/exporter', () => {
 describe('DownloadComponent', () => {
   let button: HTMLElement;
   let mockEditor: any;
-  let component: DownloadComponent;
 
   beforeEach(() => {
     document.body.innerHTML = '<button id="download"></button>';
