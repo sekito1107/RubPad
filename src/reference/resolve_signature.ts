@@ -43,12 +43,22 @@ export class ResolveSignature {
     const chain = ResolveSignature.INHERITANCE_MAP[className] || [className, "Object", "Kernel", "BasicObject"]
 
     // 2. 順にマッチするものを探す（自クラス -> 継承先 -> Object...）
+    // 2. 順にマッチするものを探す（自クラス -> 継承先 -> Object...）
     for (const ancestor of chain) {
-      const match = candidates.find(c => c.startsWith(`${ancestor}#`) || c.startsWith(`${ancestor}.`))
-      if (match) {
+      // 優先順位: インスタンスメソッド (#) -> 特異メソッド (.)
+      const matchI = candidates.find(c => c.startsWith(`${ancestor}#`))
+      if (matchI) {
         return {
-          signature: match,
-          ...URLGenerator.generateUrlInfo(match)
+          signature: matchI,
+          ...URLGenerator.generateUrlInfo(matchI)
+        }
+      }
+
+      const matchS = candidates.find(c => c.startsWith(`${ancestor}.`))
+      if (matchS) {
+        return {
+          signature: matchS,
+          ...URLGenerator.generateUrlInfo(matchS)
         }
       }
     }
