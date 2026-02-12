@@ -1,12 +1,11 @@
-# Rubbit (静的サイト版)
+# Rubbit
 
 Rubbit は、Ruby WASM、TypeScript、および Vite を使用したクライアントサイドで動作する Ruby プレイグラウンドです。
 
 ## 特徴
 
 - **Ruby WASM**: バックエンドなしで、ブラウザ上で直接 Ruby コードを実行します。
-- **Vite + TypeScript**: モダンで高速なビルドシステムと型安全な開発環境。
-- **Tailwind CSS**: クリーンでレスポンシブな UI のためのユーティリティファースト CSS。
+- **Vite + TypeScript**: 高速なビルドシステムと型安全な開発環境。
 - **Monaco Editor**: プロフェッショナルなコード編集体験。
 - **共有機能**: URL 経由でコードを同期・共有可能（pako による圧縮）。
 - **リファレンス表示**: カーソル位置のメソッドやクラスのドキュメントを即座に表示。
@@ -63,7 +62,7 @@ npm run build
 - `src/ruby-vm.ts`: Ruby WASM の初期化と実行を管理します。
 - `src/editor.ts`: Monaco Editor のセットアップと操作を管理します。
 - `src/console.ts`: 実行結果の表示とターミナルの操作を管理します。
-- `src/reference/`: Ruby リファレンス（るりま）との連携機能。
+- `src/reference/`: Ruby リファレンス表示機能。
 - `public/`: Ruby WASM バイナリやアイコンなどの静的アセット。
 - `index.html`: メインアプリケーションのレイアウト。
 

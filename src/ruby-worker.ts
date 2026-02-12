@@ -88,7 +88,7 @@ async function initializeVM(wasmUrl: string) {
     postMessage({ type: "progress", payload: { percent: 50, message: "Loading Bootstrap..." } });
     
     // Note: bootstrap.rb は public/js に置かれている想定
-    const bootstrapUrl = new URL("/js/bootstrap.rb", self.location.origin);
+    const bootstrapUrl = new URL("/ruby/bootstrap.rb", self.location.origin);
     const bootstrapResponse = await fetch(bootstrapUrl);
     const bootstrapCode = await bootstrapResponse.text();
 
