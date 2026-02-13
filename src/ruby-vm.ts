@@ -1,7 +1,4 @@
 import { LSPClient } from "./lsp/client";
-// import { LSP } from "./lsp";
-// import { Reference } from "./reference";
-// import { AnalysisCoordinator } from "./analysis";
 import RubyWorker from "./ruby-worker?worker";
 
 // グローバル定義は src/types.d.ts に移動
@@ -15,10 +12,7 @@ console.error('[RubyVM] Module loaded');
 export class RubyVM {
   private worker: Worker | null = null;
   public lspClient: LSPClient | null = null;
-  private editor: any = null; // Monaco Editor instance
-  // private lspManager: LSP | null = null; // Moved to BootLoader
-  // private reference: Reference | null = null; // Moved to BootLoader
-  // private analysis: AnalysisCoordinator | null = null; // Moved to BootLoader
+  private editor: any = null;
   private bootLoader: any = null;
   private rubyVersion: string = "";
 

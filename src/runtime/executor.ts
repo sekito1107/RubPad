@@ -22,8 +22,6 @@ export class Executor {
       this.controller.run(code);
     } catch (e: any) {
       console.error("Execution failed:", e);
-      // エラー処理は呼び出し元（あるいはVMからのメッセージ）に委譲されることが多いが、
-      // ここで最低限のガードを行う
       throw e;
     }
   }
