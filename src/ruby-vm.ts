@@ -70,13 +70,11 @@ export class RubyVM {
         break;
       case "progress":
         // Workerからの進捗イベントを中継
-        console.log(`[RubyVM] Progress: ${payload.percent}% - ${payload.message}`);
         window.dispatchEvent(new CustomEvent("rubbit:loading-progress", {
           detail: { percent: payload.percent, message: payload.message }
         }));
         break;
       case "ready":
-        console.log(`[RubyVM] Received READY from worker. Version: ${payload.version}`);
         window.__rubyVMReady = true;
         delete window.__rubyVMInitializing;
         // onReady はローディング統合のため版数を保存するのみ
@@ -126,12 +124,6 @@ export class RubyVM {
    * 各ドメイン（LSP, Reference, Analysis）の有効化を試みる
    */
   private async tryActivateDomains(): Promise<void> {
-    console.log("[RubyVM] tryActivateDomains called", { 
-      hasLsp: !!this.lspClient, 
-      hasEditor: !!this.editor, 
-      hasBoot: !!this.bootLoader, 
-      ready: window.__rubyVMReady 
-    });
     if (this.lspClient && this.editor && !this.bootLoader && window.__rubyVMReady) {
       console.log("[RubyVM] Starting BootLoader...");
       // BootLoaderの遅延読み込みと初期化
@@ -141,7 +133,6 @@ export class RubyVM {
       try {
         await this.bootLoader.boot();
         
-        console.log("[RubyVM] LSP and Domains ready (rubbit:lsp-ready fired)");
         window.dispatchEvent(new CustomEvent("rubbit:lsp-ready", {
           detail: { version: this.rubyVersion }
         }));

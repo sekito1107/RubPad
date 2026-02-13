@@ -83,16 +83,12 @@ end
 
 class Server
   def initialize
-    JS.global[:console].log("[RubyLSP] Server.initialize started")
     @read_msg = nil
     @error = nil
 
     # TypeProfコアの初期化
     rbs_list = File.exist?("/workspace/stdlib.rbs") ? ["/workspace/stdlib.rbs"] : []
-    JS.global[:console].log("[RubyLSP] RBS list: #{rbs_list}")
-    JS.global[:console].log("[RubyLSP] RBS version: #{RBS::VERSION}")
     @core = TypeProf::Core::Service.new(rbs_files: rbs_list)
-    JS.global[:console].log("[RubyLSP] TypeProf::Core::Service initialized")
     
     # ユーザーコード実行用のBindingを作成 (ローカル変数を保持するため)
     @user_binding = TOPLEVEL_BINDING.eval("binding")
@@ -133,7 +129,6 @@ class Server
   end
 
   def add_msg(msg)
-    JS.global[:console].log("[RubyLSP] Received: #{msg}")
     json = JSON.parse(msg.to_s, symbolize_names: true)
     
     # ファイル内容の同期 (Measure Valueのため)
@@ -189,12 +184,9 @@ class Server
     end
 
     @read_msg = json
-    JS.global[:console].log("[RubyLSP] Resuming fiber...")
     @fiber.resume
-    JS.global[:console].log("[RubyLSP] Fiber resumed.")
     if @error
       error, @error = @error, nil
-      JS.global[:console].log("[RubyLSP] Error in fiber: #{error.message}")
       raise error
     end
   end
@@ -404,7 +396,6 @@ class Server
     json_str = JSON.generate(json_obj)
     
     # JS.global.call を使用してグローバル関数として呼び出す
-    JS.global[:console].log("[RubyLSP] Write: #{json_str}")
     JS.global.call(:sendLspResponse, json_str)
   end
 end
