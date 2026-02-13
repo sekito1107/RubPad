@@ -48,12 +48,11 @@ async function initializeVM(wasmUrl: string) {
 
     const buffer = await response.arrayBuffer();
 
-    try {
-      postMessage({ type: "progress", payload: { percent: 30, message: "Compiling Ruby WASM..." } });
-      const module = await WebAssembly.compile(buffer);
-      
-      const result = await DefaultRubyVM(module);
-      vm = result.vm;
+    postMessage({ type: "progress", payload: { percent: 30, message: "Compiling Ruby WASM..." } });
+    const module = await WebAssembly.compile(buffer);
+    
+    const result = await DefaultRubyVM(module);
+    vm = result.vm;
 
       // RBS標準ライブラリの取得と配置
       try {
@@ -75,17 +74,14 @@ async function initializeVM(wasmUrl: string) {
             vm.eval(`File.open('/workspace/stdlib.rbs', '${mode}') { |f| f.write(['${hexChunk}'].pack('H*')) }`);
           }
         }
-      } catch (e) {
+      } catch {
+        // Ignore RBS fetch errors
       }
-
-    } catch (e: any) {
-      throw e;
-    }
 
     // bootstrap.rb (Polyfills & LSP Server) をロードする
     postMessage({ type: "progress", payload: { percent: 50, message: "Loading Bootstrap..." } });
     
-    // Note: bootstrap.rb は public/js に置かれている想定
+    // Note: bootstrap.rb は public/ruby に置かれている想定
     const bootstrapUrl = new URL("/ruby/bootstrap.rb", self.location.origin);
     const bootstrapResponse = await fetch(bootstrapUrl);
     const bootstrapCode = await bootstrapResponse.text();
