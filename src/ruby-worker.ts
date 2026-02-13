@@ -18,10 +18,7 @@ self.onmessage = async (event: MessageEvent) => {
       await initializeVM(payload.wasmUrl);
       break;
     case "run":
-      if (!vm) {
-        postMessage({ type: "output", payload: { text: "// Error: Ruby VM is not ready yet." } });
-        return;
-      }
+      if (!vm) return;
       runCode(payload.code);
       break;
     case "lsp":
@@ -65,15 +62,17 @@ async function initializeVM(wasmUrl: string) {
         if (rbsResponse.ok) {
           const rbsBuffer = await rbsResponse.arrayBuffer();
           const bytes = new Uint8Array(rbsBuffer);
-          const CHUNK_SIZE = 64 * 1024; // 64KB 単位で分割
+          const CHUNK_SIZE = 256 * 1024; // 256KB 単位で分割
 
           vm.eval(`Dir.mkdir('/workspace') unless Dir.exist?('/workspace')`);
 
           for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
             const chunk = bytes.slice(i, i + CHUNK_SIZE);
-            const hexChunk = Array.from(chunk)
-              .map(b => b.toString(16).padStart(2, '0'))
-              .join('');
+            // Hex変換の高速化
+            let hexChunk = '';
+            for (let j = 0; j < chunk.length; j++) {
+              hexChunk += chunk[j].toString(16).padStart(2, '0');
+            }
 
             const mode = (i === 0) ? 'wb' : 'ab';
             vm.eval(`File.open('/workspace/stdlib.rbs', '${mode}') { |f| f.write(['${hexChunk}'].pack('H*')) }`);
@@ -99,6 +98,10 @@ async function initializeVM(wasmUrl: string) {
     writeRubyFile("/src/workspace.rb", workspaceCode);
     writeRubyFile("/src/measure_value.rb", measureValueCode);
     writeRubyFile("/src/server.rb", serverCode);
+
+    vm.eval(`
+      $LOAD_PATH.unshift("/src")
+    `);
 
     // LSPからのレスポンスをMain Threadに転送する関数
     (self as any).sendLspResponse = (jsonString: string) => {

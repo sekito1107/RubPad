@@ -8,7 +8,6 @@ const RUBY_WASM_URL = "/ruby/rubbit.wasm";
 /**
  * Ruby VM & 実行時マネージャ
  */
-console.error('[RubyVM] Module loaded');
 export class RubyVM {
   private worker: Worker | null = null;
   public lspClient: LSPClient | null = null;

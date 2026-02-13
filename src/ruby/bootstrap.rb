@@ -1,18 +1,21 @@
 require "js"
 require "rubygems"
+
+# 環境パッチを最優先
+require "env"
+
 require "typeprof"
 require "typeprof/lsp"
 
-require_relative "env"
-require_relative "workspace"
-require_relative "measure_value"
-require_relative "server"
+require "workspace"
+require "measure_value"
+require "server"
 
 # TypeProfコアの初期化
 rbs_list = File.exist?("/workspace/stdlib.rbs") ? ["/workspace/stdlib.rbs"] : []
 core = TypeProf::Core::Service.new(rbs_files: rbs_list)
 
-# ウォームアップ: 巨大なRBSの解析を事前にトリガー
+# ウォームアップ
 begin
   iseq_klass = defined?(TypeProf::Core::ISeq) ? TypeProf::Core::ISeq : (defined?(TypeProf::ISeq) ? TypeProf::ISeq : nil)
   if iseq_klass
