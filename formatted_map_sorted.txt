@@ -1,12 +1,45 @@
-import { URLGenerator } from "./url_generator"
-import type { IndexSearcher } from "./index_searcher"
-
-/**
- * 継承関係を考慮して、特定のメソッド名に対応する最適なるりまシグネチャを解決する
- */
-export class ResolveSignature {
-  // 主要なクラスの継承/ミックスイン関係
   static readonly INHERITANCE_MAP: Record<string, string[]> = {
+    "AES": [
+      "AES",
+      "OpenSSL::Cipher",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "AES128": [
+      "AES128",
+      "OpenSSL::Cipher",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "AES192": [
+      "AES192",
+      "OpenSSL::Cipher",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "AES256": [
+      "AES256",
+      "OpenSSL::Cipher",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ASN1Data": [
+      "ASN1Data",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ASN1Error": [
+      "ASN1Error",
+      "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "Addrinfo": [
       "Addrinfo",
       "Object",
@@ -28,6 +61,48 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "Attribute": [
+      "Attribute",
+      "OpenSSL::Marshal",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "AttributeError": [
+      "AttributeError",
+      "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "AuthorityInfoAccess": [
+      "AuthorityInfoAccess",
+      "OpenSSL::X509::Extension::Helpers",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "AuthorityKeyIdentifier": [
+      "AuthorityKeyIdentifier",
+      "OpenSSL::X509::Extension::Helpers",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "BF": [
+      "BF",
+      "OpenSSL::Cipher",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "BMPString": [
+      "BMPString",
+      "OpenSSL::ASN1::Primitive",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "BN": [
       "BN",
       "Comparable",
@@ -42,34 +117,31 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "BadRequirementError": [
+      "BadRequirementError",
+      "ArgumentError",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "BasicObject": [
       "BasicObject",
       "Object",
       "Kernel"
+    ],
+    "BasicResponse": [
+      "BasicResponse",
+      "Object",
+      "Kernel",
+      "BasicObject"
     ],
     "BasicSocket": [
       "BasicSocket",
       "IO",
       "File::Constants",
       "Enumerable",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Benchmark::Job": [
-      "Benchmark::Job",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Benchmark::Report": [
-      "Benchmark::Report",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Benchmark::Tms": [
-      "Benchmark::Tms",
       "Object",
       "Kernel",
       "BasicObject"
@@ -86,8 +158,30 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "BitString": [
+      "BitString",
+      "OpenSSL::ASN1::Primitive",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Boolean": [
+      "Boolean",
+      "OpenSSL::ASN1::Primitive",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "Breakable": [
       "Breakable",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Buffer": [
+      "Buffer",
+      "Comparable",
+      "String",
       "Object",
       "Kernel",
       "BasicObject"
@@ -99,16 +193,37 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "Buffering::Buffer": [
-      "Buffering::Buffer",
-      "String",
-      "Comparable",
+    "CAST5": [
+      "CAST5",
+      "OpenSSL::Cipher",
       "Object",
       "Kernel",
       "BasicObject"
     ],
     "CGI": [
       "CGI",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "CRL": [
+      "CRL",
+      "OpenSSL::X509::Extension::AuthorityKeyIdentifier",
+      "OpenSSL::Marshal",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "CRLDistributionPoints": [
+      "CRLDistributionPoints",
+      "OpenSSL::X509::Extension::Helpers",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "CRLError": [
+      "CRLError",
+      "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
       "BasicObject"
@@ -151,99 +266,40 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "Cipher": [
-      "Cipher",
+    "Certificate": [
+      "Certificate",
+      "OpenSSL::X509::Extension::AuthorityInfoAccess",
+      "OpenSSL::X509::Extension::CRLDistributionPoints",
+      "OpenSSL::X509::Extension::AuthorityKeyIdentifier",
+      "OpenSSL::X509::Extension::SubjectKeyIdentifier",
+      "OpenSSL::Marshal",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "Cipher::AES": [
-      "Cipher::AES",
-      "OpenSSL::Cipher",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Cipher::AES128": [
-      "Cipher::AES128",
-      "OpenSSL::Cipher",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Cipher::AES192": [
-      "Cipher::AES192",
-      "OpenSSL::Cipher",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Cipher::AES256": [
-      "Cipher::AES256",
-      "OpenSSL::Cipher",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Cipher::BF": [
-      "Cipher::BF",
-      "OpenSSL::Cipher",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Cipher::CAST5": [
-      "Cipher::CAST5",
-      "OpenSSL::Cipher",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Cipher::Cipher": [
-      "Cipher::Cipher",
-      "OpenSSL::Cipher",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Cipher::CipherError": [
-      "Cipher::CipherError",
+    "CertificateError": [
+      "CertificateError",
       "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "Cipher::DES": [
-      "Cipher::DES",
+    "CertificateId": [
+      "CertificateId",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Cipher": [
+      "Cipher",
       "OpenSSL::Cipher",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "Cipher::IDEA": [
-      "Cipher::IDEA",
-      "OpenSSL::Cipher",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Cipher::RC2": [
-      "Cipher::RC2",
-      "OpenSSL::Cipher",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Cipher::RC4": [
-      "Cipher::RC4",
-      "OpenSSL::Cipher",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Cipher::RC5": [
-      "Cipher::RC5",
-      "OpenSSL::Cipher",
+    "CipherError": [
+      "CipherError",
+      "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
       "BasicObject"
@@ -251,6 +307,16 @@ export class ResolveSignature {
     "Class": [
       "Class",
       "Module",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ClosedError": [
+      "ClosedError",
+      "StopIteration",
+      "IndexError",
+      "StandardError",
+      "Exception",
       "Object",
       "Kernel",
       "BasicObject"
@@ -285,9 +351,69 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "ConsoleMode": [
+      "ConsoleMode",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Constructive": [
+      "Constructive",
+      "Enumerable",
+      "OpenSSL::ASN1::ASN1Data",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Cyclic": [
+      "Cyclic",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "DBM": [
       "DBM",
       "Enumerable",
+      "::DBM",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "DES": [
+      "DES",
+      "OpenSSL::Cipher",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "DH": [
+      "DH",
+      "OpenSSL::Marshal",
+      "OpenSSL::PKey::PKey",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "DHError": [
+      "DHError",
+      "OpenSSL::PKey::PKeyError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "DSA": [
+      "DSA",
+      "OpenSSL::Marshal",
+      "OpenSSL::PKey::PKey",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "DSAError": [
+      "DSAError",
+      "OpenSSL::PKey::PKeyError",
       "Object",
       "Kernel",
       "BasicObject"
@@ -309,6 +435,7 @@ export class ResolveSignature {
     ],
     "Digest": [
       "Digest",
+      "OpenSSL::Digest",
       "Object",
       "Kernel",
       "BasicObject"
@@ -328,39 +455,11 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "Digest::Digest": [
-      "Digest::Digest",
-      "OpenSSL::Digest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Digest::DigestError": [
-      "Digest::DigestError",
-      "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Digest::MD4": [
-      "Digest::MD4",
-      "OpenSSL::Digest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
     "Digest::MD5": [
       "Digest::MD5",
       "Digest::Base",
       "Digest::Class",
       "::Digest::Instance",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Digest::RIPEMD160": [
-      "Digest::RIPEMD160",
-      "OpenSSL::Digest",
       "Object",
       "Kernel",
       "BasicObject"
@@ -379,13 +478,6 @@ export class ResolveSignature {
       "Digest::Base",
       "Digest::Class",
       "::Digest::Instance",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Digest::SHA224": [
-      "Digest::SHA224",
-      "OpenSSL::Digest",
       "Object",
       "Kernel",
       "BasicObject"
@@ -417,9 +509,31 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "DigestError": [
+      "DigestError",
+      "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "Dir": [
       "Dir",
       "Enumerable",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "EC": [
+      "EC",
+      "OpenSSL::Marshal",
+      "OpenSSL::PKey::PKey",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ECError": [
+      "ECError",
+      "OpenSSL::PKey::PKeyError",
       "Object",
       "Kernel",
       "BasicObject"
@@ -502,15 +616,29 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "EndOfContent": [
+      "EndOfContent",
+      "OpenSSL::ASN1::ASN1Data",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "Engine": [
       "Engine",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "Engine::EngineError": [
-      "Engine::EngineError",
+    "EngineError": [
+      "EngineError",
       "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Enumerated": [
+      "Enumerated",
+      "OpenSSL::ASN1::Primitive",
       "Object",
       "Kernel",
       "BasicObject"
@@ -544,6 +672,14 @@ export class ResolveSignature {
     ],
     "Enumerator::Yielder": [
       "Enumerator::Yielder",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "EratosthenesGenerator": [
+      "EratosthenesGenerator",
+      "PseudoPrimeGenerator",
+      "Enumerable",
       "Object",
       "Kernel",
       "BasicObject"
@@ -1880,8 +2016,49 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "Error": [
+      "Error",
+      "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "Exception": [
       "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Extension": [
+      "Extension",
+      "OpenSSL::Marshal",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ExtensionError": [
+      "ExtensionError",
+      "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ExtensionFactory": [
+      "ExtensionFactory",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "FTP": [
+      "FTP",
+      "Generic",
+      "URI",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Factory": [
+      "Factory",
       "Object",
       "Kernel",
       "BasicObject"
@@ -1908,9 +2085,8 @@ export class ResolveSignature {
     ],
     "File": [
       "File",
-      "IO",
-      "File::Constants",
-      "Enumerable",
+      "Generic",
+      "URI",
       "Object",
       "Kernel",
       "BasicObject"
@@ -1933,6 +2109,12 @@ export class ResolveSignature {
       "RangeError",
       "StandardError",
       "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Formatter": [
+      "Formatter",
       "Object",
       "Kernel",
       "BasicObject"
@@ -1991,21 +2173,6 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "Gem::Requirement": [
-      "Gem::Requirement",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Gem::Requirement::BadRequirementError": [
-      "Gem::Requirement::BadRequirementError",
-      "ArgumentError",
-      "StandardError",
-      "Exception",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
     "Gem::SourceList": [
       "Gem::SourceList",
       "Object",
@@ -2031,9 +2198,38 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "Gem::Version": [
-      "Gem::Version",
-      "Comparable",
+    "GeneralString": [
+      "GeneralString",
+      "OpenSSL::ASN1::Primitive",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "GeneralizedTime": [
+      "GeneralizedTime",
+      "OpenSSL::ASN1::Primitive",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Generator23": [
+      "Generator23",
+      "PseudoPrimeGenerator",
+      "Enumerable",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Generic": [
+      "Generic",
+      "URI",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "GraphicString": [
+      "GraphicString",
+      "OpenSSL::ASN1::Primitive",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2063,10 +2259,153 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "HTTP": [
+      "HTTP",
+      "Protocol",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Copy": [
+      "HTTP::Copy",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Delete": [
+      "HTTP::Delete",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Get": [
+      "HTTP::Get",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Head": [
+      "HTTP::Head",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Lock": [
+      "HTTP::Lock",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Mkcol": [
+      "HTTP::Mkcol",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Move": [
+      "HTTP::Move",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Options": [
+      "HTTP::Options",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Patch": [
+      "HTTP::Patch",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Post": [
+      "HTTP::Post",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Propfind": [
+      "HTTP::Propfind",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Proppatch": [
+      "HTTP::Proppatch",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Put": [
+      "HTTP::Put",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Trace": [
+      "HTTP::Trace",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTP::Unlock": [
+      "HTTP::Unlock",
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "HTTPAccepted": [
       "HTTPAccepted",
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2075,6 +2414,7 @@ export class ResolveSignature {
       "HTTPAlreadyReported",
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2083,6 +2423,7 @@ export class ResolveSignature {
       "HTTPBadGateway",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2091,6 +2432,15 @@ export class ResolveSignature {
       "HTTPBadRequest",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTPBadResponse": [
+      "HTTPBadResponse",
+      "StandardError",
+      "Exception",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2098,6 +2448,7 @@ export class ResolveSignature {
     "HTTPClientError": [
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2106,6 +2457,7 @@ export class ResolveSignature {
       "HTTPConflict",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2114,6 +2466,7 @@ export class ResolveSignature {
       "HTTPContinue",
       "HTTPInformation",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2122,6 +2475,7 @@ export class ResolveSignature {
       "HTTPCreated",
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2130,6 +2484,7 @@ export class ResolveSignature {
       "HTTPEarlyHints",
       "HTTPInformation",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2138,6 +2493,8 @@ export class ResolveSignature {
       "HTTPError",
       "Net::HTTPExceptions",
       "ProtocolError",
+      "StandardError",
+      "Exception",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2146,6 +2503,7 @@ export class ResolveSignature {
       "HTTPExpectationFailed",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2154,6 +2512,7 @@ export class ResolveSignature {
       "HTTPFailedDependency",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2162,6 +2521,9 @@ export class ResolveSignature {
       "HTTPFatalError",
       "Net::HTTPExceptions",
       "ProtoFatalError",
+      "ProtocolError",
+      "StandardError",
+      "Exception",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2170,6 +2532,7 @@ export class ResolveSignature {
       "HTTPForbidden",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2178,6 +2541,7 @@ export class ResolveSignature {
       "HTTPFound",
       "HTTPRedirection",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2186,6 +2550,14 @@ export class ResolveSignature {
       "HTTPGatewayTimeout",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTPGenericRequest": [
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2194,6 +2566,15 @@ export class ResolveSignature {
       "HTTPGone",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTPHeaderSyntaxError": [
+      "HTTPHeaderSyntaxError",
+      "StandardError",
+      "Exception",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2202,6 +2583,7 @@ export class ResolveSignature {
       "HTTPIMUsed",
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2209,6 +2591,7 @@ export class ResolveSignature {
     "HTTPInformation": [
       "HTTPInformation",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2217,6 +2600,7 @@ export class ResolveSignature {
       "HTTPInsufficientStorage",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2225,6 +2609,7 @@ export class ResolveSignature {
       "HTTPInternalServerError",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2233,6 +2618,7 @@ export class ResolveSignature {
       "HTTPLengthRequired",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2241,6 +2627,7 @@ export class ResolveSignature {
       "HTTPLocked",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2249,6 +2636,7 @@ export class ResolveSignature {
       "HTTPLoopDetected",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2257,6 +2645,7 @@ export class ResolveSignature {
       "HTTPMethodNotAllowed",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2265,6 +2654,7 @@ export class ResolveSignature {
       "HTTPMisdirectedRequest",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2273,6 +2663,7 @@ export class ResolveSignature {
       "HTTPMovedPermanently",
       "HTTPRedirection",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2281,6 +2672,7 @@ export class ResolveSignature {
       "HTTPMultiStatus",
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2289,6 +2681,7 @@ export class ResolveSignature {
       "HTTPMultipleChoices",
       "HTTPRedirection",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2297,6 +2690,7 @@ export class ResolveSignature {
       "HTTPNetworkAuthenticationRequired",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2305,6 +2699,7 @@ export class ResolveSignature {
       "HTTPNoContent",
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2313,6 +2708,7 @@ export class ResolveSignature {
       "HTTPNonAuthoritativeInformation",
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2321,6 +2717,7 @@ export class ResolveSignature {
       "HTTPNotAcceptable",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2329,6 +2726,7 @@ export class ResolveSignature {
       "HTTPNotExtended",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2337,6 +2735,7 @@ export class ResolveSignature {
       "HTTPNotFound",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2345,6 +2744,7 @@ export class ResolveSignature {
       "HTTPNotImplemented",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2353,6 +2753,7 @@ export class ResolveSignature {
       "HTTPNotModified",
       "HTTPRedirection",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2361,6 +2762,7 @@ export class ResolveSignature {
       "HTTPOK",
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2369,6 +2771,7 @@ export class ResolveSignature {
       "HTTPPartialContent",
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2377,6 +2780,7 @@ export class ResolveSignature {
       "HTTPPayloadTooLarge",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2385,6 +2789,7 @@ export class ResolveSignature {
       "HTTPPaymentRequired",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2393,6 +2798,7 @@ export class ResolveSignature {
       "HTTPPermanentRedirect",
       "HTTPRedirection",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2401,6 +2807,7 @@ export class ResolveSignature {
       "HTTPPreconditionFailed",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2409,6 +2816,7 @@ export class ResolveSignature {
       "HTTPPreconditionRequired",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2417,6 +2825,7 @@ export class ResolveSignature {
       "HTTPProcessing",
       "HTTPInformation",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2425,6 +2834,7 @@ export class ResolveSignature {
       "HTTPProxyAuthenticationRequired",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2433,6 +2843,7 @@ export class ResolveSignature {
       "HTTPRangeNotSatisfiable",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2440,6 +2851,15 @@ export class ResolveSignature {
     "HTTPRedirection": [
       "HTTPRedirection",
       "HTTPResponse",
+      "Net::HTTPHeader",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTPRequest": [
+      "HTTPRequest",
+      "HTTPGenericRequest",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2448,6 +2868,7 @@ export class ResolveSignature {
       "HTTPRequestHeaderFieldsTooLarge",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2456,6 +2877,7 @@ export class ResolveSignature {
       "HTTPRequestTimeout",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2464,12 +2886,14 @@ export class ResolveSignature {
       "HTTPResetContent",
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
     ],
     "HTTPResponse": [
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2478,6 +2902,17 @@ export class ResolveSignature {
       "HTTPRetriableError",
       "Net::HTTPExceptions",
       "ProtoRetriableError",
+      "ProtocolError",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "HTTPS": [
+      "HTTPS",
+      "HTTP",
+      "Protocol",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2486,6 +2921,7 @@ export class ResolveSignature {
       "HTTPSeeOther",
       "HTTPRedirection",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2493,6 +2929,7 @@ export class ResolveSignature {
     "HTTPServerError": [
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2501,6 +2938,9 @@ export class ResolveSignature {
       "HTTPServerException",
       "Net::HTTPExceptions",
       "ProtoServerError",
+      "ProtocolError",
+      "StandardError",
+      "Exception",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2509,6 +2949,7 @@ export class ResolveSignature {
       "HTTPServiceUnavailable",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2516,6 +2957,7 @@ export class ResolveSignature {
     "HTTPSuccess": [
       "HTTPSuccess",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2524,6 +2966,7 @@ export class ResolveSignature {
       "HTTPSwitchProtocol",
       "HTTPInformation",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2532,6 +2975,7 @@ export class ResolveSignature {
       "HTTPTemporaryRedirect",
       "HTTPRedirection",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2540,6 +2984,7 @@ export class ResolveSignature {
       "HTTPTooManyRequests",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2548,6 +2993,7 @@ export class ResolveSignature {
       "HTTPURITooLong",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2556,6 +3002,7 @@ export class ResolveSignature {
       "HTTPUnauthorized",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2564,6 +3011,7 @@ export class ResolveSignature {
       "HTTPUnavailableForLegalReasons",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2571,6 +3019,7 @@ export class ResolveSignature {
     "HTTPUnknownResponse": [
       "HTTPUnknownResponse",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2579,6 +3028,7 @@ export class ResolveSignature {
       "HTTPUnprocessableEntity",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2587,6 +3037,7 @@ export class ResolveSignature {
       "HTTPUnsupportedMediaType",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2595,6 +3046,7 @@ export class ResolveSignature {
       "HTTPUpgradeRequired",
       "HTTPClientError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2603,6 +3055,7 @@ export class ResolveSignature {
       "HTTPUseProxy",
       "HTTPRedirection",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2611,6 +3064,7 @@ export class ResolveSignature {
       "HTTPVariantAlsoNegotiates",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2619,6 +3073,7 @@ export class ResolveSignature {
       "HTTPVersionNotSupported",
       "HTTPServerError",
       "HTTPResponse",
+      "Net::HTTPHeader",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2630,23 +3085,24 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "IA5String": [
+      "IA5String",
+      "OpenSSL::ASN1::Primitive",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "IDEA": [
+      "IDEA",
+      "OpenSSL::Cipher",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "IO": [
       "IO",
       "File::Constants",
       "Enumerable",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "IO::Buffer": [
-      "IO::Buffer",
-      "Comparable",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "IO::ConsoleMode": [
-      "IO::ConsoleMode",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2760,6 +3216,13 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "ISO64String": [
+      "ISO64String",
+      "OpenSSL::ASN1::Primitive",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "IndexError": [
       "IndexError",
       "StandardError",
@@ -2778,6 +3241,13 @@ export class ResolveSignature {
       "Interrupt",
       "SignalException",
       "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "IsolationError": [
+      "IsolationError",
+      "Ractor::Error",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2858,8 +3328,14 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "KDF::KDFError": [
-      "KDF::KDFError",
+    "Job": [
+      "Job",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "KDFError": [
+      "KDFError",
       "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
@@ -2867,6 +3343,23 @@ export class ResolveSignature {
     ],
     "KeyError": [
       "KeyError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "LDAP": [
+      "LDAP",
+      "Generic",
+      "URI",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "LDAPS": [
+      "LDAPS",
+      "LDAP",
+      "Generic",
+      "URI",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2887,22 +3380,38 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "LogDevice": [
+      "LogDevice",
+      "MonitorMixin",
+      "Period",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "Logger": [
       "Logger",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "Logger::Formatter": [
-      "Logger::Formatter",
+    "MD4": [
+      "MD4",
+      "OpenSSL::Digest",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "Logger::LogDevice": [
-      "Logger::LogDevice",
-      "MonitorMixin",
-      "Period",
+    "MD5": [
+      "MD5",
+      "OpenSSL::Digest",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "MailTo": [
+      "MailTo",
+      "Generic",
+      "URI",
       "Object",
       "Kernel",
       "BasicObject"
@@ -2945,232 +3454,29 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "MovedError": [
+      "MovedError",
+      "Ractor::Error",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "MovedObject": [
+      "MovedObject",
+      "BasicObject",
+      "Object",
+      "Kernel"
+    ],
+    "Name": [
+      "Name",
+      "OpenSSL::Marshal",
+      "Comparable",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "NameError": [
       "NameError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP": [
-      "Net::HTTP",
-      "Protocol",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Copy": [
-      "Net::HTTP::Copy",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Delete": [
-      "Net::HTTP::Delete",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Get": [
-      "Net::HTTP::Get",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Head": [
-      "Net::HTTP::Head",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Lock": [
-      "Net::HTTP::Lock",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Mkcol": [
-      "Net::HTTP::Mkcol",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Move": [
-      "Net::HTTP::Move",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Options": [
-      "Net::HTTP::Options",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Patch": [
-      "Net::HTTP::Patch",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Post": [
-      "Net::HTTP::Post",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Propfind": [
-      "Net::HTTP::Propfind",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Proppatch": [
-      "Net::HTTP::Proppatch",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Put": [
-      "Net::HTTP::Put",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Trace": [
-      "Net::HTTP::Trace",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTP::Unlock": [
-      "Net::HTTP::Unlock",
-      "HTTPRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTPBadResponse": [
-      "Net::HTTPBadResponse",
-      "StandardError",
-      "Exception",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTPGenericRequest": [
-      "Net::HTTPGenericRequest",
-      "Net::HTTPHeader",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTPHeaderSyntaxError": [
-      "Net::HTTPHeaderSyntaxError",
-      "StandardError",
-      "Exception",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTPRequest": [
-      "Net::HTTPRequest",
-      "HTTPGenericRequest",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::HTTPResponse": [
-      "Net::HTTPResponse",
-      "Net::HTTPHeader",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::ProtoAuthError": [
-      "Net::ProtoAuthError",
-      "ProtocolError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::ProtoCommandError": [
-      "Net::ProtoCommandError",
-      "ProtocolError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::ProtoFatalError": [
-      "Net::ProtoFatalError",
-      "ProtocolError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::ProtoRetriableError": [
-      "Net::ProtoRetriableError",
-      "ProtocolError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::ProtoServerError": [
-      "Net::ProtoServerError",
-      "ProtocolError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::ProtoSyntaxError": [
-      "Net::ProtoSyntaxError",
-      "ProtocolError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::ProtoUnknownError": [
-      "Net::ProtoUnknownError",
-      "ProtocolError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::Protocol": [
-      "Net::Protocol",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Net::ProtocolError": [
-      "Net::ProtocolError",
-      "StandardError",
-      "Exception",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Netscape::SPKI": [
-      "Netscape::SPKI",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Netscape::SPKIError": [
-      "Netscape::SPKIError",
       "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
@@ -3203,6 +3509,13 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "Null": [
+      "Null",
+      "OpenSSL::ASN1::Primitive",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "Numeric": [
       "Numeric",
       "Comparable",
@@ -3210,39 +3523,16 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "OCSP::BasicResponse": [
-      "OCSP::BasicResponse",
+    "NumericString": [
+      "NumericString",
+      "OpenSSL::ASN1::Primitive",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "OCSP::CertificateId": [
-      "OCSP::CertificateId",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OCSP::OCSPError": [
-      "OCSP::OCSPError",
+    "OCSPError": [
+      "OCSPError",
       "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OCSP::Request": [
-      "OCSP::Request",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OCSP::Response": [
-      "OCSP::Response",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OCSP::SingleResponse": [
-      "OCSP::SingleResponse",
       "Object",
       "Kernel",
       "BasicObject"
@@ -3252,190 +3542,15 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "OpenSSL::ASN1Data": [
-      "OpenSSL::ASN1Data",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::ASN1Error": [
-      "OpenSSL::ASN1Error",
-      "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::BMPString": [
-      "OpenSSL::BMPString",
+    "ObjectId": [
+      "ObjectId",
       "OpenSSL::ASN1::Primitive",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "OpenSSL::BitString": [
-      "OpenSSL::BitString",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::Boolean": [
-      "OpenSSL::Boolean",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::Constructive": [
-      "OpenSSL::Constructive",
-      "Enumerable",
-      "OpenSSL::ASN1::ASN1Data",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::EndOfContent": [
-      "OpenSSL::EndOfContent",
-      "OpenSSL::ASN1::ASN1Data",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::Enumerated": [
-      "OpenSSL::Enumerated",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::GeneralString": [
-      "OpenSSL::GeneralString",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::GeneralizedTime": [
-      "OpenSSL::GeneralizedTime",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::GraphicString": [
-      "OpenSSL::GraphicString",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::IA5String": [
-      "OpenSSL::IA5String",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::ISO64String": [
-      "OpenSSL::ISO64String",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::Integer": [
-      "OpenSSL::Integer",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::Null": [
-      "OpenSSL::Null",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::NumericString": [
-      "OpenSSL::NumericString",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::ObjectId": [
-      "OpenSSL::ObjectId",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::OctetString": [
-      "OpenSSL::OctetString",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::Primitive": [
-      "OpenSSL::Primitive",
-      "OpenSSL::ASN1::ASN1Data",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::PrintableString": [
-      "OpenSSL::PrintableString",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::Sequence": [
-      "OpenSSL::Sequence",
-      "OpenSSL::ASN1::Constructive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::Set": [
-      "OpenSSL::Set",
-      "OpenSSL::ASN1::Constructive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::T61String": [
-      "OpenSSL::T61String",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::UTCTime": [
-      "OpenSSL::UTCTime",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::UTF8String": [
-      "OpenSSL::UTF8String",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::UniversalString": [
-      "OpenSSL::UniversalString",
-      "OpenSSL::ASN1::Primitive",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "OpenSSL::VideotexString": [
-      "OpenSSL::VideotexString",
+    "OctetString": [
+      "OctetString",
       "OpenSSL::ASN1::Primitive",
       "Object",
       "Kernel",
@@ -3595,8 +3710,8 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "PKCS12::PKCS12Error": [
-      "PKCS12::PKCS12Error",
+    "PKCS12Error": [
+      "PKCS12Error",
       "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
@@ -3608,120 +3723,22 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "PKCS7::PKCS7Error": [
-      "PKCS7::PKCS7Error",
+    "PKCS7Error": [
+      "PKCS7Error",
       "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "PKCS7::RecipientInfo": [
-      "PKCS7::RecipientInfo",
+    "PKey": [
+      "PKey",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "PKCS7::SignerInfo": [
-      "PKCS7::SignerInfo",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::DH": [
-      "PKey::DH",
-      "OpenSSL::Marshal",
-      "OpenSSL::PKey::PKey",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::DHError": [
-      "PKey::DHError",
-      "OpenSSL::PKey::PKeyError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::DSA": [
-      "PKey::DSA",
-      "OpenSSL::Marshal",
-      "OpenSSL::PKey::PKey",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::DSAError": [
-      "PKey::DSAError",
-      "OpenSSL::PKey::PKeyError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::EC": [
-      "PKey::EC",
-      "OpenSSL::Marshal",
-      "OpenSSL::PKey::PKey",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::EC::Group": [
-      "PKey::EC::Group",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::EC::Group::Error": [
-      "PKey::EC::Group::Error",
+    "PKeyError": [
+      "PKeyError",
       "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::EC::Point": [
-      "PKey::EC::Point",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::EC::Point::Error": [
-      "PKey::EC::Point::Error",
-      "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::ECError": [
-      "PKey::ECError",
-      "OpenSSL::PKey::PKeyError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::PKey": [
-      "PKey::PKey",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::PKeyError": [
-      "PKey::PKeyError",
-      "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::RSA": [
-      "PKey::RSA",
-      "OpenSSL::Marshal",
-      "OpenSSL::PKey::PKey",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "PKey::RSAError": [
-      "PKey::RSAError",
-      "OpenSSL::PKey::PKeyError",
       "Object",
       "Kernel",
       "BasicObject"
@@ -3734,6 +3751,12 @@ export class ResolveSignature {
     ],
     "Pathname": [
       "Pathname",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Point": [
+      "Point",
       "Object",
       "Kernel",
       "BasicObject"
@@ -3752,30 +3775,16 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "Prime::EratosthenesGenerator": [
-      "Prime::EratosthenesGenerator",
-      "PseudoPrimeGenerator",
+    "Primitive": [
+      "Primitive",
+      "OpenSSL::ASN1::ASN1Data",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "Prime::Generator23": [
-      "Prime::Generator23",
-      "PseudoPrimeGenerator",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Prime::PseudoPrimeGenerator": [
-      "Prime::PseudoPrimeGenerator",
-      "Enumerable",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Prime::TrialDivisionGenerator": [
-      "Prime::TrialDivisionGenerator",
-      "PseudoPrimeGenerator",
+    "PrintableString": [
+      "PrintableString",
+      "OpenSSL::ASN1::Primitive",
       "Object",
       "Kernel",
       "BasicObject"
@@ -3807,73 +3816,142 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "ProtoAuthError": [
+      "ProtoAuthError",
+      "ProtocolError",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ProtoCommandError": [
+      "ProtoCommandError",
+      "ProtocolError",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ProtoFatalError": [
+      "ProtoFatalError",
+      "ProtocolError",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ProtoRetriableError": [
+      "ProtoRetriableError",
+      "ProtocolError",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ProtoServerError": [
+      "ProtoServerError",
+      "ProtocolError",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ProtoSyntaxError": [
+      "ProtoSyntaxError",
+      "ProtocolError",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ProtoUnknownError": [
+      "ProtoUnknownError",
+      "ProtocolError",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Protocol": [
+      "Protocol",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "ProtocolError": [
+      "ProtocolError",
+      "StandardError",
+      "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "PseudoPrimeGenerator": [
+      "PseudoPrimeGenerator",
+      "Enumerable",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "RC2": [
+      "RC2",
+      "OpenSSL::Cipher",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "RC4": [
+      "RC4",
+      "OpenSSL::Cipher",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "RC5": [
+      "RC5",
+      "OpenSSL::Cipher",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "RFC2396_Parser": [
+      "RFC2396_Parser",
+      "RFC2396_REGEXP",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "RIPEMD160": [
+      "RIPEMD160",
+      "OpenSSL::Digest",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "RSA": [
+      "RSA",
+      "OpenSSL::Marshal",
+      "OpenSSL::PKey::PKey",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "RSAError": [
+      "RSAError",
+      "OpenSSL::PKey::PKeyError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "Ractor": [
       "Ractor",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Ractor::ClosedError": [
-      "Ractor::ClosedError",
-      "StopIteration",
-      "IndexError",
-      "StandardError",
-      "Exception",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Ractor::Error": [
-      "Ractor::Error",
-      "RuntimeError",
-      "StandardError",
-      "Exception",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Ractor::IsolationError": [
-      "Ractor::IsolationError",
-      "Ractor::Error",
-      "RuntimeError",
-      "StandardError",
-      "Exception",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Ractor::MovedError": [
-      "Ractor::MovedError",
-      "Ractor::Error",
-      "RuntimeError",
-      "StandardError",
-      "Exception",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Ractor::MovedObject": [
-      "Ractor::MovedObject",
-      "BasicObject",
-      "Object",
-      "Kernel"
-    ],
-    "Ractor::RemoteError": [
-      "Ractor::RemoteError",
-      "Ractor::Error",
-      "RuntimeError",
-      "StandardError",
-      "Exception",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Ractor::UnsafeError": [
-      "Ractor::UnsafeError",
-      "Ractor::Error",
-      "RuntimeError",
-      "StandardError",
-      "Exception",
       "Object",
       "Kernel",
       "BasicObject"
@@ -3885,8 +3963,8 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "Random::RandomError": [
-      "Random::RandomError",
+    "RandomError": [
+      "RandomError",
       "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
@@ -3913,6 +3991,12 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "RecipientInfo": [
+      "RecipientInfo",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "Refinement": [
       "Refinement",
       "Module",
@@ -3930,6 +4014,45 @@ export class ResolveSignature {
       "RegexpError",
       "StandardError",
       "Exception",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "RemoteError": [
+      "RemoteError",
+      "Ractor::Error",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Remover": [
+      "Remover",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Report": [
+      "Report",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Request": [
+      "Request",
+      "OpenSSL::Marshal",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "RequestError": [
+      "RequestError",
+      "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Requirement": [
+      "Requirement",
       "Object",
       "Kernel",
       "BasicObject"
@@ -4382,6 +4505,25 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "Response": [
+      "Response",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Revoked": [
+      "Revoked",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "RevokedError": [
+      "RevokedError",
+      "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "RubyVM": [
       "RubyVM",
       "Object",
@@ -4402,59 +4544,94 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "SSL::SSLContext": [
-      "SSL::SSLContext",
+    "SHA1": [
+      "SHA1",
+      "OpenSSL::Digest",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "SSL::SSLError": [
-      "SSL::SSLError",
+    "SHA224": [
+      "SHA224",
+      "OpenSSL::Digest",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "SHA256": [
+      "SHA256",
+      "OpenSSL::Digest",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "SHA384": [
+      "SHA384",
+      "OpenSSL::Digest",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "SHA512": [
+      "SHA512",
+      "OpenSSL::Digest",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "SPKI": [
+      "SPKI",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "SPKIError": [
+      "SPKIError",
       "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "SSL::SSLErrorWaitReadable": [
-      "SSL::SSLErrorWaitReadable",
+    "SSLContext": [
+      "SSLContext",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "SSLError": [
+      "SSLError",
+      "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "SSLErrorWaitReadable": [
+      "SSLErrorWaitReadable",
       "IO::WaitReadable",
       "OpenSSL::SSL::SSLError",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "SSL::SSLErrorWaitWritable": [
-      "SSL::SSLErrorWaitWritable",
+    "SSLErrorWaitWritable": [
+      "SSLErrorWaitWritable",
       "IO::WaitWritable",
       "OpenSSL::SSL::SSLError",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "SSL::SSLServer": [
-      "SSL::SSLServer",
+    "SSLServer": [
+      "SSLServer",
       "OpenSSL::SSL::SocketForwarder",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "SSL::SSLSocket": [
-      "SSL::SSLSocket",
+    "SSLSocket": [
+      "SSLSocket",
       "OpenSSL::SSL::SocketForwarder",
       "OpenSSL::Buffering",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "SSL::Session": [
-      "SSL::Session",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "SSL::Session::SessionError": [
-      "SSL::Session::SessionError",
-      "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
       "BasicObject"
@@ -4473,6 +4650,26 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "Sequence": [
+      "Sequence",
+      "OpenSSL::ASN1::Constructive",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "Session": [
+      "Session",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "SessionError": [
+      "SessionError",
+      "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "Set": [
       "Set",
       "Enumerable",
@@ -4487,8 +4684,20 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "SignerInfo": [
+      "SignerInfo",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "SingleLine": [
       "SingleLine",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "SingleResponse": [
+      "SingleResponse",
       "Object",
       "Kernel",
       "BasicObject"
@@ -4537,6 +4746,25 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "Store": [
+      "Store",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "StoreContext": [
+      "StoreContext",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "StoreError": [
+      "StoreError",
+      "OpenSSL::OpenSSLError",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "String": [
       "String",
       "Comparable",
@@ -4559,6 +4787,13 @@ export class ResolveSignature {
     "Struct": [
       "Struct",
       "Enumerable",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "SubjectKeyIdentifier": [
+      "SubjectKeyIdentifier",
+      "OpenSSL::X509::Extension::Helpers",
       "Object",
       "Kernel",
       "BasicObject"
@@ -4600,6 +4835,13 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
+    "T61String": [
+      "T61String",
+      "OpenSSL::ASN1::Primitive",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
     "TCPServer": [
       "TCPServer",
       "TCPSocket",
@@ -4623,26 +4865,11 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "TSort::Cyclic": [
-      "TSort::Cyclic",
-      "StandardError",
-      "Exception",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
     "Tempfile": [
       "Tempfile",
       "File",
-      "IO",
-      "File::Constants",
-      "Enumerable",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Tempfile::Remover": [
-      "Tempfile::Remover",
+      "Generic",
+      "URI",
       "Object",
       "Kernel",
       "BasicObject"
@@ -4726,39 +4953,35 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "Timestamp::Factory": [
-      "Timestamp::Factory",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Timestamp::Request": [
-      "Timestamp::Request",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Timestamp::Response": [
-      "Timestamp::Response",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "Timestamp::TimestampError": [
-      "Timestamp::TimestampError",
+    "TimestampError": [
+      "TimestampError",
       "OpenSSL::OpenSSLError",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "Timestamp::TokenInfo": [
-      "Timestamp::TokenInfo",
+    "Tms": [
+      "Tms",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "TokenInfo": [
+      "TokenInfo",
       "Object",
       "Kernel",
       "BasicObject"
     ],
     "TracePoint": [
       "TracePoint",
+      "Object",
+      "Kernel",
+      "BasicObject"
+    ],
+    "TrialDivisionGenerator": [
+      "TrialDivisionGenerator",
+      "PseudoPrimeGenerator",
+      "Enumerable",
       "Object",
       "Kernel",
       "BasicObject"
@@ -4816,85 +5039,22 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "URI::FTP": [
-      "URI::FTP",
-      "Generic",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "URI::File": [
-      "URI::File",
-      "Generic",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "URI::Generic": [
-      "URI::Generic",
-      "URI",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "URI::HTTP": [
-      "URI::HTTP",
-      "Generic",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "URI::HTTPS": [
-      "URI::HTTPS",
-      "HTTP",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "URI::LDAP": [
-      "URI::LDAP",
-      "Generic",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "URI::LDAPS": [
-      "URI::LDAPS",
-      "LDAP",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "URI::MailTo": [
-      "URI::MailTo",
-      "Generic",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "URI::RFC2396_Parser": [
-      "URI::RFC2396_Parser",
-      "RFC2396_REGEXP",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
     "URI::RFC3986_Parser": [
       "URI::RFC3986_Parser",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "URI::WS": [
-      "URI::WS",
-      "Generic",
+    "UTCTime": [
+      "UTCTime",
+      "OpenSSL::ASN1::Primitive",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "URI::WSS": [
-      "URI::WSS",
-      "WS",
+    "UTF8String": [
+      "UTF8String",
+      "OpenSSL::ASN1::Primitive",
       "Object",
       "Kernel",
       "BasicObject"
@@ -4914,165 +5074,47 @@ export class ResolveSignature {
       "Kernel",
       "BasicObject"
     ],
-    "X509::Attribute": [
-      "X509::Attribute",
-      "OpenSSL::Marshal",
+    "UniversalString": [
+      "UniversalString",
+      "OpenSSL::ASN1::Primitive",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "X509::AttributeError": [
-      "X509::AttributeError",
-      "OpenSSL::OpenSSLError",
+    "UnsafeError": [
+      "UnsafeError",
+      "Ractor::Error",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "X509::CRL": [
-      "X509::CRL",
-      "OpenSSL::X509::Extension::AuthorityKeyIdentifier",
-      "OpenSSL::Marshal",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::CRLError": [
-      "X509::CRLError",
-      "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::Certificate": [
-      "X509::Certificate",
-      "OpenSSL::X509::Extension::AuthorityInfoAccess",
-      "OpenSSL::X509::Extension::CRLDistributionPoints",
-      "OpenSSL::X509::Extension::AuthorityKeyIdentifier",
-      "OpenSSL::X509::Extension::SubjectKeyIdentifier",
-      "OpenSSL::Marshal",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::CertificateError": [
-      "X509::CertificateError",
-      "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::Extension": [
-      "X509::Extension",
-      "OpenSSL::Marshal",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::Extension::AuthorityInfoAccess": [
-      "X509::Extension::AuthorityInfoAccess",
-      "OpenSSL::X509::Extension::Helpers",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::Extension::AuthorityKeyIdentifier": [
-      "X509::Extension::AuthorityKeyIdentifier",
-      "OpenSSL::X509::Extension::Helpers",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::Extension::CRLDistributionPoints": [
-      "X509::Extension::CRLDistributionPoints",
-      "OpenSSL::X509::Extension::Helpers",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::Extension::SubjectKeyIdentifier": [
-      "X509::Extension::SubjectKeyIdentifier",
-      "OpenSSL::X509::Extension::Helpers",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::ExtensionError": [
-      "X509::ExtensionError",
-      "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::ExtensionFactory": [
-      "X509::ExtensionFactory",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::Name": [
-      "X509::Name",
-      "OpenSSL::Marshal",
+    "Version": [
+      "Version",
       "Comparable",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "X509::NameError": [
-      "X509::NameError",
-      "OpenSSL::OpenSSLError",
+    "VideotexString": [
+      "VideotexString",
+      "OpenSSL::ASN1::Primitive",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "X509::Request": [
-      "X509::Request",
-      "OpenSSL::Marshal",
+    "WS": [
+      "WS",
+      "Generic",
+      "URI",
       "Object",
       "Kernel",
       "BasicObject"
     ],
-    "X509::RequestError": [
-      "X509::RequestError",
-      "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::Revoked": [
-      "X509::Revoked",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::RevokedError": [
-      "X509::RevokedError",
-      "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::Store": [
-      "X509::Store",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::StoreContext": [
-      "X509::StoreContext",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "X509::StoreError": [
-      "X509::StoreError",
-      "OpenSSL::OpenSSLError",
-      "Object",
-      "Kernel",
-      "BasicObject"
-    ],
-    "YAML::DBM": [
-      "YAML::DBM",
-      "::DBM",
+    "WSS": [
+      "WSS",
+      "WS",
+      "Generic",
+      "URI",
       "Object",
       "Kernel",
       "BasicObject"
@@ -5093,61 +5135,3 @@ export class ResolveSignature {
       "BasicObject"
     ]
   }
-
-
-  private searcher: IndexSearcher
-
-  constructor(indexSearcher: IndexSearcher) {
-    this.searcher = indexSearcher
-  }
-
-  /**
-   * クラス名とメソッド名からるりま情報を解決する
-   */
-  resolve(className: string, methodName: string): {
-    signature: string
-    url: string
-    className: string
-    methodName: string
-    separator: string
-    displayName: string
-  } | null {
-    const candidates = this.searcher.findMethod(methodName)
-    if (!candidates) return null
-
-    // 1. 継承チェーンを取得 (継承マップにない場合は Object 系をデフォルトとする)
-    const chain = ResolveSignature.INHERITANCE_MAP[className] || [className, "Object", "Kernel", "BasicObject"]
-
-    // 2. 順にマッチするものを探す（自クラス -> 継承先 -> Object...）
-    // 2. 順にマッチするものを探す（自クラス -> 継承先 -> Object...）
-    for (const ancestor of chain) {
-      // 優先順位: インスタンスメソッド (#) -> 特異メソッド (.)
-      const matchI = candidates.find(c => c.startsWith(`${ancestor}#`))
-      if (matchI) {
-        return {
-          signature: matchI,
-          ...URLGenerator.generateUrlInfo(matchI)
-        }
-      }
-
-      const matchS = candidates.find(c => c.startsWith(`${ancestor}.`))
-      if (matchS) {
-        const info = URLGenerator.generateUrlInfo(matchS)
-        
-        // 特例: Kernelモジュールのメソッドとして検出された場合、
-        // 実態がモジュール関数（かつ暗黙的メソッド）の場合はモジュール関数のURL (/m/) に誘導する
-        if (ancestor === "Kernel" && (info.url.includes("/s/") || info.url.includes("/i/"))) {
-           // Kernelメソッドは /i/ や /s/ ではなく /m/ で記録されていることが多いためリライト
-           info.url = info.url.replace(/\/[si]\//, "/m/")
-        }
-        
-        return {
-          signature: matchS,
-          ...info
-        }
-      }
-    }
-
-    return null
-  }
-}

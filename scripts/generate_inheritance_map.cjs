@@ -10,45 +10,67 @@ function parseRbs(filePath) {
 
   const relationships = {}; // child -> parent
   const includes = {}; // child -> [modules]
+  const methods = {}; // methodName -> [Class#method, ...]
 
-  let currentContext = null;
+  const contextStack = [];
 
   for (let line of lines) {
+    const rawLine = line;
     line = line.trim();
     if (!line || line.startsWith('#')) continue;
 
     // クラス定義: class Name < Parent
     const classMatch = line.match(/^class\s+([\w:]+)(?:\s*<\s*([\w:]+))?/);
     if (classMatch) {
-      const className = classMatch[1];
+      let className = classMatch[1];
+      if (contextStack.length > 0 && !className.startsWith('::')) {
+          className = contextStack.join('::') + '::' + className;
+      }
+      className = className.replace(/^::/, '');
+
       const parentName = classMatch[2] || 'Object';
       relationships[className] = parentName;
-      currentContext = className;
+      contextStack.push(classMatch[1]);
       continue;
     }
 
     // モジュール定義: module Name
     const moduleMatch = line.match(/^module\s+([\w:]+)/);
     if (moduleMatch) {
-      currentContext = moduleMatch[1];
+      contextStack.push(moduleMatch[1]);
       continue;
     }
 
     // インクルード: include Module
     const includeMatch = line.match(/^include\s+([\w:]+)/);
-    if (includeMatch && currentContext) {
+    if (includeMatch && contextStack.length > 0) {
+      const currentContext = contextStack.join('::').replace(/^::/, '');
       if (!includes[currentContext]) includes[currentContext] = [];
       includes[currentContext].push(includeMatch[1]);
       continue;
     }
+
+    // メソッド定義: def name
+    const methodMatch = line.match(/^def\s+(?:self\.)?([\w=:!=\?\+-\/\*<>\[\]]+)/);
+    if (methodMatch && contextStack.length > 0) {
+      const methodName = methodMatch[1];
+      const currentContext = contextStack.join('::').replace(/^::/, '');
+      const isSelf = line.includes('def self.');
+      const signature = `${currentContext}${isSelf ? '.' : '#'}${methodName}`;
+      
+      if (!methods[methodName]) methods[methodName] = [];
+      if (!methods[methodName].includes(signature)) {
+          methods[methodName].push(signature);
+      }
+    }
     
     // 定義の終了
     if (line === 'end') {
-        currentContext = null;
+        contextStack.pop();
     }
   }
 
-  return { relationships, includes };
+  return { relationships, includes, methods };
 }
 
 function buildAncestorChain(className, relationships, includes) {
@@ -84,7 +106,7 @@ function buildAncestorChain(className, relationships, includes) {
       } else if (current === 'Object' && !visited.has('Kernel')) {
           chain.push('Kernel');
           visited.add('Kernel');
-          current = 'Object'; // 擬似的にKernelを追加したあとBasicObjectへ
+          current = 'Object';
       } else if (current === 'Object' && visited.has('Kernel') && !visited.has('BasicObject')) {
           chain.push('BasicObject');
           visited.add('BasicObject');
@@ -98,19 +120,17 @@ function buildAncestorChain(className, relationships, includes) {
   return chain;
 }
 
-const { relationships, includes } = parseRbs(rbsPath);
-const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+const { relationships, includes, methods } = parseRbs(rbsPath);
 
-// RBSに含まれる全クラス・モジュールを対象にする
-const allClasses = new Set([
-  ...Object.keys(relationships),
-  ...Object.keys(includes)
-]);
-
+// 継承マップ生成
+const allClasses = new Set([...Object.keys(relationships), ...Object.keys(includes)]);
 const inheritanceMap = {};
 for (const className of allClasses) {
   inheritanceMap[className] = buildAncestorChain(className, relationships, includes);
 }
 
+// 両方出力できるように分割するが、取り急ぎJSONとして出力
+fs.writeFileSync('inheritance_map_v2.json', JSON.stringify(inheritanceMap, null, 2));
+fs.writeFileSync('rurima_index_v2.json', JSON.stringify(methods, null, 2));
 
-console.log(JSON.stringify(inheritanceMap, null, 2));
+console.log('Extraction complete. Files generated: inheritance_map_v2.json, rurima_index_v2.json');
