@@ -47,5 +47,46 @@ describe('ResolveSignature', () => {
       expect(result!.signature).toBe('Kernel.puts') // シグネチャはそのままでよい
       expect(result!.url).toContain('/m/puts.html') // URLは /m/ になっていること
     })
+
+    it('FileクラスがIOやEnumerableを継承していることを考慮して解決できること', () => {
+      // File は IO を継承し、IO は Enumerable をインクルードしている
+      // Enumerable#entries を探す場合
+      mockSearcher.findMethod.mockReturnValue(['Enumerable#entries'])
+      const result = resolver.resolve('File', 'entries')
+
+      expect(result).not.toBeNull()
+      expect(result!.signature).toBe('Enumerable#entries')
+    })
+
+    it('TimeクラスがComparableを継承していることを考慮して解決できること', () => {
+      // Time は Comparable をインクルードしている
+      mockSearcher.findMethod.mockReturnValue(['Comparable#<=>'])
+      const result = resolver.resolve('Time', '<=>')
+
+      expect(result).not.toBeNull()
+      expect(result!.signature).toBe('Comparable#<=>')
+    })
+
+    it('ネストしたクラス(Net::HTTP)が正しく解決できること', () => {
+      // Net::HTTP#get などの解決をシミュレート
+      mockSearcher.findMethod.mockReturnValue(['Net::HTTP#get'])
+      const result = resolver.resolve('Net::HTTP', 'get')
+
+      expect(result).not.toBeNull()
+      expect(result!.signature).toBe('Net::HTTP#get')
+      expect(result!.className).toBe('Net::HTTP')
+    })
+
+    it('ネストした例外クラス(Errno::ENOENT)が親クラス(Exception)のメソッドを解決できること', () => {
+      // Errno::ENOENT は Exception を継承している (Exception <- StandardError <- SystemCallError <- Errno::ENOENT)
+      mockSearcher.findMethod.mockReturnValue(['Exception#message'])
+      const result = resolver.resolve('Errno::ENOENT', 'message')
+
+      expect(result).not.toBeNull()
+      expect(result!.signature).toBe('Exception#message')
+    })
+
+
+
   })
 })
