@@ -161,4 +161,4 @@ for (const className of allClasses) {
 fs.writeFileSync(indexPath.replace('rurima_index.json', 'inheritance_map.json'), JSON.stringify(inheritanceMap, null, 2));
 fs.writeFileSync(indexPath, JSON.stringify(methods, null, 2));
 
-console.log('Extraction complete. Files generated: inheritance_map_v2.json, rurima_index_v2.json');
+console.log('Extraction complete. Files generated: inheritance_map.json, rurima_index.json');
