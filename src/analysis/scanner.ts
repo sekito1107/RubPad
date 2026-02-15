@@ -21,12 +21,11 @@ export class Scanner {
     const results = new Map<number, ScannedMethod[]>()
     
     // 定義済みの重要なメソッド名のパターン
-    // 1. ドット形式: .method
-    // 2. 括弧形式: method( or method {
-    // 3. ブロック形式: method do
-    // 4. シンボル形式: &:method
-    // 5. 単独形式 (ホワイトリスト & 定数): method
-    const methodPattern = /(?:\.)([a-zA-Z_][a-zA-Z0-9_]*[!?]?)|(\b[a-zA-Z_][a-zA-Z0-9_]*[!?]?)\s*[({]|(\b[a-zA-Z_][a-zA-Z0-9_]*[!?]?)\s+do\b|&:([a-zA-Z_][a-zA-Z0-9_]*[!?]?)|(\b[a-zA-Z_][a-zA-Z0-9_]*[!?]?)/g
+    // 1. シンボル形式: &:method (優先)
+    // 2. ドット形式: .method
+    // 3. 括弧・ブロック形式: method( or method { or method do
+    // 4. 単独形式: method
+    const methodPattern = /&:(?:([a-zA-Z_]\w*[!?]?))|(?:\.)([a-zA-Z_]\w*[!?]?)|(\b[a-zA-Z_]\w*[!?]?)\s*(?=[({]|\s+do\b)|(\b[a-zA-Z_]\w*[!?]?)/g
 
     lineIndices.forEach(idx => {
       const lineContent = model.getLineContent(idx + 1).replace(/#(?!\{).*$/g, m => " ".repeat(m.length))
@@ -34,10 +33,10 @@ export class Scanner {
       let match: RegExpExecArray | null
 
       while ((match = methodPattern.exec(lineContent)) !== null) {
-        const name = match[1] || match[2] || match[3] || match[4] || match[5]
+        const name = match[1] || match[2] || match[3] || match[4]
         
-        // 単独形式（グループ5）のフィルタリング
-        if (match[5]) {
+        // 単独形式（グループ4）のフィルタリング
+        if (match[4]) {
             // 定数（大文字開始）またはホワイトリストに含まれる場合のみ採用
             const isConstant = /^[A-Z]/.test(name)
             if (!isConstant && !ImplicitMethods.has(name)) {
