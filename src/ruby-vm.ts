@@ -128,14 +128,11 @@ export class RubyVM {
       const { BootLoader } = await import("./boot");
       this.bootLoader = new BootLoader(this, this.editor);
 
-      try {
-        await this.bootLoader.boot();
-        
-        window.dispatchEvent(new CustomEvent("rubbit:lsp-ready", {
-          detail: { version: this.rubyVersion }
-        }));
-      } catch (e) {
-      }
+      await this.bootLoader.boot();
+      
+      window.dispatchEvent(new CustomEvent("rubbit:lsp-ready", {
+        detail: { version: this.rubyVersion }
+      }));
     }
   }
 
