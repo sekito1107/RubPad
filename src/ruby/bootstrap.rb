@@ -5,10 +5,6 @@ require "pathname"
 # WASM環境用のモック設定 (env.rb はユーザーの .so 形式を維持)
 require_relative "env"
 
-# TypeProf 0.3x は io/console と socket を要求するため、bootstrap.rb 指定で一時的に回避
-# (env.rb の実績ある設定を尊重しつつ、ここでは TypeProf が起動できる状態にする)
-$LOADED_FEATURES << "io/console" << "socket" << "io/console.rb" << "socket.rb"
-
 # 外部ライブラリ
 require "typeprof"
 require "typeprof/lsp"
