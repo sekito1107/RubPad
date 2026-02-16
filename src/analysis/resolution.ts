@@ -21,7 +21,6 @@ export class Resolution {
         lineContent = model.getLineContent(line)
       } catch (e: any) {
         console.error(`[Resolution/resolveAtPosition] Error getting content for line ${line}:`, e.message);
-        if (e.stack) console.error(e.stack);
         return null;
       }
       const commentIdx = lineContent.indexOf('#')
@@ -29,32 +28,31 @@ export class Resolution {
       if (commentIdx !== -1 && lineContent[commentIdx + 1] !== '{' && commentIdx < col - 1) {
         return null
       }
-    }
 
-    // 1. 現在位置を試行
-    let type: string | null = await this.lsp.getTypeAtPosition(line, col)
-    
-    // 2. フォールバック: 1文字戻って試行 (単語の末尾にカーソルがある場合への対応: names|)
-    if (!type && col > 1) {
-      type = await this.lsp.getTypeAtPosition(line, col - 1)
-    }
-    
-    // 3. フォールバック: さらに1文字戻って試行 (ドットの直後にカーソルがある場合への対応: names.| )
-    if (!type && col > 2) {
-      type = await this.lsp.getTypeAtPosition(line, col - 2)
-    }
+      // 1. 本来の位置で試行
+      let type: string | null = await this.lsp.getTypeAtPosition(line, col)
+      if (type) return type
 
-    // 4. フォールバック: 1文字進めて試行 (ドットの直後などの微調整)
-    if (!type) {
-      type = await this.lsp.getTypeAtPosition(line, col + 1)
-    }
+      // 2. フォールバック: 前方に遡って意味のあるシンボルを探す
+      // ドット直後や単語の末尾で解決に失敗した場合のため、空白やドットを飛ばして文字を探す
+      for (let offset = 1; offset <= 5; offset++) {
+        const targetCol = col - offset
+        if (targetCol <= 0) break
+        
+        const char = lineContent[targetCol - 1]
+        // 空白とドットは飛ばす (names. | のようなケース)
+        if (/\s/.test(char) || char === '.') continue
 
-    // 5. 最終手段: ドット直後の解決失敗時、ドットを除去したコードでプローブ試行
-    if (!type && model) {
+        type = await this.lsp.getTypeAtPosition(line, targetCol)
+        if (type) return type
+      }
+
+      // 3. 最終手段: ドット直後の解決失敗時、ドットを除去したコードでプローブ試行
       type = await this._probeReceiverType(model, line, col)
+      if (type) return type
     }
     
-    return type
+    return null
   }
 
   /**
@@ -77,27 +75,27 @@ export class Resolution {
       return null;
     }
     
-    // カーソル位置(col)の直前または現在位置が "." かを確認
-    // 1-indexedなので col-1 が現在文字の 0-indexed 位置
-    const prevChar = lineContent[col - 2]
-    const currChar = lineContent[col - 1]
-    
-    if (prevChar !== '.' && currChar !== '.') return null
+    // カーソル位置(col)の直前が "." かを確認
+    // Range (..) の場合もあるため、ドットが連続している場合はそれらも考慮する
+    let dotEnd = col - 1
+    while (dotEnd > 0 && lineContent[dotEnd - 1] === ' ') dotEnd-- // 空白を飛ばす
 
-    // ドットを一つ除去した一時的な全行コンテンツを作成
-    // (TypeProf の解析精度を保つため、当該行のドットだけを消す)
+    if (lineContent[dotEnd - 1] !== '.') return null
+
+    // ドットの開始位置を見つける (.. や ... に対応)
+    let dotStart = dotEnd - 1
+    while (dotStart > 0 && lineContent[dotStart - 1] === '.') dotStart--
+
+    // ドット部分を除去した一時的な全行コンテンツを作成
     const lines = model.getLinesContent()
     const targetIdx = line - 1
-    const dotPos = (prevChar === '.') ? col - 2 : col - 1
     
-    const newLine = lineContent.substring(0, dotPos) + lineContent.substring(dotPos + 1)
+    const newLine = lineContent.substring(0, dotStart) + " ".repeat(dotEnd - dotStart) + lineContent.substring(dotEnd)
     lines[targetIdx] = newLine
     const tempContent = lines.join("\n")
 
-    // ドットを除去した位置（またはその直前）でプローブ
-    // ドットを消したので、新しい位置は line, dotPos (0-indexed to 1-indexed is dotPos+1, 
-    // しかしその一点前を見たいので dotPos)
-    return this.probe(tempContent, line, Math.max(1, dotPos))
+    // ドットを除去した直前の位置でプローブ
+    return this.probe(tempContent, line, Math.max(1, dotStart))
   }
 
   /**
