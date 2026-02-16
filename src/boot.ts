@@ -29,7 +29,7 @@ export class BootLoader {
     }
 
     // 1. LSPの初期化
-    this.dispatchProgress(70, "Starting Language Server...");
+    this.dispatchProgress(75, "Starting Language Server...");
     this.lspManager = new LSP(this.rubyVM.lspClient, this.editor);
     await this.lspManager.initialize();
     this.lspManager.activate();
@@ -40,8 +40,8 @@ export class BootLoader {
     window.dispatchEvent(new CustomEvent("rubbit:lsp-analysis-finished"));
 
     // 2. リファレンスの読み込み
-    this.dispatchProgress(85, "Loading Reference Index...");
-    this.reference = new Reference();
+    this.dispatchProgress(90, "Loading Reference Index...");
+    this.reference = new Reference(this.rubyVM.lspClient);
     await this.reference.loadIndex();
 
     // 3. 解析機能の起動

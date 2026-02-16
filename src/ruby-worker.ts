@@ -50,7 +50,7 @@ async function initializeVM(wasmUrl: string) {
 
     const buffer = await response.arrayBuffer();
 
-    postMessage({ type: "progress", payload: { percent: 30, message: "Compiling Ruby WASM..." } });
+    postMessage({ type: "progress", payload: { percent: 20, message: "Compiling Ruby WASM..." } });
     const module = await WebAssembly.compile(buffer);
     
     const result = await DefaultRubyVM(module);
@@ -58,7 +58,7 @@ async function initializeVM(wasmUrl: string) {
 
 
     // bootstrap.rb (Polyfills & LSP Server) をロードする
-    postMessage({ type: "progress", payload: { percent: 45, message: "Initializing VM..." } });
+    postMessage({ type: "progress", payload: { percent: 35, message: "Initializing VM..." } });
     
     // 1. VFSのディレクトリ作成
     vm.eval("require 'js'");
@@ -66,7 +66,7 @@ async function initializeVM(wasmUrl: string) {
     vm.eval("begin; Dir.mkdir('/workspace'); rescue; end");
 
     // 2. RBS標準ライブラリのロード (bootstrap前に書き込む)
-    postMessage({ type: "progress", payload: { percent: 55, message: "Loading RBS Stdlib..." } });
+    postMessage({ type: "progress", payload: { percent: 50, message: "Loading RBS Stdlib..." } });
     const rbsUrl = new URL("/rbs/ruby-stdlib.rbs", self.location.origin);
     const rbsResponse = await fetch(rbsUrl);
     if (rbsResponse.ok) {
@@ -103,7 +103,7 @@ async function initializeVM(wasmUrl: string) {
     writeRubyFile("/src/server.rb", serverCode);
 
     // 4. ブートストラップスクリプトを評価する
-    postMessage({ type: "progress", payload: { percent: 85, message: "Starting LSP Server..." } });
+    postMessage({ type: "progress", payload: { percent: 65, message: "Starting LSP Server..." } });
     (self as any).sendLspResponse = (jsonString: string) => {
       postMessage({ type: "lsp", payload: jsonString });
     };
@@ -120,7 +120,7 @@ async function initializeVM(wasmUrl: string) {
     `);
 
     postMessage({ type: "ready", payload: { version: vm.eval("RUBY_VERSION").toString() } });
-    postMessage({ type: "progress", payload: { percent: 100, message: "Ready!" } });
+    // 100% は BootLoader が担当するためここでは送信しない
   } catch (error: any) {
     postMessage({ type: "error", payload: { message: error.message } });
     postMessage({ type: "output", payload: { text: `// Error: ${error.message}` } });
