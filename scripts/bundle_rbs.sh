@@ -2,7 +2,7 @@
 set -e
 
 # RBS gem のディレクトリを取得
-RBS_DIR=$(ls -d wasm-build/vendor/bundle/ruby/*/gems/rbs-* | head -n 1)
+RBS_DIR=$(ls -d wasm-build/vendor/bundle/ruby/*/gems/rbs-* 2>/dev/null | head -n 1)
 OUTPUT="public/rbs/ruby-stdlib.rbs"
 TEMP_OUTPUT="public/rbs/ruby-stdlib.tmp.rbs"
 
