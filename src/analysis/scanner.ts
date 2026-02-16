@@ -33,7 +33,40 @@ export class Scanner {
       
       let lineContent = "";
       try {
+        // コメントを除去
         lineContent = model.getLineContent(lineNum).replace(/#(?!\{).*$/g, m => " ".repeat(m.length))
+
+        // 文字列リテラルを空白で置換（式展開 #{...} は残す）
+        // 簡易的な実装: "..." or '...' を探し、中身を空白にする。ただし # は考慮しない（コメントは先に消している）
+        lineContent = lineContent.replace(/(["'])(?:(?=(\\?))\2.)*?\1/g, (m) => {
+            // 式展開 #{...} が含まれている場合は、その部分だけ残して周りを空白にする
+            if (m.includes("#{")) {
+                let result = m[0]; // 開始クォート
+                let i = 1;
+                while (i < m.length - 1) {
+                    if (m.substring(i, i + 2) === "#{") {
+                        // 式展開開始。対応する } を探す（ネストは非考慮の簡易版）
+                        const start = i;
+                        let nest = 0;
+                        for (; i < m.length - 1; i++) {
+                            if (m.substring(i, i + 2) === "#{") nest++;
+                            if (m[i] === "}") {
+                                nest--;
+                                if (nest === 0) break;
+                            }
+                        }
+                        result += m.substring(start, i + 1);
+                        i++;
+                    } else {
+                        result += " ";
+                        i++;
+                    }
+                }
+                result += m[m.length - 1]; // 終了クォート
+                return result;
+            }
+            return " ".repeat(m.length);
+        });
       } catch {
         return;
       }
@@ -43,13 +76,18 @@ export class Scanner {
       while ((match = methodPattern.exec(lineContent)) !== null) {
         const name = match[1] || match[2] || match[3] || match[4]
         
-        // 単独形式（グループ4）のフィルタリング
+        // 1. 単独形式（グループ4）のフィルタリング
         if (match[4]) {
             // 暗黙のメソッド（ホワイトリスト）に含まれる場合のみ採用
-            // 定数（大文字開始）はメソッドではないので除外する
             if (!ImplicitMethods.has(name)) {
               continue
             }
+        }
+
+        // 2. 定数（大文字開始）はメソッドではないので全形式で除外する
+        // (例: Sum(...) はメソッドではなく定数/クラス)
+        if (name && /^[A-Z]/.test(name)) {
+            continue;
         }
 
         if (name && !Scanner.BLACKLIST.has(name)) {
