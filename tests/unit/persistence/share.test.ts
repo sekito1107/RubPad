@@ -6,11 +6,11 @@ describe('Share', () => {
 
   beforeEach(() => {
     share = new Share()
-    // Mock window.location
+    // window.location のモック化
     vi.stubGlobal('location', {
       href: 'http://localhost:5173/'
     })
-    // Mock window.history
+    // window.history のモック化
     vi.stubGlobal('history', {
       replaceState: vi.fn()
     })

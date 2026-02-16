@@ -41,7 +41,7 @@ describe('RubyVM', () => {
       terminate: vi.fn(),
     };
     
-    // Workerのモックを毎回設定
+    // Worker のモックを毎回設定
     const MockWorker = vi.fn(function() { return mockWorker; });
     vi.stubGlobal('Worker', MockWorker);
   });
@@ -110,13 +110,13 @@ describe('RubyVM', () => {
   it('runメソッドでコードをWorkerに送信すること', () => {
     vm = new RubyVM();
     
-    // Worker初期化を確認
+    // Worker 初期化を確認
     expect(mockWorker.postMessage).toHaveBeenCalledWith({
        type: 'initialize',
        payload: { wasmUrl: '/ruby/rubbit.wasm' },
     });
 
-    // run呼び出し
+    // run 呼び出し
     vm.run('puts "Hello"');
 
     expect(mockWorker.postMessage).toHaveBeenCalledWith({
@@ -126,7 +126,7 @@ describe('RubyVM', () => {
   });
 
   it('Worker未初期化時のrun呼び出しをハンドリングすること', () => {
-    // Worker初期化失敗をシミュレート
+    // Worker 初期化失敗をシミュレート
     const ErrorWorker = vi.fn(function() {
       throw new Error("Worker Error");
     });

@@ -25,7 +25,7 @@ describe('LSPClient', () => {
         }
       });
 
-      // Workerからのレスポンスをシミュレート
+      // Worker からのレスポンスをシミュレート
       const messageEvent = {
         data: {
           type: 'lsp',
