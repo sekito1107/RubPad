@@ -40,7 +40,7 @@ vi.mock('monaco-editor', () => ({
   KeyCode: mockMonaco.KeyCode,
 }));
 
-// Persistenceのモック
+// Persistence のモック
 // 実際のクラス構造に合わせてモックを作成
 vi.mock('../../src/persistence', () => {
   const mockSettings = {
@@ -101,7 +101,7 @@ describe('EditorComponent', () => {
   it('テーマ更新が機能すること', () => {
     component = new EditorComponent(container, persistence);
 
-    // Dark mode
+    // ダークモード
     document.documentElement.classList.add('dark');
 
     expect(mockMonaco.editor.create).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({

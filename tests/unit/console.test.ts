@@ -20,7 +20,7 @@ describe('ConsoleComponent', () => {
     runButton = document.getElementById('run') as HTMLElement;
     clearButton = document.getElementById('clear') as HTMLElement;
 
-    // jsdom doesn't implement scrollIntoView
+    // jsdom は scrollIntoView を実装していないためモック化する
     window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
     mockRubyVM = {

@@ -5,7 +5,7 @@ import * as monaco from 'monaco-editor'
 // テスト用にグローバル公開
 window.monaco = monaco;
 
-// Features
+// 機能
 import { ThemeComponent } from "./theme"
 import { ShareComponent } from "./share"
 import { EditorComponent } from "./editor"
@@ -17,11 +17,7 @@ import { HeaderComponent } from "./header"
 import { ExamplesComponent } from "./examples"
 import { ToastComponent } from "./toast"
 import { MethodListComponent, CursorDocComponent } from "./reference"
-
-// Ruby VM
 import { RubyVM } from "./ruby-vm"
-
-// Persistence
 import { Persistence } from "./persistence"
 
 document.addEventListener("DOMContentLoaded", () => {

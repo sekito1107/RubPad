@@ -3,7 +3,7 @@ import { ShareComponent } from '../../src/share';
 
 describe('ShareComponent', () => {
   let button: HTMLElement;
-  let modal: HTMLDialogElement; // Modal Mock
+  let modal: HTMLDialogElement; // モーダルモック
   let mockEditor: any;
   let mockShare: any;
 
@@ -29,7 +29,7 @@ describe('ShareComponent', () => {
     button = document.getElementById('share') as HTMLElement;
     modal = document.getElementById('share-modal') as HTMLDialogElement;
     
-    // Mock Dialog methods
+    // ダイアログメソッドのモック化
     modal.showModal = vi.fn();
     modal.close = vi.fn();
 
@@ -45,21 +45,21 @@ describe('ShareComponent', () => {
       generateCodeBlock: vi.fn(),
     };
 
-    // Location Mock
+    // Location のモック化
     delete (window as any).location;
     window.location = { ...originalLocation, hash: '', pathname: '/', search: '' } as any;
     
-    // History Mock
+    // History のモック化
     delete (window as any).history;
     window.history = { ...originalHistory, replaceState: vi.fn() };
 
-    // Navigator Mock
+    // Navigator のモック化
     Object.defineProperty(navigator, 'clipboard', {
       value: {
         writeText: vi.fn(),
       },
       writable: true,
-      configurable: true // Allow re-definition
+      configurable: true // 再定義を許可する
     });
   });
 
@@ -105,12 +105,12 @@ describe('ShareComponent', () => {
     mockShare.generateEmbedTag.mockReturnValue('<iframe src="http://embed"></iframe>');
     mockShare.generateCodeBlock.mockReturnValue('```');
 
-    // Default (URL)
+    // デフォルト (URL)
     button.click();
     expect(mockShare.compress).toHaveBeenCalled();
     expect((modal.querySelector('#share-embed-preview-container') as HTMLElement).classList.contains('hidden')).toBe(true);
 
-    // Switch to Embed
+    // Embed プレビューへ切り替え
     (modal.querySelector('#share-tab-embed') as HTMLElement).click();
     expect(mockShare.generateEmbedTag).toHaveBeenCalledWith('code');
     expect((modal.querySelector('#share-preview') as HTMLTextAreaElement).value).toBe('<iframe src="http://embed"></iframe>');
@@ -121,7 +121,7 @@ describe('ShareComponent', () => {
     expect(previewContainer.classList.contains('hidden')).toBe(false);
     expect(frameWrapper.innerHTML).toContain('<iframe src="http://embed"');
 
-    // Switch to Code Block
+    // コードブロックへ切り替え
     (modal.querySelector('#share-tab-block') as HTMLElement).click();
     expect(mockShare.generateCodeBlock).toHaveBeenCalledWith('code');
     expect((modal.querySelector('#share-preview') as HTMLTextAreaElement).value).toBe('```');
@@ -134,7 +134,7 @@ describe('ShareComponent', () => {
     
     mockEditor.getValue.mockReturnValue('code');
     mockShare.compress.mockReturnValue('url');
-    button.click(); // Open modal to setup preview
+    button.click(); // プレビューをセットアップするためにモーダルを開く
 
     const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
     

@@ -13,7 +13,7 @@ describe('CodePersistence', () => {
   beforeEach(() => {
     persistence = new CodePersistence()
     
-    // Mock localStorage
+    // localStorage のモック化
     localStorageMock = {
       getItem: vi.fn(),
       setItem: vi.fn(),

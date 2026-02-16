@@ -89,6 +89,7 @@ export class ProvideHover {
     )) : "";
     const isSymbol = charBefore === ':';
 
+    if (position.lineNumber <= 0 || position.lineNumber > model.getLineCount()) return false;
     const lineContent = model.getLineContent(position.lineNumber);
     const textBefore = lineContent.substring(0, position.column - 1);
     const quoteCount = (textBefore.match(/['"]/g) || []).length;

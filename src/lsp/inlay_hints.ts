@@ -6,7 +6,7 @@ import * as monaco from 'monaco-editor';
 export class ProvideInlayHints {
   private editor: monaco.editor.ICodeEditor;
   private emitter: monaco.Emitter<void> = new monaco.Emitter<void>();
-  private measuredValues: Map<number, string> = new Map(); // Key: lineNumber(1-based), Value: measured string
+  private measuredValues: Map<number, string> = new Map();
 
   constructor(editor: monaco.editor.ICodeEditor) {
     this.editor = editor;
@@ -20,16 +20,22 @@ export class ProvideInlayHints {
       onDidChangeInlayHints: this.emitter.event,
       provideInlayHints: (model: monaco.editor.ITextModel, range: monaco.Range) => {
         const hints: monaco.languages.InlayHint[] = [];
-        for (const [line, value] of this.measuredValues.entries()) {
-          const lineNum = Number(line);
-          if (lineNum < range.startLineNumber || lineNum > range.endLineNumber) continue;
-          const maxCol = model.getLineMaxColumn(lineNum);
-          hints.push({
-            kind: monaco.languages.InlayHintKind.Type,
-            position: { lineNumber: lineNum, column: maxCol },
-            label: ` # => ${value}`,
-            paddingLeft: true
-          });
+        try {
+          for (const [line, value] of this.measuredValues.entries()) {
+            const lineNum = Number(line);
+            if (isNaN(lineNum) || lineNum <= 0 || lineNum > model.getLineCount()) continue;
+            if (lineNum < range.startLineNumber || lineNum > range.endLineNumber) continue;
+
+            const maxCol = model.getLineMaxColumn(lineNum);
+            hints.push({
+              kind: monaco.languages.InlayHintKind.Type,
+              position: { lineNumber: lineNum, column: maxCol },
+              label: ` # => ${value}`,
+              paddingLeft: true
+            });
+          }
+        } catch {
+          // ヒント提供失敗時は静かに終了
         }
         return { hints: hints, dispose: () => {} };
       }

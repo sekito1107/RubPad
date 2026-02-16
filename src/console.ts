@@ -82,21 +82,27 @@ export class ConsoleComponent {
   private showLoadingUI(percent: number, message: string): void {
     if (!this.outputElement) return;
 
+    let container = document.getElementById("loading-container");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "loading-container";
+      container.className = "flex flex-col items-center justify-center select-none py-8 my-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-lg";
+      this.outputElement.appendChild(container);
+    }
+
     const barWidth = 30;
     const filled = Math.round((percent / 100) * barWidth);
     const empty = barWidth - filled;
     const bar = "█".repeat(filled) + "░".repeat(empty);
 
-    this.outputElement.innerHTML = `
-      <div id="loading-container" class="flex flex-col items-center justify-center h-full select-none" style="min-height: 100px;">
-        <div id="rabbit-track" class="text-2xl mb-3 w-full overflow-hidden relative" style="height: 42px;">
-          <span id="rabbit-emoji" class="absolute transition-all duration-1000 ease-in-out" style="left: ${percent}%; transform: scaleX(-1); line-height: 1;">🐇</span>
-        </div>
-        <div class="font-mono text-sm text-slate-500 dark:text-slate-400 mb-1">
-          <span class="text-slate-600 dark:text-slate-300">[${bar}]</span> <span id="loading-percent" class="font-bold">${percent}%</span>
-        </div>
-        <div id="loading-message" class="text-xs text-slate-400 dark:text-slate-500 mt-1 animate-pulse">${message}</div>
+    container.innerHTML = `
+      <div id="rabbit-track" class="text-2xl mb-3 w-full overflow-hidden relative" style="height: 42px; max-width: 300px;">
+        <span id="rabbit-emoji" class="absolute transition-all duration-1000 ease-in-out" style="left: ${percent}%; transform: scaleX(-1); line-height: 1;">🐇</span>
       </div>
+      <div class="font-mono text-sm text-slate-500 dark:text-slate-400 mb-1">
+        <span class="text-slate-600 dark:text-slate-300">[${bar}]</span> <span id="loading-percent" class="font-bold">${percent}%</span>
+      </div>
+      <div id="loading-message" class="text-xs text-slate-400 dark:text-slate-500 mt-1 animate-pulse">${message}</div>
     `;
   }
 
@@ -104,15 +110,13 @@ export class ConsoleComponent {
    * うさぎアニメーションを開始する
    */
   private startRabbitAnimation(): void {
-    // うさぎの微小な跳ね返りアニメーション
     let step = 0;
     this.loadingAnimationId = window.setInterval(() => {
+      if (typeof document === 'undefined') return;
       const rabbit = document.getElementById("rabbit-emoji");
       if (rabbit) {
         step = (step + 1) % 10;
-        // 走っている感を出すため、サイン波で上下運動を表現
         const yOffset = Math.sin(step * (Math.PI / 5)) * 6;
-        // scaleX(-1) を維持しつつ上下移動
         rabbit.style.transform = `scaleX(-1) translateY(${yOffset}px)`;
       }
     }, 100);
@@ -122,18 +126,16 @@ export class ConsoleComponent {
    * 進捗を更新する
    */
   private updateLoadingProgress(percent: number, message: string): void {
+    if (typeof document === 'undefined') return;
     const percentEl = document.getElementById("loading-percent");
     const messageEl = document.getElementById("loading-message");
     const rabbit = document.getElementById("rabbit-emoji");
 
     if (percentEl && messageEl && rabbit) {
-      // 既存のUI要素を更新
       percentEl.textContent = `${percent}%`;
       messageEl.textContent = message;
       rabbit.style.left = `calc(${Math.min(percent, 95)}% - 12px)`;
 
-      // 進捗バーとバウンドアニメーションの同期を強める
-      // (CSS transition が 1s なので、それに合わせて left が動く)
       const barWidth = 30;
       const filled = Math.round((percent / 100) * barWidth);
       const empty = barWidth - filled;
@@ -143,7 +145,6 @@ export class ConsoleComponent {
         barEl.textContent = `[${bar}]`;
       }
     } else {
-      // UI未生成の場合は再描画
       this.showLoadingUI(percent, message);
     }
   }
@@ -168,7 +169,9 @@ export class ConsoleComponent {
         // ターミナルクリア & Readyメッセージ表示
         if (this.outputElement) {
           this.outputElement.innerHTML = "";
-          this.appendOutput(`// Ruby WASM ready! (Version: ${version})`);
+          if (version) {
+            this.appendOutput(`// Ruby WASM ready! (Version: ${version})`);
+          }
         }
 
         // Runボタンを有効化
@@ -188,7 +191,9 @@ export class ConsoleComponent {
       // フォールバック: container がない場合
       if (this.outputElement) {
         this.outputElement.innerHTML = "";
-        this.appendOutput(`// Ruby WASM ready! (Version: ${version})`);
+        if (version) {
+          this.appendOutput(`// Ruby WASM ready! (Version: ${version})`);
+        }
       }
       if (this.runButton) {
         this.runButton.removeAttribute("disabled");

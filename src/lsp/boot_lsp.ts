@@ -20,27 +20,22 @@ export class BootLSP {
    * LSP サーバの初期化プロセスを実行する
    */
   async execute(): Promise<any> {
-    try {
-      // 1. Diagnostics 通知の初回受信を監視して「解析完了」を検知する準備
-      this.setupInitialAnalysisListener();
+    // 1. Diagnostics 通知の初回受信を監視して「解析完了」を検知する準備
+    this.setupInitialAnalysisListener();
 
-      // 2. 'initialize' リクエストの送信 (TypeProf 向け)
-      const result = await this.client.sendRequest("initialize", {
-        processId: null,
-        rootUri: "inmemory:///workspace/",
-        capabilities: {
-          textDocument: {
-            publishDiagnostics: {}
-          }
-        },
-        workspaceFolders: [{ uri: "inmemory:///workspace/", name: "workspace" }]
-      });
+    // 2. 'initialize' リクエストの送信 (TypeProf 向け)
+    const result = await this.client.sendRequest("initialize", {
+      processId: null,
+      rootUri: "inmemory:///workspace/",
+      capabilities: {
+        textDocument: {
+          publishDiagnostics: {}
+        }
+      },
+      workspaceFolders: [{ uri: "inmemory:///workspace/", name: "workspace" }]
+    });
 
-      return result;
-    } catch (e) {
-      console.error("[BootLSP] Initialization failed:", e);
-      throw e;
-    }
+    return result;
   }
 
   private setupInitialAnalysisListener(): void {

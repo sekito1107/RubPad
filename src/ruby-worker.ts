@@ -39,7 +39,7 @@ self.onmessage = async (event: MessageEvent) => {
  */
 async function initializeVM(wasmUrl: string) {
   try {
-    postMessage({ type: "progress", payload: { percent: 10, message: "Starting Ruby Worker..." } });
+    postMessage({ type: "progress", payload: { percent: 10, message: "Ruby Worker を起動中..." } });
 
     const fullUrl = new URL(wasmUrl, self.location.origin);
     const response = await fetch(fullUrl);
@@ -50,46 +50,49 @@ async function initializeVM(wasmUrl: string) {
 
     const buffer = await response.arrayBuffer();
 
-    postMessage({ type: "progress", payload: { percent: 30, message: "Compiling Ruby WASM..." } });
+    postMessage({ type: "progress", payload: { percent: 20, message: "Ruby WASM をコンパイル中..." } });
     const module = await WebAssembly.compile(buffer);
     
     const result = await DefaultRubyVM(module);
     vm = result.vm;
 
-      try {
-        const rbsResponse = await fetch('/rbs/ruby-stdlib.rbs');
-        if (rbsResponse.ok) {
-          const rbsBuffer = await rbsResponse.arrayBuffer();
-          const bytes = new Uint8Array(rbsBuffer);
-          const CHUNK_SIZE = 256 * 1024; // 256KB 単位で分割
 
-          vm.eval(`Dir.mkdir('/workspace') unless Dir.exist?('/workspace')`);
+    // bootstrap.rb (ポリフィル & LSP サーバー) をロードする
+    postMessage({ type: "progress", payload: { percent: 35, message: "VM を初期化中..." } });
+    
+    // 1. VFSのディレクトリ作成
+    vm.eval("require 'js'");
+    vm.eval("begin; Dir.mkdir('/src'); rescue; end");
+    vm.eval("begin; Dir.mkdir('/workspace'); rescue; end");
 
-          for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
-            const chunk = bytes.slice(i, i + CHUNK_SIZE);
-            // Hex変換の高速化
-            let hexChunk = '';
-            for (let j = 0; j < chunk.length; j++) {
-              hexChunk += chunk[j].toString(16).padStart(2, '0');
+    // 2. RBS 標準ライブラリのロード (bootstrap 前に書き込む)
+    postMessage({ type: "progress", payload: { percent: 50, message: "RBS 標準ライブラリをロード中..." } });
+    const rbsUrl = new URL("/rbs/ruby-stdlib.rbs", self.location.origin);
+    const rbsResponse = await fetch(rbsUrl);
+    if (rbsResponse.ok) {
+        const rbsText = await rbsResponse.text();
+        try {
+            vm.eval(`File.write("/workspace/stdlib.rbs", "")`);
+            const chunkSize = 50 * 1024;
+            for (let i = 0; i < rbsText.length; i += chunkSize) {
+                const chunk = rbsText.substring(i, i + chunkSize);
+                const b64 = btoa(unescape(encodeURIComponent(chunk)));
+                vm.eval(`File.open("/workspace/stdlib.rbs", "ab") { |f| f.write("${b64}".unpack1("m")) }`);
             }
-
-            const mode = (i === 0) ? 'wb' : 'ab';
-            vm.eval(`File.open('/workspace/stdlib.rbs', '${mode}') { |f| f.write(['${hexChunk}'].pack('H*')) }`);
-          }
+        } catch (e: any) {
+            postMessage({ type: "output", payload: { text: `// RBS load failed: ${e.message}` } });
         }
-      } catch {
-        // Ignore RBS fetch errors
-      }
+    }
 
-    // bootstrap.rb (Polyfills & LSP Server) をロードする
-    postMessage({ type: "progress", payload: { percent: 50, message: "Loading Bootstrap..." } });
-    
-    // VFSに書き込んで読み込む
-    vm.eval(`Dir.mkdir("/src") unless Dir.exist?("/src")`);
-    
+    // 3. スクリプトファイルの書き込み
     const writeRubyFile = (path: string, code: string) => {
-      const b64 = btoa(unescape(encodeURIComponent(code)));
-      vm.eval(`File.write("${path}", "${b64}".unpack1("m"))`);
+      try {
+        const b64 = btoa(unescape(encodeURIComponent(code)));
+        vm.eval(`File.write("${path}", "${b64}".unpack1("m"))`);
+      } catch (e: any) {
+        postMessage({ type: "output", payload: { text: `// writeRubyFile Failed (${path}): ${e.message}` } });
+        throw e;
+      }
     };
 
     writeRubyFile("/src/bootstrap.rb", bootstrapCode);
@@ -98,13 +101,12 @@ async function initializeVM(wasmUrl: string) {
     writeRubyFile("/src/measure_value.rb", measureValueCode);
     writeRubyFile("/src/server.rb", serverCode);
 
-
-    // LSPからのレスポンスをMain Threadに転送する関数
+    // 4. ブートストラップスクリプトを評価する
+    postMessage({ type: "progress", payload: { percent: 65, message: "LSP サーバーを起動中..." } });
     (self as any).sendLspResponse = (jsonString: string) => {
       postMessage({ type: "lsp", payload: jsonString });
     };
 
-    // ブートストラップスクリプトを評価する
     vm.eval(`
       require "js"
       require_relative "/src/bootstrap"
@@ -117,6 +119,7 @@ async function initializeVM(wasmUrl: string) {
     `);
 
     postMessage({ type: "ready", payload: { version: vm.eval("RUBY_VERSION").toString() } });
+    // 100% は BootLoader が担当するためここでは送信しない
   } catch (error: any) {
     postMessage({ type: "error", payload: { message: error.message } });
     postMessage({ type: "output", payload: { text: `// Error: ${error.message}` } });

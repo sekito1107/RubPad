@@ -11,14 +11,14 @@ export class ShareComponent {
   private editor: EditorComponent;
   private service: Share;
 
-  // UI Elements inside modal
+  // モーダル内のUI要素
   private tabUrl: HTMLElement | null = null;
   private tabEmbed: HTMLElement | null = null;
   private tabBlock: HTMLElement | null = null;
   private previewArea: HTMLTextAreaElement | null = null;
   private copyButton: HTMLElement | null = null;
   
-  // Embed Preview
+  // 埋め込みプレビュー
   private embedPreviewContainer: HTMLElement | null = null;
   private embedFrameWrapper: HTMLElement | null = null;
 
@@ -41,7 +41,7 @@ export class ShareComponent {
     this.editor = editorComponent;
     this.service = shareService;
 
-    // Modal UI references
+    // モーダルUIの参照
     if (this.modal) {
       this.tabUrl = this.modal.querySelector('#share-tab-url');
       this.tabEmbed = this.modal.querySelector('#share-tab-embed');
@@ -76,7 +76,7 @@ export class ShareComponent {
   public openModal(): void {
     if (!this.modal) return;
     
-    // Reset to default tab
+    // デフォルトのタブにリセット
     this.switchTab('url');
     this.modal.showModal();
     this.updatePreview();
@@ -141,9 +141,9 @@ export class ShareComponent {
         }
       }
       this.previewArea.value = content;
-    } catch (e) {
-      console.error("Failed to generate preview", e);
-      this.previewArea.value = "Error generating preview";
+    } catch {
+      // プレビュー生成失敗
+      this.previewArea.value = "プレビュー生成エラー";
     }
   }
 
@@ -155,8 +155,7 @@ export class ShareComponent {
       this.dispatchToast("Copied to clipboard!", "success");
       
       this.modal?.close();
-    } catch (err) {
-      console.error(err);
+    } catch {
       this.dispatchToast("Failed to copy", "error");
     }
   }
