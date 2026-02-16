@@ -1,0 +1,28 @@
+GIT
+  remote: https://github.com/ruby/ruby.wasm.git
+  revision: 218332ff4d42d6a66b46c2727411564656a5a1de
+  specs:
+    ruby_wasm (2.7.0.dev)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    js (2.7.0)
+    logger (1.6.4)
+    rbs (3.8.0)
+      logger
+    typeprof (0.30.1)
+      rbs (>= 3.6.0)
+
+PLATFORMS
+  ruby
+  x86_64-linux
+
+DEPENDENCIES
+  js
+  rbs
+  ruby_wasm!
+  typeprof
+
+BUNDLED WITH
+  4.0.3

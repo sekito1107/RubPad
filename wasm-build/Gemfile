@@ -1,0 +1,6 @@
+source "https://rubygems.org"
+
+gem "ruby_wasm", group: :build, github: "ruby/ruby.wasm"
+gem "typeprof"
+gem "rbs"
+gem "js"
