@@ -141,7 +141,7 @@ export class ShareComponent {
         }
       }
       this.previewArea.value = content;
-    } catch (e) {
+    } catch {
       // プレビュー生成失敗
       this.previewArea.value = "プレビュー生成エラー";
     }
@@ -155,7 +155,7 @@ export class ShareComponent {
       this.dispatchToast("クリップボードにコピーしました！", "success");
       
       this.modal?.close();
-    } catch (err) {
+    } catch {
       this.dispatchToast("コピーに失敗しました", "error");
     }
   }

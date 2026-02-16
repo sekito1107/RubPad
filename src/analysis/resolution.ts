@@ -73,7 +73,7 @@ export class Resolution {
     let lineContent = "";
     try {
       lineContent = model.getLineContent(line)
-    } catch (e: any) {
+    } catch {
       return null;
     }
     

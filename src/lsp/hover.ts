@@ -57,7 +57,7 @@ export class ProvideHover {
               ...additionalContents
             ]
           };
-        } catch (e: any) {
+        } catch {
           return null;
         }
       }

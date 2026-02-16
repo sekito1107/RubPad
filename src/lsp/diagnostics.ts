@@ -79,7 +79,7 @@ export class HandleDiagnostics {
             endLineNumber: Math.min(lineCount, m.endLineNumber)
           }));
           monaco.editor.setModelMarkers(currentModel, "lsp", adjustedMarkers);
-        } catch (e: any) {
+        } catch {
           // マーカー設定失敗時は静かに終了
         }
         
@@ -116,7 +116,7 @@ export class HandleDiagnostics {
             endLineNumber: Math.min(lineCount, m.endLineNumber)
           }));
           monaco.editor.setModelMarkers(model, "ruby-syntax", adjustedMarkers);
-        } catch (e: any) {
+        } catch {
           // 構文チェックマーカー設定失敗時は静かに終了
         }
       }

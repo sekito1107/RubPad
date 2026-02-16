@@ -34,7 +34,7 @@ export class ProvideInlayHints {
               paddingLeft: true
             });
           }
-        } catch (e: any) {
+        } catch {
           // ヒント提供失敗時は静かに終了
         }
         return { hints: hints, dispose: () => {} };

@@ -161,7 +161,7 @@ export class AnalysisCoordinator {
         this.store.notify()
       }
 
-    } catch (e) {
+    } catch {
       // 解析エラーは外部に伝播させず、静かに失敗する
     } finally {
       this.isAnalyzing = false

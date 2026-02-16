@@ -44,7 +44,7 @@ export class FetchMethodList {
           ...URLGenerator.generateUrlInfo(cand)
         }))
       }))
-    } catch (e) {
+    } catch {
       return []
     }
   }
