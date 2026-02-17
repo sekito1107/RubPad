@@ -138,6 +138,22 @@ describe('Scanner', () => {
       expect(upcaseMatch.col).toBe(16)
     })
 
+    it('メソッド定義 (def name) を正しく検出できること', () => {
+      const code = 'def fib(n)\ndef self.foo\nend'
+      const model = createMockModel(code)
+      const results = scanner.scanLines(model, [0, 1])
+      
+      const line1 = results.get(0)!
+      expect(line1.length).toBeGreaterThanOrEqual(1)
+      expect(line1[0].name).toBe('fib')
+      expect(line1[0].scanType).toBe('definition')
+
+      const line2 = results.get(1)!
+      expect(line2).toHaveLength(1)
+      expect(line2[0].name).toBe('foo')
+      expect(line2[0].scanType).toBe('definition')
+    })
+    
     it('scanType が正しく判定されること', () => {
       const code = 'name\nobj.method\nfunc()\n&:sym'
       const model = createMockModel(code)
