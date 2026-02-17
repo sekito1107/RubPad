@@ -185,7 +185,7 @@ test.describe('Rubbit System Integration Tests', () => {
             await page.getByRole('button', { name: 'Share' }).click();
             await expect(page.locator('#share-modal')).toBeVisible();
             await page.locator('#share-copy-btn').click();
-            await expect(page.locator('[data-toast="message"]')).toContainText('Copied to clipboard!');
+            await expect(page.locator('[data-toast="message"]')).toContainText('クリップボードにコピーしました！');
 
             // 新しいページを開いて復元確認
             const urlWithHash = await page.evaluate(() => window.location.href);

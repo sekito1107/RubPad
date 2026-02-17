@@ -22,6 +22,7 @@ import { Persistence } from "./persistence"
 
 document.addEventListener("DOMContentLoaded", () => {
   // 機能の初期化
+  new ToastComponent(document.getElementById("toast-container")!)
   new ThemeComponent()
 
   // RubyVM を早期に初期化 (イベントリスナー登録のため)
@@ -63,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
   )
   
   
-  new ToastComponent(document.getElementById("toast-container")!)
+
 
   // リファレンス機能
   new MethodListComponent(
