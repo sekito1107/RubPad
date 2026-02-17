@@ -5,9 +5,10 @@ export interface ScannedMethod {
   name: string
   line: number
   col: number
+  scanType: 'symbol' | 'dot' | 'call' | 'bare'
 }
 
-import { ImplicitMethods } from "./builtins"
+
 
 export class Scanner {
   private static readonly BLACKLIST = new Set([
@@ -75,14 +76,6 @@ export class Scanner {
 
       while ((match = methodPattern.exec(lineContent)) !== null) {
         const name = match[1] || match[2] || match[3] || match[4]
-        
-        // 1. 単独形式（グループ4）のフィルタリング
-        if (match[4]) {
-            // 暗黙のメソッド（ホワイトリスト）に含まれる場合のみ採用
-            if (!ImplicitMethods.has(name)) {
-              continue
-            }
-        }
 
         // 2. 定数（大文字開始）はメソッドではないので全形式で除外する
         // (例: Sum(...) はメソッドではなく定数/クラス)
@@ -95,10 +88,16 @@ export class Scanner {
           // name の位置を特定するために match[0].indexOf(name) を使用（より安全）
           const offsetInMatch = match[0].indexOf(name)
 
+          let scanType: 'symbol' | 'dot' | 'call' | 'bare' = 'bare'
+          if (match[1]) scanType = 'symbol'
+          else if (match[2]) scanType = 'dot'
+          else if (match[3]) scanType = 'call'
+
           matches.push({
             name: name,
             line: idx + 1,
-            col: match.index + offsetInMatch + 1 // 1-indexed
+            col: match.index + offsetInMatch + 1, // 1-indexed
+            scanType
           })
         }
       }
