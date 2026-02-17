@@ -7,9 +7,7 @@ import serverCode from "./ruby/server.rb?raw";
 
 let vm: any = null;
 
-/**
- * Worker メッセージハンドラ
- */
+// Worker メッセージハンドラ
 self.onmessage = async (event: MessageEvent) => {
   const { type, payload } = event.data;
 
@@ -34,9 +32,7 @@ self.onmessage = async (event: MessageEvent) => {
   }
 };
 
-/**
- * Ruby VM の初期化
- */
+// Ruby VM の初期化
 async function initializeVM(wasmUrl: string) {
   try {
     postMessage({ type: "progress", payload: { percent: 10, message: "Ruby Worker を起動中..." } });
@@ -140,9 +136,7 @@ async function initializeVM(wasmUrl: string) {
   }
 }
 
-/**
- * コードを実行する
- */
+// コードを実行する
 function runCode(code: string) {
   try {
     (self as any)._tmpCode = code;

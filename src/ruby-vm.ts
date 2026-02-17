@@ -5,9 +5,7 @@ import RubyWorker from "./ruby-worker?worker";
 
 const RUBY_WASM_URL = "/ruby/rubbit.wasm";
 
-/**
- * Ruby VM & 実行時マネージャ
- */
+// Ruby VM & 実行時マネージャ
 export class RubyVM {
   private worker: Worker | null = null;
   public lspClient: LSPClient | null = null;
@@ -31,9 +29,7 @@ export class RubyVM {
     }
   }
 
-  /**
-   * Workerを初期化し、LSPクライアントをセットアップする
-   */
+  // Workerを初期化し、LSPクライアントをセットアップする
   private initializeWorker(): void {
     try {
       this.worker = new RubyWorker();
@@ -54,9 +50,7 @@ export class RubyVM {
     }
   }
 
-  /**
-   * Workerからのメッセージを処理する
-   */
+  // Workerからのメッセージを処理する
   private handleWorkerMessage(type: string, payload: any): void {
     switch (type) {
       case "output":
@@ -87,9 +81,7 @@ export class RubyVM {
     }
   }
 
-  /**
-   * コードを実行する
-   */
+  // コードを実行する
   public run(code: string): void {
     if (!this.worker) {
       this.dispatchOutput("// Ruby VM Worker が初期化されていません。");
@@ -98,9 +90,7 @@ export class RubyVM {
     this.worker.postMessage({ type: "run", payload: { code } });
   }
 
-  /**
-   * 出力イベントを発火する
-   */
+  // 出力イベントを発火する
   private dispatchOutput(text: string): void {
     if (this.onOutput) this.onOutput(text);
 

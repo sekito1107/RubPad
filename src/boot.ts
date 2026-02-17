@@ -3,10 +3,8 @@ import { LSP } from "./lsp";
 import { Reference } from "./reference";
 import { AnalysisCoordinator } from "./analysis";
 
-/**
- * アプリケーションの初期化シーケンス（ブートローダー）
- * 依存関係の解決と起動順序の制御を行う
- */
+// アプリケーションの初期化シーケンス（ブートローダー）
+// 依存関係の解決と起動順序の制御を行う
 export class BootLoader {
   private rubyVM: RubyVM;
   private editor: any;
@@ -19,9 +17,7 @@ export class BootLoader {
     this.editor = editor;
   }
 
-  /**
-   * システム初期化を開始
-   */
+  // システム初期化を開始
   public async boot(): Promise<void> {
     // 0. 依存関係の準備待ち
     // RubyVM (WASM) の初期化完了を待つ
@@ -69,9 +65,7 @@ export class BootLoader {
     }));
   }
 
-  /**
-   * リソースの破棄とグローバル汚染のクリーンアップ
-   */
+  // リソースの破棄とグローバル汚染のクリーンアップ
   public destroy(): void {
     if (window.rubbitLSPManager === this.lspManager) delete window.rubbitLSPManager;
     if (window.rubbitAnalysisCoordinator === this.analysis) delete window.rubbitAnalysisCoordinator;
