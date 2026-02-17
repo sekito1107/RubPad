@@ -7,11 +7,14 @@ export class LSPResponseParser {
     if (!markdownContent) return null;
     const content = markdownContent.trim();
 
-    // 変数定義のホバー (例: "i: Integer") かどうかを判定
+    // TypeProf のホバーが変数型情報である場合にメソッド候補から除外するための判定
     // メソッドシグネチャ (def ...) や クラス/モジュール定義を含まない、
-    // かつ "名前: 型" の形式である場合は、メソッド解決用のクラス名としては返さない。
-    if (!content.includes("def ") && !content.match(/^(?:class|module)\s/) && content.match(/^[a-z_]\w*:/)) {
-      return null;
+    // かつ "名前: 型" の形式が主要な情報として含まれる場合は、メソッド解決用として扱わない。
+    if (!content.includes("def ") && !content.match(/^(?:class|module)\s/)) {
+      // プレーンテキストまたはコードブロック内の "var: Type" 形式をチェック
+      if (content.match(/(?:^|\n|```ruby\n)\s*[a-z_]\w*\s*:\s*[A-Z]/)) {
+         return null;
+      }
     }
 
     return this._doParse(content);

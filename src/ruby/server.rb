@@ -36,8 +36,11 @@ module TypeProf::LSP
     end
   end
 end
-
 class Server
+  # 公式リファレンスでドキュメントが集約されている代表的な基底クラス
+  # 継承先での再定義（型宣言等）があっても、これらのクラスに定義の実体がある場合はリンク切れ防止のため優先する
+  DOCUMENT_AGGREGATE_ROOTS = ["Numeric", "Comparable", "Enumerable", "Kernel"].freeze
+
   def initialize(core)
     @read_msg = nil
     @error = nil
@@ -228,17 +231,25 @@ class Server
             # 暫定の定義場所を記録
             sep = singleton ? "." : "#"
             
-            # もし Numeric, Comparable, Enumerable, Kernel 等の
-            # 基本的なドキュメント集約先で定義されている場合は、そちらを優先する。
-            # (子クラスでの再定義が単なる型指定である場合などの 404 回避)
-            mod_name = mod.show_cpath
-            if ["Numeric", "Comparable", "Enumerable", "Kernel"].include?(mod_name)
-              return {
-                signature: "#{mod_name}#{sep}#{mdef.respond_to?(:show) ? mdef.show : method_name.to_s}",
-                className: mod_name,
-                methodName: method_name,
-                separator: sep
-              }
+            # リファレンス上のドキュメント集約状況を考慮して、最適な定義クラスを選択する
+            owner_class_or_module = Object.const_get(mod.show_cpath) rescue nil
+            
+            if owner_class_or_module
+              candidates = [owner_class_or_module.name] + owner_class_or_module.ancestors.map(&:name)
+              aggregate_owner_name = DOCUMENT_AGGREGATE_ROOTS.find { |c| candidates.include?(c) }
+
+              # 実際にその集約先クラスでメソッドが定義されている（所有されている）場合、
+              # 子クラスでの再定義（型指定のみの場合など）を無視して基底クラスを優先する。
+              if aggregate_owner_name && owner_class_or_module.instance_methods.include?(method_sym) &&
+                 owner_class_or_module.instance_method(method_sym).owner.name == aggregate_owner_name
+                
+                return {
+                  signature: "#{aggregate_owner_name}#{sep}#{mdef.respond_to?(:show) ? mdef.show : method_name.to_s}",
+                  className: aggregate_owner_name,
+                  methodName: method_name,
+                  separator: sep
+                }
+              end
             end
 
             # まだ見つかっていなければ、最初に見つかったもの（最も子に近いもの）を候補にする

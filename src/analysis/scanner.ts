@@ -3,7 +3,7 @@ export interface ScannedMethod {
   name: string
   line: number
   col: number
-  scanType: 'symbol' | 'dot' | 'call' | 'bare' | 'definition'
+  scanType: 'symbol' | 'dot' | 'call' | 'bare' | 'definition' | 'variable_definition'
 }
 
 
@@ -102,6 +102,45 @@ export class Scanner {
           })
         }
       }
+
+      // ブロック引数を変数定義として抽出
+      const blockParamPattern = /\|([^|]+)\|/g
+      let bMatch
+      while ((bMatch = blockParamPattern.exec(lineContent)) !== null) {
+        const paramsStr = bMatch[1]
+        const params = paramsStr.split(',')
+        params.forEach(p => {
+          const name = p.trim().match(/^[a-zA-Z_]\w*[!?]?/)?.[0]
+          if (name && !Scanner.BLACKLIST.has(name)) {
+            matches.push({
+              name,
+              line: idx + 1,
+              col: bMatch!.index + bMatch![0].indexOf(name) + 1,
+              scanType: 'variable_definition'
+            })
+          }
+        })
+      }
+
+      // for 文のループ変数を変数定義として抽出
+      const forPattern = /for\s+([a-zA-Z_]\w*(?:\s*,\s*[a-zA-Z_]\w*)*)\s+in/g
+      let fMatch
+      while ((fMatch = forPattern.exec(lineContent)) !== null) {
+        const varsStr = fMatch[1]
+        const vars = varsStr.split(',')
+        vars.forEach(v => {
+          const name = v.trim()
+          if (name && !Scanner.BLACKLIST.has(name)) {
+            matches.push({
+              name,
+              line: idx + 1,
+              col: fMatch!.index + fMatch![0].indexOf(name) + 1,
+              scanType: 'variable_definition'
+            })
+          }
+        })
+      }
+
       results.set(idx, matches)
     })
     return results

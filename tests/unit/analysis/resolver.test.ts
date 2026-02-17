@@ -28,7 +28,7 @@ describe('Resolver', () => {
         separator: '#'
       })
 
-      const result = await resolver.resolve('push', 10, 5)
+      const result = await resolver.resolve('push', 10, 5, 'dot')
 
       expect(result.status).toBe('resolved')
       expect(result.className).toBe('Array')
@@ -47,7 +47,7 @@ describe('Resolver', () => {
         separator: '#'
       })
 
-      const result = await resolver.resolve('upcase', 10, 10)
+      const result = await resolver.resolve('upcase', 10, 10, 'dot')
 
       expect(resolution.resolveAtPosition).toHaveBeenCalledWith(10, 9)
       expect(result.status).toBe('resolved')
@@ -59,7 +59,7 @@ describe('Resolver', () => {
       vi.mocked(resolution.resolveMethodAt).mockResolvedValue('UnknownClass')
       mockRurima.resolve.mockResolvedValue(null)
 
-      const result = await resolver.resolve('missing_method', 1, 1)
+      const result = await resolver.resolve('missing_method', 1, 1, 'dot')
 
       expect(result.status).toBe('unknown')
     })
@@ -68,7 +68,7 @@ describe('Resolver', () => {
       const resolution = resolver.resolution
       vi.mocked(resolution.resolveMethodAt).mockRejectedValue(new Error('LSP Error'))
 
-      await expect(resolver.resolve('error_method', 1, 1)).rejects.toThrow('LSP Error')
+      await expect(resolver.resolve('error_method', 1, 1, 'dot')).rejects.toThrow('LSP Error')
     })
 
   })

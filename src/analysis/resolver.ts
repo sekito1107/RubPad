@@ -9,7 +9,7 @@ export class Resolver {
     this.resolution = new Resolution(lspManager)
   }
 
-  async resolve(methodName: string, line: number, col: number): Promise<{
+  async resolve(methodName: string, line: number, col: number, scanType: string): Promise<{
     status: 'resolved' | 'unknown'
     className?: string
     url?: string
@@ -18,9 +18,12 @@ export class Resolver {
     // 1.LSPを使用してクラス名を特定
     let className = await this.resolution.resolveMethodAt(line, col)
     
-    // 2.フォールバック: レシーバ（ドットの直前）を解決
+    // 2.フォールバック: レシーバ（ドットの左）を解決
+    // bare の場合は、ドットを伴わない限りレシーバ解決（フォールバック）を行わない
     if (!className && col > 1) {
-      className = await this.resolution.resolveAtPosition(line, col - 1)
+      if (scanType === 'dot' || scanType === 'call') {
+        className = await this.resolution.resolveAtPosition(line, col - 1)
+      }
     }
 
     if (className) {

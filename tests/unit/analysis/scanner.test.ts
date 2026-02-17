@@ -37,7 +37,10 @@ describe('Scanner', () => {
       const results = scanner.scanLines(model, [0, 1])
       
       expect(results.get(0)![0].name).toBe('calculate')
-      expect(results.get(1)![0].name).toBe('format')
+      const line2 = results.get(1)!
+      expect(line2.map((m: any) => m.name)).toContain('format')
+      expect(line2.map((m: any) => m.name)).toContain('x')
+      expect(line2.find((m: any) => m.name === 'x' && m.scanType === 'variable_definition')).toBeDefined()
     })
 
     it('doブロック付きのメソッドを抽出できること', () => {
@@ -46,10 +49,24 @@ describe('Scanner', () => {
       const results = scanner.scanLines(model, [0])
       
       const matches = results.get(0)!
-      expect(matches).toHaveLength(3) // items, each, item
-      expect(matches[0].name).toBe('items')
-      expect(matches[1].name).toBe('each')
-      expect(matches[2].name).toBe('item')
+      // items(bare), each(dot), item(bare), item(variable_definition)
+      expect(matches).toHaveLength(4) 
+      expect(matches.map(m => m.name)).toContain('items')
+      expect(matches.map(m => m.name)).toContain('each')
+      expect(matches.filter(m => m.name === 'item')).toHaveLength(2)
+      expect(matches.some(m => m.name === 'item' && m.scanType === 'variable_definition')).toBe(true)
+    })
+
+    it('for文のループ変数を定義として抽出できること', () => {
+      const code = 'for i, j in [[1,2]]\nend'
+      const model = createMockModel(code)
+      const results = scanner.scanLines(model, [0])
+      const matches = results.get(0)!
+      
+      const iDef = matches.find(m => m.name === 'i' && m.scanType === 'variable_definition')
+      const jDef = matches.find(m => m.name === 'j' && m.scanType === 'variable_definition')
+      expect(iDef).toBeDefined()
+      expect(jDef).toBeDefined()
     })
 
     it('コメントアウトされた行のメソッドを無視し、インデックスを維持すること', () => {

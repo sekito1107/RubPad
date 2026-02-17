@@ -135,11 +135,32 @@ export class AnalysisCoordinator {
       const definedMethods = new Set(
         allOccurrences.filter(m => m.scanType === 'definition').map(m => m.name)
       )
-      
-      // 定義そのものと、ローカル定義が存在するメソッドの呼び出しを除外
-      const filteredOccurrences = allOccurrences.filter(m => 
-        m.scanType !== 'definition' && !definedMethods.has(m.name)
+
+      const definedVariables = new Set(
+        allOccurrences.filter(m => m.scanType === 'variable_definition').map(m => m.name)
       )
+      
+      // 出現箇所のフィルタリング
+      const filteredOccurrences = allOccurrences.filter(m => {
+        // 定義（メソッド/変数）そのものは候補に出さない
+        if (m.scanType === 'definition' || m.scanType === 'variable_definition') {
+          return false
+        }
+
+        // ローカルメソッド定義がある場合、すべての呼び出し（bare, dot, call問わず）を除外
+        // (同じファイル内の外部メソッドをオーバーライドしているとみなし、ローカル優先とする)
+        if (definedMethods.has(m.name)) {
+          return false
+        }
+
+        // ローカル定義された変数がある場合、ドットのない単独の呼び出し (bare) のみを除外
+        // これによりローカル変数をメソッドとして誤認するのを防ぎつつ、明示的なレシーバ付き呼び出しは許容する
+        if (definedVariables.has(m.name) && m.scanType === 'bare') {
+          return false
+        }
+
+        return true
+      })
 
       const currentIds = new Set(filteredOccurrences.map(m => this._getMethodId(m)))
 
@@ -187,7 +208,7 @@ export class AnalysisCoordinator {
     item.isResolving = true
     this.store.set(id, item)
 
-    const result = await this.resolver.resolve(item.name, item.line, item.col)
+    const result = await this.resolver.resolve(item.name, item.line, item.col, item.scanType)
     
     const updatedItem = this.store.get(id)
     if (updatedItem) {
