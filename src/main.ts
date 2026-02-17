@@ -70,8 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("method-list")!,
     document.getElementById("method-list-loader")!,
     document.getElementById("method-card-template")! as HTMLTemplateElement,
-    document.getElementById("link-template")! as HTMLTemplateElement,
-    document.getElementById("search-template")! as HTMLTemplateElement
+    document.getElementById("link-template")! as HTMLTemplateElement
   )
 
   new CursorDocComponent(

@@ -4,7 +4,6 @@ export class MethodListComponent {
   private loaderElement: HTMLElement | null
   private cardTemplate: HTMLTemplateElement
   private linkTemplate: HTMLTemplateElement
-  private searchTemplate: HTMLTemplateElement
 
   private cardMap: Map<string, HTMLElement>
   private boundHandleAnalysisUpdated: (e: any) => void
@@ -14,14 +13,12 @@ export class MethodListComponent {
     listElement: HTMLElement | null,
     loaderElement: HTMLElement | null,
     cardTemplate: HTMLTemplateElement,
-    linkTemplate: HTMLTemplateElement,
-    searchTemplate: HTMLTemplateElement
+    linkTemplate: HTMLTemplateElement
   ) {
     this.listElement = listElement
     this.loaderElement = loaderElement
     this.cardTemplate = cardTemplate
     this.linkTemplate = linkTemplate
-    this.searchTemplate = searchTemplate
     
     this.cardMap = new Map()
 
@@ -169,27 +166,9 @@ export class MethodListComponent {
     }
 
     if (item.status === 'unknown') {
-      // 解決できなかったものでも、明示的にメソッド呼び出しに見えるものは表示する
-      // (変数と思われる bare なものだけ除外)
-      if (item.scanType === 'bare') {
-        card.remove()
-        this.cardMap.delete(item.name)
-        return
-      }
-
-      if (card.getAttribute('data-status') === 'unknown') return
-      card.setAttribute('data-status', 'unknown')
-
-      detailsContainer.innerHTML = ""
-      icon.textContent = "?"
-      icon.classList.remove("text-blue-600", "dark:text-blue-400")
-      icon.classList.add("text-slate-400", "dark:text-slate-500")
-
-      const searchNode = this.searchTemplate.content.cloneNode(true) as DocumentFragment
-      const anchor = searchNode.querySelector("a") as HTMLAnchorElement
-      anchor.href = `https://docs.ruby-lang.org/ja/latest/search/query:${encodeURIComponent(item.name)}`
-      searchNode.querySelector("span")!.textContent = "Search in Reference"
-      detailsContainer.appendChild(searchNode)
+      card.remove()
+      this.cardMap.delete(item.name)
+      return
     }
   }
 

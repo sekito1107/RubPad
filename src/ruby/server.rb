@@ -36,8 +36,11 @@ module TypeProf::LSP
     end
   end
 end
-
 class Server
+  # 公式リファレンスでドキュメントが集約されている代表的な基底クラス
+  # 継承先での再定義（型宣言等）があっても、これらのクラスに定義の実体がある場合はリンク切れ防止のため優先する
+  DOCUMENT_AGGREGATE_ROOTS = ["Numeric", "Comparable", "Enumerable", "Kernel"].freeze
+
   def initialize(core)
     @read_msg = nil
     @error = nil
@@ -210,6 +213,11 @@ class Server
       
       # 継承チェーンに沿ってメソッドを探す
       base_mod = genv.resolve_cpath(cpath)
+      
+      best_me = nil
+      best_mod = nil
+      best_sep = nil
+      
       [false, true].each do |singleton|
         genv.each_superclass(base_mod, singleton) do |mod, _singleton|
           begin
@@ -220,25 +228,49 @@ class Server
             mdef = (me.defs.to_a.first || me.decls.to_a.first) rescue nil
             next unless mdef
             
-            # 実際の定義場所 (Kernel, Enumerable 等) を特定
-            defined_in = mod.show_cpath
-            
+            # 暫定の定義場所を記録
             sep = singleton ? "." : "#"
             
-            # シグネチャの文字列表記
-            # decls の場合は show ではなく method_types などを見る必要がある場合があるが、
-            # もし show が定義されていればそれを使う
-            sig_text = mdef.respond_to?(:show) ? mdef.show : method_name.to_s
-            signature = "#{defined_in}#{sep}#{sig_text}"
+            # リファレンス上のドキュメント集約状況を考慮して、最適な定義クラスを選択する
+            owner_class_or_module = Object.const_get(mod.show_cpath) rescue nil
+            
+            if owner_class_or_module
+              candidates = [owner_class_or_module.name] + owner_class_or_module.ancestors.map(&:name)
+              aggregate_owner_name = DOCUMENT_AGGREGATE_ROOTS.find { |c| candidates.include?(c) }
 
-            return {
-              signature: signature,
-              className: defined_in,
-              methodName: method_name,
-              separator: sep
-            }
+              # 実際にその集約先クラスでメソッドが定義されている（所有されている）場合、
+              # 子クラスでの再定義（型指定のみの場合など）を無視して基底クラスを優先する。
+              if aggregate_owner_name && owner_class_or_module.instance_methods.include?(method_sym) &&
+                 owner_class_or_module.instance_method(method_sym).owner.name == aggregate_owner_name
+                
+                return {
+                  signature: "#{aggregate_owner_name}#{sep}#{mdef.respond_to?(:show) ? mdef.show : method_name.to_s}",
+                  className: aggregate_owner_name,
+                  methodName: method_name,
+                  separator: sep
+                }
+              end
+            end
+
+            # まだ見つかっていなければ、最初に見つかったもの（最も子に近いもの）を候補にする
+            unless best_me
+              best_me = mdef
+              best_mod = mod
+              best_sep = sep
+            end
           rescue
           end
+        end
+        
+        if best_me
+          defined_in = best_mod.show_cpath
+          sig_text = best_me.respond_to?(:show) ? best_me.show : method_name.to_s
+          return {
+            signature: "#{defined_in}#{best_sep}#{sig_text}",
+            className: defined_in,
+            methodName: method_name,
+            separator: best_sep
+          }
         end
       end
     rescue => e

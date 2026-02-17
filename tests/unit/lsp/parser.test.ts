@@ -37,6 +37,12 @@ describe('LSPResponseParser', () => {
       expect(LSPResponseParser.parseClassNameFromHover('   ')).toBeNull();
       expect(LSPResponseParser.parseClassNameFromHover('lowercase')).toBeNull();
     });
+
+    it('変数定義のホバーに対して null を返すこと', () => {
+      expect(LSPResponseParser.parseClassNameFromHover('i: Integer')).toBeNull();
+      expect(LSPResponseParser.parseClassNameFromHover('```ruby\ni: Integer\n```')).toBeNull();
+      expect(LSPResponseParser.parseClassNameFromHover('  i: Integer  ')).toBeNull();
+    });
   });
 
   describe('normalizeTypeName', () => {
