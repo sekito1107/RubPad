@@ -148,11 +148,11 @@ export class ShareComponent {
     
     try {
       await navigator.clipboard.writeText(this.previewArea.value);
-      this.dispatchToast("Copied to clipboard!", "success");
+      this.dispatchToast("クリップボードにコピーしました！", "success");
       
       this.modal?.close();
     } catch {
-      this.dispatchToast("Failed to copy", "error");
+      this.dispatchToast("コピーに失敗しました", "error");
     }
   }
 
@@ -164,10 +164,14 @@ export class ShareComponent {
     if (code) {
       this.editor.setValue(code);
       history.replaceState(null, "", window.location.pathname + window.location.search);
+      
+      // 共有コードが展開されたら警告を表示
+      // ユーザーにコード確認を促す (Security)
+      this.dispatchToast("⚠️ 共有されたコードです。実行前に内容を確認してください。", "warning");
     }
   }
 
-  private dispatchToast(message: string, type: "success" | "error" = "success"): void {
+  private dispatchToast(message: string, type: "success" | "error" | "warning" = "success"): void {
     window.dispatchEvent(new CustomEvent("show-toast", {
       detail: { message, type },
       bubbles: true
