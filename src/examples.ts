@@ -40,7 +40,7 @@ puts "Sum (1..100): #{sum}"
 const EXAMPLES: Record<string, string> = {
   default: DefaultCode,
   hello: `# Hello World
-puts "Hello, Rubbit!"
+puts "Hello, Rubox!"
 puts "Ruby Version: #{RUBY_VERSION}"
 `,
   fizzbuzz: `# FizzBuzz

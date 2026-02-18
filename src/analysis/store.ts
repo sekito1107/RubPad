@@ -48,7 +48,7 @@ export class AnalysisStore {
   }
 
   notify(): void {
-    const event = new CustomEvent("rubbit:analysis-updated", {
+    const event = new CustomEvent("rubox:analysis-updated", {
       detail: { 
         methods: this.getAll(),
         firstScanDone: this.firstScanDone
