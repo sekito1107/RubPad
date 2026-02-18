@@ -32,7 +32,7 @@ describe('RubyVM', () => {
     Object.defineProperty(window, '__rubyVMInitializing', { value: false, writable: true, configurable: true });
     Object.defineProperty(window, '__rubyVMReady', { value: false, writable: true, configurable: true });
     Object.defineProperty(window, 'rubyLSP', { value: undefined, writable: true, configurable: true });
-    Object.defineProperty(window, 'rubbitLSPManager', { value: undefined, writable: true, configurable: true });
+    Object.defineProperty(window, 'ruboxLSPManager', { value: undefined, writable: true, configurable: true });
 
     // テスト毎に新しいWorkerモックを作成
     mockWorker = {

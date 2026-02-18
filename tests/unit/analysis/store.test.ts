@@ -11,7 +11,7 @@ describe('AnalysisStore', () => {
 
   describe('set & get & getAll', () => {
     it('メソッドデータを保存し、取得できること', () => {
-      const data: MethodItem = { name: 'test', line: 1, col: 1, status: 'pending' }
+      const data: MethodItem = { name: 'test', line: 1, col: 1, status: 'pending', scanType: 'bare' }
       store.set('test', data)
       
       expect(store.get('test')).toEqual(data)
@@ -21,8 +21,8 @@ describe('AnalysisStore', () => {
 
   describe('keepOnly', () => {
     it('リストに含まれないメソッドを削除し、変更があった場合に true を返すこと', () => {
-      store.set('m1', { name: 'm1', line: 1, col: 1, status: 'pending' })
-      store.set('m2', { name: 'm2', line: 1, col: 2, status: 'pending' })
+      store.set('m1', { name: 'm1', line: 1, col: 1, status: 'pending', scanType: 'bare' })
+      store.set('m2', { name: 'm2', line: 1, col: 2, status: 'pending', scanType: 'bare' })
       
       const changed = store.keepOnly(new Set(['m1']))
       
@@ -32,16 +32,16 @@ describe('AnalysisStore', () => {
     })
 
     it('すべてのメソッドがリストに含まれる場合、削除せず false を返すこと', () => {
-      store.set('m1', { name: 'm1', line: 1, col: 1, status: 'pending' })
+      store.set('m1', { name: 'm1', line: 1, col: 1, status: 'pending', scanType: 'bare' })
       const changed = store.keepOnly(new Set(['m1']))
       expect(changed).toBe(false)
     })
   })
 
   describe('notify', () => {
-    it('rubbit:analysis-updated イベントを正しいペイロードで発火すること', () => {
+    it('rubox:analysis-updated イベントを正しいペイロードで発火すること', () => {
       const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
-      const data: MethodItem = { name: 'm1', line: 1, col: 1, status: 'resolved' }
+      const data: MethodItem = { name: 'm1', line: 1, col: 1, status: 'resolved', scanType: 'bare' }
       store.set('m1', data)
       store.setFirstScanDone(true)
       
@@ -49,7 +49,7 @@ describe('AnalysisStore', () => {
       
       expect(dispatchSpy).toHaveBeenCalled()
       const event = dispatchSpy.mock.calls[0][0] as CustomEvent
-      expect(event.type).toBe('rubbit:analysis-updated')
+      expect(event.type).toBe('rubox:analysis-updated')
       expect(event.detail.methods).toEqual([data])
       expect(event.detail.firstScanDone).toBe(true)
     })

@@ -100,7 +100,7 @@ describe('ConsoleComponent', () => {
     vi.useFakeTimers();
 
     // リファクタリングにより rubbit:lsp-ready イベント経由で通知される
-    window.dispatchEvent(new CustomEvent('rubbit:lsp-ready', {
+    window.dispatchEvent(new CustomEvent('rubox:lsp-ready', {
       detail: { version: '4.0.0' }
     }));
     

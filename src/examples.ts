@@ -6,8 +6,8 @@ interface EditorLike extends RuntimeEditorLike {
   setValue(value: string): void;
 }
 
-export const DefaultCode = `# Rubbitへようこそ！
-# Rubbitはサーバー通信なしで、即座に Ruby コードの評価と解析を行います。
+export const DefaultCode = `# Ruboxへようこそ！
+# Ruboxはサーバー通信なしで、即座に Ruby コードの評価と解析を行います。
 
 # 【機能の活用方法】
 # 1. 動的リファレンス
@@ -40,7 +40,7 @@ puts "Sum (1..100): #{sum}"
 const EXAMPLES: Record<string, string> = {
   default: DefaultCode,
   hello: `# Hello World
-puts "Hello, Rubbit!"
+puts "Hello, Rubox!"
 puts "Ruby Version: #{RUBY_VERSION}"
 `,
   fizzbuzz: `# FizzBuzz

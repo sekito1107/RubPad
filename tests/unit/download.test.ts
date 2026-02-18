@@ -31,7 +31,7 @@ describe('DownloadComponent', () => {
 
     button.click();
 
-    expect(mockExporterInstance.export).toHaveBeenCalledWith('rubbit.rb');
+    expect(mockExporterInstance.export).toHaveBeenCalledWith('rubox.rb');
   });
 
   it('ボタンが存在しない場合でもエラーにならないこと', () => {

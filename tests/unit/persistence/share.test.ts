@@ -69,7 +69,7 @@ describe('Share', () => {
 
   describe('可逆性', () => {
     it('compress して decompress したら元のコードに戻ること', () => {
-      const complexCode = 'def hello(name)\n  "Hello, #{name}!"\nend\n\nputs hello("Rubbit")'
+      const complexCode = 'def hello(name)\n  "Hello, #{name}!"\nend\n\nputs hello("Rubox")'
       const url = share.compress(complexCode)
       const hash = new URL(url).hash
       
