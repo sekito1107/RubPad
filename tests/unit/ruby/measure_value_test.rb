@@ -1,15 +1,15 @@
 
-require 'test/unit'
+require 'minitest/autorun'
 require 'stringio'
 require_relative '../../../src/ruby/measure_value'
 
-# Provide RubbitStopExecution if needed
+# テスト実行を中断するための例外クラス (src/ruby/measure_value.rb で使用)
 class RubbitStopExecution < StandardError; end
 
-class TestMeasureValue < Test::Unit::TestCase
+class TestMeasureValue < Minitest::Test
   def setup
-    # MeasureValue.run reads from /workspace/main.rb, so we mock it
-    # But since we are running in a test environment, let's redefine the behavior for testing.
+    # MeasureValue.run は通常 /workspace/main.rb からコードを読み込みますが、
+    # ユニットテスト環境ではコードを引数から直接渡せるようにモック化します。
     unless MeasureValue.respond_to?(:original_run)
       class << MeasureValue
         alias_method :original_run, :run
@@ -17,13 +17,15 @@ class TestMeasureValue < Test::Unit::TestCase
           MeasureValue::CapturedValue.reset
           begin
             measure_binding = TOPLEVEL_BINDING.eval("binding")
-            # For testing, we allow passing code_str directly
+            # テスト用に引数の code_str を優先する
             code_str ||= File.read("/workspace/main.rb") rescue "nil"
             code_str += "\nnil"
 
+            # TracePointの設定 (src/ruby/measure_value.rb と同等のロジック)
             tp = TracePoint.new(:line, :return, :end, :b_call, :b_return) do |tp|
               next unless tp.path == "(eval)"
               
+              # 1. ターゲット行に到達した場合
               if tp.lineno == target_line && tp.event == :line
                 begin
                   eval_locs = caller_locations.select { |l| l.path == "(eval)" }
@@ -46,10 +48,12 @@ class TestMeasureValue < Test::Unit::TestCase
                   end
                 end
 
+              # 2. ターゲット行を抜けた直後、またはブロックの終了時
               elsif MeasureValue::CapturedValue.target_triggered && (tp.lineno != target_line || tp.event == :b_return)
                 begin
                   val = tp.binding.eval(expression)
                   inspect_val = val.inspect.to_s
+                  # 値が変化した場合のみ追加
                   if inspect_val != MeasureValue::CapturedValue.get_all.last
                     MeasureValue::CapturedValue.add(inspect_val)
                   end
@@ -58,6 +62,7 @@ class TestMeasureValue < Test::Unit::TestCase
                   MeasureValue::CapturedValue.target_triggered = false
                 end
 
+              # 3. ターゲット行を通り過ぎた場合 (最適化対策)
               elsif !MeasureValue::CapturedValue.target_triggered && tp.lineno > target_line
                 begin
                   val = tp.binding.eval(expression)
@@ -69,6 +74,7 @@ class TestMeasureValue < Test::Unit::TestCase
               end
             end
 
+            # 入出力のセットアップ
             measure_binding.eval("require 'stringio'; $stdin = StringIO.new(#{stdin_str.inspect})") rescue nil
             measure_binding.eval("$stdout = StringIO.new") rescue nil
             
@@ -79,6 +85,7 @@ class TestMeasureValue < Test::Unit::TestCase
             rescue RubbitStopExecution
             rescue
             ensure
+              # フォールバック: キャプチャが空の場合
               if MeasureValue::CapturedValue.get_all.empty?
                 begin
                   val = measure_binding.eval(expression)
@@ -88,7 +95,7 @@ class TestMeasureValue < Test::Unit::TestCase
               end
               tp.disable if tp
             end
-          rescue
+          rescue 
           ensure
             MeasureValue::CapturedValue.target_triggered = false
           end
@@ -98,7 +105,7 @@ class TestMeasureValue < Test::Unit::TestCase
     end
   end
 
-  def test_no_future_value_capture
+  def test_未来の値のキャプチャが防止されていること
     code = <<~RUBY
       string = "Ruby"
       5.times do 
@@ -107,18 +114,18 @@ class TestMeasureValue < Test::Unit::TestCase
       string = "reset"
     RUBY
     
-    # Inspect "string" at line 1
+    # 1行目の "string" を検査
     result = MeasureValue.run("string", 1, binding, "", code)
-    assert_equal '"Ruby"', result, "Line 1 should only capture initial value"
+    assert_equal '"Ruby"', result, "1行目では初期値のみがキャプチャされるべきです"
   end
 
-  def test_gets_support_maintained
+  def test_getsの実行結果が正しく取得できること
     code = "x = gets"
     result = MeasureValue.run("x", 1, binding, "hello\n", code)
-    assert_match /"hello\\n"/, result, "Should capture gets result via :return event"
+    assert_match /"hello\\n"/, result, "gets の戻り値がキャプチャされるべきです"
   end
 
-  def test_loop_capture_remains_correct
+  def test_ループ内での値の変化が正しく取得できること
     code = <<~RUBY
       a = 0
       3.times do |i|
@@ -126,14 +133,12 @@ class TestMeasureValue < Test::Unit::TestCase
       end
     RUBY
     
-    # Inspect "a" at line 3 (a += 1)
-    # Note: MeasureValue.run increments target_line for server, but here we use exact lines for testing.
-    # In the original code, target_line is 1-indexed.
+    # 3行目の "a" (+1 される箇所) を検査
     result = MeasureValue.run("a", 3, binding, "", code)
-    assert_equal '1, 2, 3', result, "Loop values on the target line should still be captured"
+    assert_equal '1, 2, 3', result, "ループ中の各ステップの値がキャプチャされるべきです"
   end
 
-  def test_reassignment_shows_only_new_value
+  def test_再代入時に新しい値のみが表示されること
     code = <<~RUBY
       string = "Ruby"
 
@@ -148,29 +153,8 @@ class TestMeasureValue < Test::Unit::TestCase
       puts string
     RUBY
     
-    # Inspect "string" at line 11 (string = "reset")
-    # In the snippet above:
-    # 1: string...
-    # 2: (blank)
-    # 3: 5.times...
-    # 4:   string...
-    # 5: end
-    # 6: (blank)
-    # 7: puts string
-    # 8: (blank)
-    # 9: string = "reset"
-    # Actually let's count exactly.
-    # 1: string = "Ruby"
-    # 2: 
-    # 3: 5.times do 
-    # 4:   string << "!"
-    # 5: end
-    # 6: 
-    # 7: puts string
-    # 8: 
-    # 9: string = "reset"
-    
+    # 9行目の "string = 'reset'" を検査
     result = MeasureValue.run("string", 9, binding, "", code)
-    assert_equal '"reset"', result, "Reassignment should only show the final value of that line"
+    assert_equal '"reset"', result, "再代入行では古い値を含まず、新しい値のみが表示されるべきです"
   end
 end
