@@ -43,8 +43,9 @@ class MethodFilter
       # シングルトンメソッド (クラスメソッド)
       Set.new(klass.singleton_methods)
     else
-      # インスタンスメソッド (継承含む)
-      Set.new(klass.instance_methods)
+      # インスタンスメソッド (継承含む、privateメソッドも含む)
+      Set.new(klass.instance_methods + klass.private_instance_methods)
     end
+
   end
 end

@@ -30,11 +30,10 @@ class TestMethodFilter < Minitest::Test
 
 
   def test_シングルトンメソッド
-
-    assert @filter.valid?("File", "open", singleton: true)
-    refute @filter.valid?("File", "open", singleton: false) # File#open は標準ではない
-
+    assert @filter.valid?("File", "join", singleton: true)
+    refute @filter.valid?("File", "join", singleton: false) # File#join は存在しない
   end
+
 
   def test_存在しないクラス
 
@@ -47,7 +46,14 @@ class TestMethodFilter < Minitest::Test
     assert @filter.valid?("Net::HTTP", "get", singleton: true)
   end
 
+  def test_プライベートメソッド
+    # puts は Kernel のプライベートメソッド
+    assert @filter.valid?("Object", "puts")
+    assert @filter.valid?("Kernel", "puts")
+  end
+
   def test_キャッシュ機構
+
 
     # 1回目の呼び出し
     assert @filter.valid?("String", "reverse")
