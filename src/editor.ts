@@ -35,6 +35,8 @@ export class EditorComponent {
   private editor: monaco.editor.IStandaloneCodeEditor | null = null;
   private boundHandleSettingsUpdate: (event: Event) => void;
   private observer: MutationObserver | null = null;
+  private menuObserver: MutationObserver | null = null;
+  private bodyObserver: MutationObserver | null = null;
 
   // containerElement: エディタを表示するコンテナ
   // persistence: 永続化ドメイン
@@ -103,6 +105,30 @@ export class EditorComponent {
       window.dispatchEvent(new CustomEvent("rubox:run-trigger"));
     });
 
+    // コンテキストメニュー「貼り付け」の修正
+    this.editor.addAction({
+      id: "rubox.paste",
+      label: "Paste",
+      contextMenuGroupId: "9_cutcopypaste",
+      contextMenuOrder: 4,
+      precondition: "!editorReadonly",
+      run: async (ed) => {
+        try {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            ed.trigger("keyboard", "type", { text });
+          }
+        } catch (e) {
+          console.warn("クリップボードの読み取りに失敗しました:", e);
+        }
+      },
+    });
+
+    // Shadow DOM内の壊れた標準「貼り付け」メニューを非表示にする
+    // カスタムアクションを追加すると「貼り付け」が2つ表示されるため、
+    // 壊れた標準の方をMutationObserverで検知して非表示にする。
+    this.setupContextMenuObserver();
+
     // グローバルアクセス用 (テスト等で利用)
     window.monacoEditor = this.editor;
     window.monaco = monaco;
@@ -125,6 +151,66 @@ export class EditorComponent {
         bubbles: true,
       })
     );
+  }
+
+  /**
+   * Shadow DOM内のコンテキストメニューを監視し、壊れた標準「貼り付け」を非表示にする。
+   */
+  private setupContextMenuObserver(): void {
+    const hideDuplicatePaste = (shadowRoot: ShadowRoot) => {
+      const pasteLabels = Array.from(
+        shadowRoot.querySelectorAll(
+          '.action-label[aria-label="Paste"], .action-label[aria-label="貼り付け"]'
+        )
+      );
+      // 2つ以上ある場合、最初の（壊れた標準の）方を非表示にする
+      if (pasteLabels.length >= 2) {
+        const brokenItem = pasteLabels[0].closest(".action-item") as HTMLElement | null;
+        if (brokenItem) {
+          brokenItem.style.display = "none";
+        }
+      }
+    };
+
+    const setupObserver = (host: Element) => {
+      if (this.menuObserver || !host.shadowRoot) return;
+
+      this.menuObserver = new MutationObserver(() => {
+        if (host.shadowRoot) {
+          hideDuplicatePaste(host.shadowRoot);
+        }
+      });
+      this.menuObserver.observe(host.shadowRoot, {
+        childList: true,
+        subtree: true,
+      });
+
+      // Shadow hostが初回右クリック時に遅延生成される場合、
+      // Observer開始前にメニュー項目が既にDOMにある可能性があるため即時実行
+      hideDuplicatePaste(host.shadowRoot);
+    };
+
+    // .shadow-root-host は document 直下に生成される場合がある
+    const shadowHost = document.querySelector(".shadow-root-host");
+    if (shadowHost?.shadowRoot) {
+      setupObserver(shadowHost);
+    } else {
+      // まだ存在しない場合、document.body を監視して出現を待つ
+      this.bodyObserver = new MutationObserver(() => {
+        const host = document.querySelector(".shadow-root-host");
+        if (host?.shadowRoot) {
+          setupObserver(host);
+          if (this.bodyObserver) {
+            this.bodyObserver.disconnect();
+            this.bodyObserver = null;
+          }
+        }
+      });
+      this.bodyObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    }
   }
 
   private updateTheme(): void {
@@ -163,6 +249,8 @@ export class EditorComponent {
     window.removeEventListener("settings:updated", this.boundHandleSettingsUpdate);
     if (this.editor) this.editor.dispose();
     if (this.observer) this.observer.disconnect();
+    if (this.menuObserver) this.menuObserver.disconnect();
+    if (this.bodyObserver) this.bodyObserver.disconnect();
     if (this.saveTimer) clearTimeout(this.saveTimer);
   }
 }
