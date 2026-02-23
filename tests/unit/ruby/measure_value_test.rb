@@ -218,12 +218,19 @@ class TestMeasureValue < Minitest::Test
 
   def test_ループ内のブロック呼び出しを伴う行で最終的な値が取得できること
     code = <<~RUBY
-      lines = []
+      a = []
       3.times do |i|
-        lines << [1, 1, 1].map { |n| n.to_i }
+        a << [1].map { |n| n }
       end
     RUBY
-    result = MeasureValue.run("lines", 3, binding, "", code)
-    assert_match /\[\[1, 1, 1\], \[1, 1, 1\], \[1, 1, 1\]\]/, result, "ループの各周回で、ブロック実行後の最終的な配列の状態がキャプチャされるべきです"
+    result = MeasureValue.run("a", 3, binding, "", code)
+    # "[1], [1], [1]" が最終的な配列の状態として含まれていることを確認
+    assert_includes result, "[[1], [1], [1]]", "ループの最終周回において、ブロック実行後の最終的な状態がキャプチャされるべきです"
+  end
+
+  def test_同一行内でのループにおけるキャプチャ
+    code = "a = []; 3.times { a << 1 }"
+    result = MeasureValue.run("a", 1, binding, "", code)
+    assert_includes result, "[1, 1, 1]", "単一行のループ内でも、最終的な状態がキャプチャされるべきです"
   end
 end

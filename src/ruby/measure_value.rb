@@ -83,19 +83,23 @@ module MeasureValue
           # エントリポイント（def行やブロック開始行）がターゲットの場合
           if tp.lineno == target_line && !pass_captured && tp.binding
             capture_and_report.call(tp.binding)
+            CapturedValue.target_triggered = true
+            target_line_depth = method_depth
           end
         when :return, :b_return, :c_return, :end
           # ターゲット行を抜けた後の事後キャプチャ（同じ深度に戻った時）
-          if CapturedValue.target_triggered && tp.lineno != target_line && (target_line_depth.nil? || method_depth == target_line_depth)
+          if CapturedValue.target_triggered && (target_line_depth.nil? || method_depth == target_line_depth)
             capture_and_report.call(tp.binding)
             CapturedValue.target_triggered = false
+            pass_captured = false
           end
           method_depth -= 1 if method_depth > 0
         when :line
-          # ターゲット行を抜けた直後の事後キャプチャ
-          if CapturedValue.target_triggered && tp.lineno != target_line && (target_line_depth.nil? || method_depth == target_line_depth)
+          # ターゲット行を抜けた直後、あるいはループで同じ行に戻った時の事後キャプチャ
+          if CapturedValue.target_triggered
             capture_and_report.call(tp.binding)
             CapturedValue.target_triggered = false
+            pass_captured = false
           end
 
           if !pass_captured
