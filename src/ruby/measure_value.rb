@@ -1,28 +1,23 @@
+require 'stringio'
+
 module MeasureValue
   class CapturedValue
-    @vals = [] # [ [RawValue, InspectString], ... ]
-    @target_triggered = false
-    @target_dirty = false
-    class << self
-      attr_accessor :target_triggered, :target_dirty
-      def add(v)
-        inspected = v.inspect
-        # 前回の値（RawValue）とオブジェクトとして等しく、かつ文字列としても等しければスキップ
-        return if !@vals.empty? && @vals.last[0] == v && @vals.last[1] == inspected
-        val_to_save = (v.is_a?(Numeric) || v.is_a?(Symbol) || v.nil? || v.is_a?(TrueClass) || v.is_a?(FalseClass)) ? v : (v.dup rescue v)
-        @vals << [val_to_save, inspected]
+    def self.inspect_and_add(vals, v)
+      inspected = v.inspect rescue "???"
+      # 重複排除
+      return if !vals.empty? && vals.last[1] == inspected
+      val_to_save = (v.is_a?(Numeric) || v.is_a?(Symbol) || v.nil? || v.is_a?(TrueClass) || v.is_a?(FalseClass)) ? v : (v.dup rescue v)
+      vals << [val_to_save, inspected]
+    end
+
+    def self.format_all(vals)
+      return nil if vals.empty?
+      results = vals.map { |v| v[1] }
+      # 初期化直後のnil/空配列ノイズを除去
+      if results.size > 1 && results.first.strip =~ /\A(nil|\[\s*\])\z/
+        results.shift
       end
-      def get_all
-        results = @vals.map { |v| v[1] }
-        # 初回が空値(nil/[]/)で、かつ後続に値がある場合は、初期状態ノイズとして除去
-        # 文字列の前後の空白を考慮
-        if results.size > 1 && results.first.strip =~ /\A(nil|\[\s*\])\z/
-          results.shift
-        end
-        results
-      end
-      def found?; !@vals.empty?; end
-      def reset; @vals = []; @target_triggered = false; @target_dirty = false; end
+      results.uniq.join(", ")
     end
   end
 
@@ -30,11 +25,8 @@ module MeasureValue
     require 'ripper'
     sexp = Ripper.sexp(expr)
     return expr unless sexp && sexp[0] == :program
-    
     body = sexp[1][0]
     return expr unless body.is_a?(Array)
-
-    # 副作用のある式から安全な変数名（LHS）を抽出
     extracted = analyze_lhs(body, expr)
     extracted || expr
   rescue
@@ -44,24 +36,18 @@ module MeasureValue
   def self.analyze_lhs(body, original_expr)
     case body[0]
     when :assign, :massign, :opassign
-      # a = ..., a += ...
       match = original_expr.match(/\A(.*?)(?:\+|-|\*|\/|%|\*\*|&|\||\^|<<|>>|&&|\|\|)?=/)
       if match
         lhs = match[1].strip
         return (body[0] == :massign) ? "[#{lhs}]" : lhs
       end
     when :binary
-      # lines << ...
       return extract_node_name(body[1]) if body[2] == :<<
     when :method_add_arg, :call
-      # lines.push(...), lines.concat(...)
-      # レシーバ部分を特定
       call_node = (body[0] == :method_add_arg) ? body[1] : body
       if call_node[0] == :call || call_node[0] == :method_add_arg
         method_name_node = call_node[3] || (call_node[0] == :method_add_arg ? call_node[1][3] : nil)
         method_name = method_name_node ? method_name_node[1] : nil
-        
-        # 破壊的メソッドのホワイトリスト（または ! 付き）
         destructive = ["push", "concat", "insert", "delete", "update", "replace", "clear", "shift", "unshift"]
         if method_name && (method_name.end_with?("!") || destructive.include?(method_name))
           return extract_node_name(call_node[1])
@@ -75,7 +61,6 @@ module MeasureValue
     return nil unless node.is_a?(Array)
     case node[0]
     when :vcall, :var_ref
-      # [:vcall, [:@ident, "name", ...]]
       return node[1][1]
     when :@ident
       return node[1]
@@ -84,95 +69,93 @@ module MeasureValue
   end
 
   def self.run(expression, target_line, user_binding, stdin_str = "", code_str = nil)
-    expression = sanitize_expression(expression)
-    CapturedValue.reset
+    final_result = ""
     begin
+      expression = sanitize_expression(expression)
       old_verbose, $VERBOSE = $VERBOSE, nil
-      measure_binding = TOPLEVEL_BINDING.eval("binding")
-      code_str ||= File.read("/workspace/main.rb") rescue "nil"
-      code_str += "\nnil"
-
+      
+      vals = []
+      target_triggered = false
+      target_line_depth = 0
+      last_line_binding = nil
       method_depth = 0
-      last_lineno = 0
-      target_line_depth = 0 # Initialize to 0 to avoid comparison with nil
 
-      # キャプチャ実行の共通処理
       capture_and_report = proc do |binding|
         next if binding.nil?
         begin
           val = binding.eval(expression)
-          unless val.nil? && !CapturedValue.found?
-            # ここでの val は生の状態。CapturedValue.add 内で一回だけ inspect される。
-            CapturedValue.add(val)
-          end
+          CapturedValue.inspect_and_add(vals, val)
         rescue
+          # キャプチャ失敗は無視
         end
       end
 
-      last_line_binding = nil
-
-      tp = TracePoint.new(:line, :call, :return, :end, :b_call, :b_return, :c_call, :c_return) do |tp|
-        # path の判定。eval 時の名前 "(eval)" もしくはファイルパスにマッチ
-        next unless tp.path == "(eval)" || tp.path == "/workspace/main.rb" || tp.path == ""
+      tp = TracePoint.new(:line, :call, :return, :b_call, :b_return, :end) do |tp|
+        next if tp.path == "/src/measure_value.rb"
         
-        # 1. 深度管理
         case tp.event
-        when :call, :b_call, :c_call; method_depth += 1
-        when :return, :b_return, :c_return, :end; method_depth -= 1 if method_depth > 0
+        when :call, :b_call; method_depth += 1
+        when :return, :b_return, :end; method_depth -= 1 if method_depth > 0
         end
 
-        # 2. 回収
-        if CapturedValue.target_triggered
-          is_departure = (tp.lineno != target_line && method_depth <= target_line_depth) || 
-                         (tp.event == :b_return && method_depth <= target_line_depth) ||
-                         (tp.event == :return && method_depth < target_line_depth) ||
-                         (method_depth < target_line_depth)
-
-          if is_departure
-            # 離脱直前のコンテキスト（または現在のコンテキスト）でキャプチャ
-            capture_and_report.call(last_line_binding || tp.binding || measure_binding)
-            CapturedValue.target_triggered = false
+        if tp.event == :line && tp.lineno == target_line
+          if target_triggered
+             if method_depth <= target_line_depth
+               # 同一深度または親スコープでの再入（ループ）の場合、前回の実行完了を記録
+               capture_and_report.call(last_line_binding)
+             else
+               # より深い深度でのヒット（1行内での入れ子等）があった場合、深い方を優先して追跡を更新
+               target_line_depth = method_depth
+               last_line_binding = tp.binding
+             end
           end
-        end
-
-        # 3. トリガー
-        if tp.lineno == target_line
-          unless CapturedValue.target_triggered
-            CapturedValue.target_triggered = true
+          
+          unless target_triggered
+            target_triggered = true
             target_line_depth = method_depth
+            last_line_binding = tp.binding
           end
-          # 同じ行にいる間、最新の有効なBindingを保持し続ける
-          last_line_binding = tp.binding if tp.binding
         end
 
-        # 常に最新を追跡（フォールバック用）
-        trigger_active_binding = tp.binding if tp.binding
-        last_lineno = tp.lineno
+        # ターゲット行からの離脱検知（Double-Safety）
+        if target_triggered
+          is_departure = (tp.event == :line && tp.lineno != target_line && method_depth <= target_line_depth) ||
+                         (method_depth < target_line_depth)
+          if is_departure
+            capture_and_report.call(last_line_binding)
+            # キャプチャはするが、target_triggeredは維持してループ再入に備える
+          end
+        end
       end
 
+      # 実行環境のセットアップ
       old_stdin, old_stdout = $stdin, $stdout
-      measure_binding.eval("require 'stringio'; $stdin = StringIO.new(#{stdin_str.inspect})") rescue nil
-      measure_binding.eval("$stdout = StringIO.new") rescue nil
+      $stdin = StringIO.new(stdin_str.to_s)
+      $stdout = StringIO.new
       
+      measure_binding = TOPLEVEL_BINDING.eval("binding")
+      actual_code = (code_str || "nil") + "\n# end"
+
       begin
         tp.enable do
-          measure_binding.eval(code_str, "(eval)")
+          measure_binding.eval(actual_code, "(eval)")
         end
       rescue RuboxStopExecution
       rescue
+        # 実行時エラーもキャプチャ結果の一部として許容
       ensure
         tp.disable if tp
-        # 最後にトリガーが残っていれば回収（最終行対策）
-        if CapturedValue.target_triggered
-           capture_and_report.call(trigger_active_binding || measure_binding)
-        end
+        capture_and_report.call(last_line_binding) if target_triggered
         $stdin, $stdout = old_stdin, old_stdout
       end
-    rescue
+
+      formatted = CapturedValue.format_all(vals)
+      final_result = formatted || ""
+    rescue => e
+      final_result = "ERROR: #{e.message}"
     ensure
-      $VERBOSE = old_verbose
-      CapturedValue.target_triggered = false
+      $VERBOSE = old_verbose rescue nil
     end
-    CapturedValue.get_all.uniq.join(", ")
+    final_result
   end
 end
