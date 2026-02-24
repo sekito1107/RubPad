@@ -114,47 +114,38 @@ module MeasureValue
       tp = TracePoint.new(:line, :call, :return, :end, :b_call, :b_return, :c_call, :c_return) do |tp|
         next unless tp.path == "(eval)"
         
-        # 1. 深度・バインディング管理
+        # 1. 深度管理
         case tp.event
         when :call, :b_call, :c_call; method_depth += 1
         when :return, :b_return, :c_return, :end; method_depth -= 1 if method_depth > 0
         end
-        last_line_binding = tp.binding if tp.binding
 
-        # 2. 回収（トリガー後の確定タイミング）
-        if CapturedValue.target_triggered && CapturedValue.target_dirty
-          # 確定とみなす条件:
-          # - 完全な別行に移動した
-          # - 反復の区切り（b_return: ブロック終了）
-          # - スコープを抜けた (method_depth < start_depth)
+        # 2. 回収
+        if CapturedValue.target_triggered
           is_departure = (tp.lineno != target_line && method_depth <= target_line_depth) || 
                          (tp.event == :b_return && method_depth <= target_line_depth) ||
+                         (tp.event == :return && method_depth < target_line_depth) ||
                          (method_depth < target_line_depth)
 
           if is_departure
-            capture_and_report.call(tp.binding || last_line_binding)
-            CapturedValue.target_dirty = false # 回収したので一旦クリーンに
-            
-            # ターゲット行以外に移動した、または上の階層に戻ったならトリガー解除
-            if tp.lineno != target_line || method_depth < target_line_depth
-              CapturedValue.target_triggered = false
-            end
+            # 離脱直前のコンテキスト（または現在のコンテキスト）でキャプチャ
+            capture_and_report.call(last_line_binding || tp.binding || measure_binding)
+            CapturedValue.target_triggered = false
           end
         end
 
-        # 3. トリガーと状態管理
+        # 3. トリガー
         if tp.lineno == target_line
-          if tp.event == :line
+          unless CapturedValue.target_triggered
             CapturedValue.target_triggered = true
             target_line_depth = method_depth
-            # Line開始時はクリーン（まだ何も実行していない）
-            CapturedValue.target_dirty = false
-          else
-            # Line内で何らかの命令（call等）が動いたなら、それは「結果が出る可能性のある状態」
-            CapturedValue.target_dirty = true
           end
+          # 同じ行にいる間、最新の有効なBindingを保持し続ける
+          last_line_binding = tp.binding if tp.binding
         end
 
+        # 常に最新を追跡（フォールバック用）
+        trigger_active_binding = tp.binding if tp.binding
         last_lineno = tp.lineno
       end
 
@@ -172,7 +163,7 @@ module MeasureValue
         tp.disable if tp
         # 最後にトリガーが残っていれば回収（最終行対策）
         if CapturedValue.target_triggered
-           capture_and_report.call(measure_binding)
+           capture_and_report.call(trigger_active_binding || measure_binding)
         end
         $stdin, $stdout = old_stdin, old_stdout
       end
