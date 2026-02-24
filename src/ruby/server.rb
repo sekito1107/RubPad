@@ -125,8 +125,9 @@ class Server
     when "typeprof.measureValue"
       expression = params[:arguments][0][:expression]
       target_line = params[:arguments][0][:line] + 1
-      stdin = JS.global[:_ruboxStdin].to_s
-      result = MeasureValue.run(expression, target_line, @user_binding, stdin)
+      stdin = params[:arguments][0][:stdin] || JS.global[:_ruboxStdin].to_s
+      stdin = params[:arguments][0][:stdin] || JS.global[:_ruboxStdin].to_s
+      result = MeasureValue.run(expression, target_line, @user_binding, stdin.to_s)
       write(id: json[:id], result: result)
     when "rubox.resolveSignature"
       class_name = params[:arguments][0]

@@ -94,7 +94,7 @@ module MeasureValue
 
       method_depth = 0
       last_lineno = 0
-      target_line_depth = nil
+      target_line_depth = 0 # Initialize to 0 to avoid comparison with nil
 
       # キャプチャ実行の共通処理
       capture_and_report = proc do |binding|
@@ -112,7 +112,8 @@ module MeasureValue
       last_line_binding = nil
 
       tp = TracePoint.new(:line, :call, :return, :end, :b_call, :b_return, :c_call, :c_return) do |tp|
-        next unless tp.path == "(eval)"
+        # path の判定。eval 時の名前 "(eval)" もしくはファイルパスにマッチ
+        next unless tp.path == "(eval)" || tp.path == "/workspace/main.rb" || tp.path == ""
         
         # 1. 深度管理
         case tp.event
