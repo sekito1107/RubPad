@@ -41,6 +41,16 @@ export class ConsoleComponent {
     this.showLoadingUI(0, "準備中...");
     this.startRabbitAnimation();
 
+    // OS判定とショートカット表記の追加
+    if (this.runButton) {
+      const isMac = /Mac|iPod|iPhone|iPad/i.test(navigator.userAgent);
+      const shortcut = isMac ? "⌘Enter" : "Ctrl+Enter";
+      const shortcutSpan = this.runButton.querySelector("#run-shortcut");
+      if (shortcutSpan) {
+        shortcutSpan.textContent = shortcut;
+      }
+    }
+
     // イベントの紐付け
     if (this.runButton) {
       this.runButton.addEventListener("click", () => this.run());
