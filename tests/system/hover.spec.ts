@@ -7,28 +7,26 @@ test.describe('LSP Hover機能の検証', () => {
         await page.waitForSelector('.monaco-editor');
     });
 
-    test('変数（num）にホバーして型情報と評価リンクが表示されること', async ({ page }) => {
+    test('変数にホバーして型情報と評価リンクが表示されること', async ({ page }) => {
         const editor = page.locator('.monaco-editor');
+        const textarea = page.locator('.monaco-editor textarea');
+        
+        // エディタをクリックしてフォーカス
         await editor.click();
 
-        // エディタを完全にクリアして状態を安定させる
-        await page.keyboard.press('ControlOrMeta+A');
-        await page.keyboard.press('Backspace');
+        // 環境に依存せず確実にデフォルトコードをクリアする
+        await textarea.fill('');
 
-        // Integer が表示されるようにメソッド呼び出し（* 2）を含むコードを入力
-        await page.keyboard.insertText('n = 10');
-        await page.keyboard.press('Enter');
-        await page.keyboard.insertText('result = n * 2');
-        await page.keyboard.press('Enter');
-        await page.keyboard.insertText('puts result');
+        // コードの入力
+        await page.keyboard.insertText('n = 10\nresult = n * 2\nputs result\n');
 
-        // サジェストボックスがホバーを妨害しないように閉じる
+        // サジェストボックスを閉じる
         await page.keyboard.press('Escape');
 
         // サイドバーに Integer が現れるのを待つ（解析完了の同期ポイント）
         await expect(page.locator('#method-list')).toContainText('Integer');
 
-        // result をホバー（inlay_hints.spec.ts と同じロケーター）
+        // 変数部分をホバー
         await editor.getByText('result').last().hover();
 
         // 「値を確認」リンクが表示されることを検証
