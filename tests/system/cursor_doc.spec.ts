@@ -9,16 +9,24 @@ test.describe('カーソルドキュメント（Hover Doc）機能の検証', ()
 
     test('メソッド名にホバーした際にドキュメントパネルが表示されること', async ({ page }) => {
         const editor = page.locator('.monaco-editor');
+        const textarea = page.locator('.monaco-editor textarea');
+
         await editor.click();
-        await page.keyboard.press('ControlOrMeta+A');
-        await page.keyboard.press('Backspace');
+
+        // OS や環境に依存せず確実にエディタをクリア
+        await textarea.fill('');
+
+        // コードを入力
         await page.keyboard.insertText('"hello".upcase');
 
-        const methodName = page.locator('#method-list [data-role="methodName"]:text-is("upcase")');
-        await expect(methodName).toBeVisible(); 
+        // サジェストボックスがホバーを妨害しないように閉じる
+        await page.keyboard.press('Escape');
 
-        const monacoEditor = page.locator('.monaco-editor');
-        const upcaseNode = monacoEditor.getByText('upcase').first();
+        // サイドバーに解析結果（Integer）が現れるのを待つ
+        const methodName = page.locator('#method-list [data-role="methodName"]:text-is("upcase")');
+        await expect(methodName).toBeVisible();
+
+        const upcaseNode = editor.getByText('upcase').first();
         await upcaseNode.hover();
 
         const docContainer = page.locator('#cursor-doc-container');
