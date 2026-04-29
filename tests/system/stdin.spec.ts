@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearEditor } from './support/editor';
 
 test.describe('Stdin UI 機能の検証', () => {
     test.beforeEach(async ({ page }) => {
@@ -10,11 +11,7 @@ test.describe('Stdin UI 機能の検証', () => {
 
     test('stdin パネルのトグルと入力値の実行反映', async ({ page }) => {
         // 1. コードのセットアップ (UI 操作のみで行う)
-        const editor = page.locator('.monaco-editor');
-        await editor.click();
-        // 既存のコードがあれば全選択して消去
-        await page.keyboard.press('ControlOrMeta+A');
-        await page.keyboard.press('Backspace');
+        await clearEditor(page);
         // キーボード入力としてコードを注入
         await page.keyboard.insertText('print "Enter something: "; puts gets.chomp');
 
