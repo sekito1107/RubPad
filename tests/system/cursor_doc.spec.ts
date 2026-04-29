@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearEditor } from './support/editor';
 
 test.describe('カーソルドキュメント（Hover Doc）機能の検証', () => {
     test.beforeEach(async ({ page }) => {
@@ -9,12 +10,9 @@ test.describe('カーソルドキュメント（Hover Doc）機能の検証', ()
 
     test('メソッド名にホバーした際にドキュメントパネルが表示されること', async ({ page }) => {
         const editor = page.locator('.monaco-editor');
-        const textarea = page.locator('.monaco-editor textarea');
-
-        await editor.click();
 
         // OS や環境に依存せず確実にエディタをクリア
-        await textarea.fill('');
+        await clearEditor(page);
 
         // コードを入力
         await page.keyboard.insertText('"hello".upcase');
