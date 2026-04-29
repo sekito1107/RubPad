@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearEditor } from './support/editor';
 
 test.describe('共有機能の整合性と再現性の検証', () => {
     test.beforeEach(async ({ page, context }) => {
@@ -10,10 +11,7 @@ test.describe('共有機能の整合性と再現性の検証', () => {
 
     test('生成された Embed タグをそのままレンダリングして、コードが正常に再現されること', async ({ page }) => {
         const testCode = 'puts "Direct Rendering Test"';
-        const editor = page.locator('.monaco-editor');
-        await editor.click();
-        await page.keyboard.press('ControlOrMeta+A');
-        await page.keyboard.press('Backspace');
+        await clearEditor(page);
         await page.keyboard.insertText(testCode);
 
         await page.locator('#share-button').click();
@@ -29,10 +27,7 @@ test.describe('共有機能の整合性と再現性の検証', () => {
 
     test('URL ハッシュからコードが正しく再現されること', async ({ page, context }) => {
         const testCode = 'puts "Hash Restore Test"';
-        const editor = page.locator('.monaco-editor');
-        await editor.click();
-        await page.keyboard.press('ControlOrMeta+A');
-        await page.keyboard.press('Backspace');
+        await clearEditor(page);
         await page.keyboard.insertText(testCode);
 
         await page.locator('#share-button').click();
