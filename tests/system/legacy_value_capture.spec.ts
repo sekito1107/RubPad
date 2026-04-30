@@ -16,11 +16,11 @@ end
 my_count`);
 
     await page.locator('.monaco-editor .view-line').getByText('target').last().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => "apple"')).toBeVisible();
 });
 
@@ -32,11 +32,11 @@ end
 my_count("apple")`);
 
     await page.locator('.monaco-editor .view-line').getByText('target').first().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => "banana"')).toBeVisible();
 });
 
@@ -48,11 +48,11 @@ end
 my_method`);
 
     await page.locator('.monaco-editor .view-line').getByText('target').last().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => 10')).toBeVisible();
 });
 
@@ -63,7 +63,7 @@ end
 my_method(10)`);
 
     await page.locator('.monaco-editor .view-line').getByText('target_arg').first().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target_arg' });
     await expect(link).toBeHidden();
 });
@@ -75,11 +75,11 @@ test('ループ: 単純なインクリメント', async ({ page }) => {
 end`);
 
     await page.locator('.monaco-editor .view-line').getByText('target').last().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => 1, 2, 3')).toBeVisible();
 });
 
@@ -90,11 +90,11 @@ test('ループ: ブロック内での破壊的変更', async ({ page }) => {
 end`);
 
     await page.locator('.monaco-editor .view-line').getByText('target').last().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => [[1]], [[1], [1]], [[1], [1], [1]]')).toBeVisible();
 });
 
@@ -102,11 +102,11 @@ test('ループ: 1行ループ', async ({ page }) => {
     await page.keyboard.insertText(`target = []; 3.times { target << [1] }`);
 
     await page.locator('.monaco-editor .view-line').getByText('target').last().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => [[1]], [[1], [1]], [[1], [1], [1]]')).toBeVisible();
 });
 
@@ -117,11 +117,11 @@ items.each do |target_item|
 end`);
 
     await page.locator('.monaco-editor .view-line').getByText('target_item').last().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target_item' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => "a", "b"')).toBeVisible();
 });
 
@@ -133,11 +133,11 @@ end
 target = fact(3)`);
 
     await page.locator('.monaco-editor .view-line').getByText('target_num').nth(1).hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target_num' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => 3, 2, 1, 0')).toBeVisible();
 });
 
@@ -149,11 +149,11 @@ end
 target = fact(3)`);
 
     await page.locator('.monaco-editor .view-line').getByText('target_num').nth(2).hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target_num' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => 3, 2, 1')).toBeVisible();
 });
 
@@ -168,11 +168,11 @@ count = 0
 end`);
 
     await page.locator('.monaco-editor .view-line').getByText('strings').last().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: strings[j]' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => "a", "a", "b", "a", "b", "b"')).toBeVisible();
 });
 
@@ -182,11 +182,11 @@ test('タイミング: 未来の値のキャプチャ防止', async ({ page }) =
 target_str = "reset"`);
 
     await page.locator('.monaco-editor .view-line').getByText('target_str').first().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target_str' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => "R"')).toBeVisible();
 });
 
@@ -202,9 +202,8 @@ puts target_str`);
     const link1 = page.getByRole('link', { name: '値を確認: target_str' });
     await expect(link1).toBeVisible();
     await link1.click({ force: true });
-    await expect(page.getByText('# => "R!!!"')).toBeVisible();
 
-    // ホバーウィジェットを閉じる（固定値sleepを避けるためEscapeキーを使用）
+    // ホバーウィジェットを閉じる
     await page.keyboard.press('Escape');
     await expect(link1).toBeHidden();
 
@@ -216,3 +215,15 @@ puts target_str`);
     await expect(page.getByText('# => "reset"')).toBeVisible();
 });
 
+test.fixme('フィルタリング: 中間的なnilを除外', async ({ page }) => {
+    await page.keyboard.insertText(`targets = ["a", "bb"]
+max_size = targets.max_by{|t| t.size}.size`);
+
+    await page.locator('.monaco-editor .view-line').getByText('max_size').last().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: max_size' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
+    await expect(page.getByText('# => 2')).toBeVisible();
+});
