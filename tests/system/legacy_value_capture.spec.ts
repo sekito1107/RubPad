@@ -15,8 +15,12 @@ def my_count
 end
 my_count`);
 
-    await page.locator('.monaco-editor').getByText('target').last().hover();
-    await page.getByRole('link', { name: '値を確認: target' }).click({ force: true });
+    await page.locator('.monaco-editor .view-line').getByText('target').last().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: target' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
     await expect(page.getByText('# => "apple"')).toBeVisible();
 });
 
@@ -28,7 +32,28 @@ def my_count(target)
 end
 my_count("apple")`);
 
-    await page.locator('.monaco-editor').getByText('target').first().hover();
-    await page.getByRole('link', { name: '値を確認: target' }).click({ force: true });
+    await page.locator('.monaco-editor .view-line').getByText('target').first().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: target' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
     await expect(page.getByText('# => "banana"')).toBeVisible();
+});
+
+test('スコープ: メソッド内のローカル変数', async ({ page }) => {
+    await clearEditor(page);
+    await page.keyboard.insertText(`def my_method
+  target = 10
+  target
+end
+my_method`);
+
+    await page.locator('.monaco-editor .view-line').getByText('target').last().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: target' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
+    await expect(page.getByText('# => 10')).toBeVisible();
 });
