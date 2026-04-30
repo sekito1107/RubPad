@@ -70,3 +70,18 @@ end`);
     
     await expect(page.getByText('# => 1, 2, 3')).toBeVisible();
 });
+
+test('ループ: ブロック内での破壊的変更', async ({ page }) => {
+    await page.keyboard.insertText(`target = []
+3.times do |i|
+  target << [1].map { |n| n }
+end`);
+
+    await page.locator('.monaco-editor .view-line').getByText('target').last().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: target' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
+    await expect(page.getByText('# => [[1]], [[1], [1]], [[1], [1], [1]]')).toBeVisible();
+});
