@@ -55,3 +55,18 @@ my_method`);
     
     await expect(page.getByText('# => 10')).toBeVisible();
 });
+
+test('ループ: 単純なインクリメント', async ({ page }) => {
+    await page.keyboard.insertText(`target = 0
+3.times do |i|
+  target += 1
+end`);
+
+    await page.locator('.monaco-editor .view-line').getByText('target').last().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: target' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
+    await expect(page.getByText('# => 1, 2, 3')).toBeVisible();
+});
