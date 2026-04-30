@@ -97,3 +97,18 @@ test('ループ: 1行ループ', async ({ page }) => {
     
     await expect(page.getByText('# => [[1]], [[1], [1]], [[1], [1], [1]]')).toBeVisible();
 });
+
+test('ループ: コレクションの各要素', async ({ page }) => {
+    await page.keyboard.insertText(`items = ["a", "b"]
+items.each do |target_item|
+  target_item
+end`);
+
+    await page.locator('.monaco-editor .view-line').getByText('target_item').last().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: target_item' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
+    await expect(page.getByText('# => "a", "b"')).toBeVisible();
+});
