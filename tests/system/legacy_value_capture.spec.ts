@@ -227,3 +227,18 @@ max_size = targets.max_by{|t| t.size}.size`);
     
     await expect(page.getByText('# => 2')).toBeVisible();
 });
+
+test('ループ: 破壊的変更の追跡', async ({ page }) => {
+    await page.keyboard.insertText(`target_str = "R"
+3.times do
+  target_str << "!"
+end`);
+
+    await page.locator('.monaco-editor .view-line').getByText('target_str').last().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: target_str' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
+    await expect(page.getByText('# => "R!", "R!!", "R!!!"')).toBeVisible();
+});
