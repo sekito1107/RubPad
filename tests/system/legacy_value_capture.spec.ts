@@ -85,3 +85,15 @@ end`);
     
     await expect(page.getByText('# => [[1]], [[1], [1]], [[1], [1], [1]]')).toBeVisible();
 });
+
+test('ループ: 1行ループ', async ({ page }) => {
+    await page.keyboard.insertText(`target = []; 3.times { target << [1] }`);
+
+    await page.locator('.monaco-editor .view-line').getByText('target').last().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: target' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
+    await expect(page.getByText('# => [[1]], [[1], [1]], [[1], [1], [1]]')).toBeVisible();
+});
