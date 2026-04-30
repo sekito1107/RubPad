@@ -175,3 +175,17 @@ end`);
     
     await expect(page.getByText('# => "a", "a", "b", "a", "b", "b"')).toBeVisible();
 });
+
+test('タイミング: 未来の値のキャプチャ防止', async ({ page }) => {
+    await page.keyboard.insertText(`target_str = "R"
+5.times { target_str << "!" }
+target_str = "reset"`);
+
+    await page.locator('.monaco-editor .view-line').getByText('target_str').first().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: target_str' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
+    await expect(page.getByText('# => "R"')).toBeVisible();
+});
