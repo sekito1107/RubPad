@@ -156,3 +156,22 @@ target = fact(3)`);
     
     await expect(page.getByText('# => 3, 2, 1')).toBeVisible();
 });
+
+test('ループ: 配列アクセス式のキャプチャ', async ({ page }) => {
+    await page.keyboard.insertText(`n = 4
+strings = "baab".chars
+count = 0
+(0...n).each do |i|
+  ((i + 1)...n).each do |j|
+    count += 1 if strings[i] == strings[j]
+  end
+end`);
+
+    await page.locator('.monaco-editor .view-line').getByText('strings').last().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: strings[j]' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
+    await expect(page.getByText('# => "a", "a", "b", "a", "b", "b"')).toBeVisible();
+});
