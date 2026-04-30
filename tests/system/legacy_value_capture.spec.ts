@@ -242,3 +242,18 @@ end`);
     
     await expect(page.getByText('# => "R!", "R!!", "R!!!"')).toBeVisible();
 });
+
+test('リグレッション: 複数行のネスト', async ({ page }) => {
+    await page.keyboard.insertText(`target_array = []
+3.times do |i|
+  target_array << [i]
+end`);
+
+    await page.locator('.monaco-editor .view-line').getByText('target_array').last().hover();
+    
+    const link = page.getByRole('link', { name: '値を確認: target_array' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    
+    await expect(page.getByText('# => [[0]], [[0], [1]], [[0], [1], [2]]')).toBeVisible();
+});
