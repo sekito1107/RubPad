@@ -15,12 +15,20 @@ def my_count
 end
 my_count`);
 
-    // 変数「target」にホバー
     await page.locator('.monaco-editor').getByText('target').last().hover();
-
-    // ホバー内の「値を確認」リンクをクリック
     await page.getByRole('link', { name: '値を確認: target' }).click({ force: true });
-
-    // インレイヒントが表示されることを確認
     await expect(page.getByText('# => "apple"')).toBeVisible();
+});
+
+test('スコープ: メソッド引数の独立性', async ({ page }) => {
+    await clearEditor(page);
+    await page.keyboard.insertText(`target = "banana"
+def my_count(target)
+  target
+end
+my_count("apple")`);
+
+    await page.locator('.monaco-editor').getByText('target').first().hover();
+    await page.getByRole('link', { name: '値を確認: target' }).click({ force: true });
+    await expect(page.getByText('# => "banana"')).toBeVisible();
 });
