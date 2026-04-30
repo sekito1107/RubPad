@@ -4,10 +4,10 @@ import { clearEditor } from './support/editor';
 test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('#terminal-output')).toContainText('Ruby WASM ready!', { timeout: 90000 });
+    await clearEditor(page);
 });
 
 test('スコープ: トップレベル vs メソッド', async ({ page }) => {
-    await clearEditor(page);
     await page.keyboard.insertText(`target = "banana"
 def my_count
   target = "apple"
@@ -25,7 +25,6 @@ my_count`);
 });
 
 test('スコープ: メソッド引数の独立性', async ({ page }) => {
-    await clearEditor(page);
     await page.keyboard.insertText(`target = "banana"
 def my_count(target)
   target
@@ -42,7 +41,6 @@ my_count("apple")`);
 });
 
 test('スコープ: メソッド内のローカル変数', async ({ page }) => {
-    await clearEditor(page);
     await page.keyboard.insertText(`def my_method
   target = 10
   target
