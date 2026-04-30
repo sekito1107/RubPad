@@ -189,3 +189,30 @@ target_str = "reset"`);
     
     await expect(page.getByText('# => "R"')).toBeVisible();
 });
+
+test('タイミング: 変数の状態変化（破壊的変更と再代入）', async ({ page }) => {
+    await page.keyboard.insertText(`target_str = "R"
+3.times { target_str << "!" }
+puts target_str
+target_str = "reset"
+puts target_str`);
+
+    // 1回目のputsを検証
+    await page.locator('.monaco-editor .view-line').getByText('target_str').nth(2).hover();
+    const link1 = page.getByRole('link', { name: '値を確認: target_str' });
+    await expect(link1).toBeVisible();
+    await link1.click({ force: true });
+    await expect(page.getByText('# => "R!!!"')).toBeVisible();
+
+    // ホバーウィジェットを閉じる（固定値sleepを避けるためEscapeキーを使用）
+    await page.keyboard.press('Escape');
+    await expect(link1).toBeHidden();
+
+    // 2回目のputsを検証
+    await page.locator('.monaco-editor .view-line').getByText('target_str').last().hover();
+    const link2 = page.getByRole('link', { name: '値を確認: target_str' });
+    await expect(link2).toBeVisible();
+    await link2.click({ force: true });
+    await expect(page.getByText('# => "reset"')).toBeVisible();
+});
+
