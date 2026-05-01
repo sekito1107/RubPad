@@ -1,6 +1,5 @@
 import { proxy } from 'valtio';
-
-type Theme = 'dark' | 'light';
+import { Theme } from '../types/app';
 
 const DEFAULT_THEME: Theme = 'dark';
 
