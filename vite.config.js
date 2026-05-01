@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 export default defineConfig({
   root: '.', 
   plugins: [
+    react(),
     tailwindcss(),
   ],
   preview: {
@@ -40,17 +42,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'utils': path.resolve(__dirname, './src/utils'),
-      'controllers/': path.resolve(__dirname, './src/controllers/'),
-      'lsp/': path.resolve(__dirname, './src/lsp/'),
-      'analysis/': path.resolve(__dirname, './src/analysis/'),
-      'analysis': path.resolve(__dirname, './src/analysis.ts'),
-      'reference/': path.resolve(__dirname, './src/reference/'),
-      'reference': path.resolve(__dirname, './src/reference.ts'),
-      'runtime/': path.resolve(__dirname, './src/runtime/'),
-      'runtime': path.resolve(__dirname, './src/runtime.ts'),
-      'persistence/': path.resolve(__dirname, './src/persistence/'),
-      'persistence': path.resolve(__dirname, './src/persistence.ts'),
+      'state': path.resolve(__dirname, './src/state'),
+      'core': path.resolve(__dirname, './src/core'),
+      'components': path.resolve(__dirname, './src/components'),
     },
   },
 })
+
