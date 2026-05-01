@@ -7,7 +7,7 @@ export default function App() {
   const { theme } = useSnapshot(app)
 
   return (
-    <div className={clsx(
+    <div id="app-container" className={clsx(
       'flex flex-col h-full transition-colors',
       'bg-white text-zinc-900',
       'dark:bg-[#0D1117] dark:text-zinc-100',
