@@ -9,10 +9,9 @@ export default function App() {
   return (
     <div className={clsx(
       'flex flex-col h-full transition-colors',
-      {
-        'dark bg-[#0D1117] text-zinc-100': theme === 'dark',
-        'bg-white text-zinc-900': theme === 'light'
-      }
+      'bg-white text-zinc-900',
+      'dark:bg-[#0D1117] dark:text-zinc-100',
+      { 'dark': theme === 'dark' }
     )}>
       <Header />
       <main className="flex-1 flex items-center justify-center">
