@@ -220,11 +220,11 @@ test.fixme('フィルタリング: 中間的なnilを除外', async ({ page }) =
 max_size = targets.max_by{|t| t.size}.size`);
 
     await page.locator('.monaco-editor .view-line').getByText('max_size').last().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: max_size' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => 2')).toBeVisible();
 });
 
@@ -235,11 +235,11 @@ test('ループ: 破壊的変更の追跡', async ({ page }) => {
 end`);
 
     await page.locator('.monaco-editor .view-line').getByText('target_str').last().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target_str' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => "R!", "R!!", "R!!!"')).toBeVisible();
 });
 
@@ -250,10 +250,41 @@ test('リグレッション: 複数行のネスト', async ({ page }) => {
 end`);
 
     await page.locator('.monaco-editor .view-line').getByText('target_array').last().hover();
-    
+
     const link = page.getByRole('link', { name: '値を確認: target_array' });
     await expect(link).toBeVisible();
     await link.click({ force: true });
-    
+
     await expect(page.getByText('# => [[0]], [[0], [1]], [[0], [1], [2]]')).toBeVisible();
 });
+
+test.fixme('エラー: 存在しない変数では未定義である旨が表示されるべき', async ({ page }) => {
+    await page.keyboard.insertText(`undefined_var`);
+
+    await page.locator('.monaco-editor .view-line').getByText('undefined_var').hover();
+
+    const link = page.getByRole('link', { name: '値を確認: undefined_var' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+
+    await expect(page.getByText('# => (undefined)')).toBeVisible();
+});
+
+test('IOロジック: 多重代入と値の持続性', async ({ page }) => {
+    await page.locator('#stdin-toggle').click();
+    await page.locator('#stdin-input').fill("10 20\n");
+
+    await page.locator('.monaco-editor').first().click();
+
+    await page.keyboard.insertText(`x, y = gets.split.map(&:to_i)
+target = x + y`);
+
+    await expect(page.getByText('target')).toBeVisible();
+    await page.getByText('target').hover();
+
+    const link = page.getByRole('link', { name: '値を確認: target' });
+    await expect(link).toBeVisible();
+    await link.click({ force: true });
+    await expect(page.getByText('# => 30')).toBeVisible();
+});
+
