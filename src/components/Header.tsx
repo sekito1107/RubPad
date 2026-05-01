@@ -20,6 +20,7 @@ function ThemeToggleButton() {
         dark:hover:text-slate-200 dark:hover:bg-white/5
       `}
       title="テーマ切り替え"
+      id="theme-toggle-button"
     >
       {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
     </button>
