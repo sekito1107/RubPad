@@ -1,13 +1,19 @@
 import { Sun, Moon } from 'lucide-react'
 import { useSnapshot } from 'valtio'
 import { app, toggleTheme } from '../state/app'
+import { saveTheme } from '../core/persistence/app'
 
 function ThemeToggleButton() {
   const { theme } = useSnapshot(app)
 
+  const handleToggle = () => {
+    toggleTheme()
+    saveTheme(app.theme)
+  }
+
   return (
     <button
-      onClick={toggleTheme}
+      onClick={handleToggle}
       className={`
         p-2 rounded-md transition-colors text-slate-400
         hover:text-slate-600 hover:bg-slate-100
