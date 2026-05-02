@@ -1,7 +1,39 @@
-import { Sun, Moon } from 'lucide-react'
+import { Play, Sun, Moon } from 'lucide-react'
 import { useSnapshot } from 'valtio'
 import { app, toggleTheme } from '../state/app'
+import { editor } from '../state/editor'
+import { yarv, setPhase } from '../state/yarv'
+import { updateOutput } from '../state/terminal'
+import { run } from '../core/yarv'
 import { saveTheme } from '../core/persistence/app'
+
+function RunButton() {
+  const { phase } = useSnapshot(yarv)
+
+  const handleRun = async () => {
+    if (phase !== 'ready') return
+    setPhase('running')
+    const result = await run(editor.code)
+    updateOutput(result)
+    setPhase('ready')
+  }
+
+  return (
+    <button
+      onClick={handleRun}
+      disabled={phase !== 'ready'}
+      className={`
+        flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+        bg-emerald-600 text-white hover:bg-emerald-700
+        dark:bg-emerald-600
+      `}
+      id="run-button"
+    >
+      <Play size={16} fill="currentColor" />
+      <span>Run</span>
+    </button>
+  )
+}
 
 function ThemeToggleButton() {
   const { theme } = useSnapshot(app)
@@ -15,8 +47,8 @@ function ThemeToggleButton() {
     <button
       onClick={handleToggle}
       className={`
-        p-2 rounded-md transition-colors text-slate-400
-        hover:text-slate-600 hover:bg-slate-100
+        p-2 rounded-md transition-colors
+        text-slate-400 hover:text-slate-600 hover:bg-slate-100
         dark:hover:text-slate-200 dark:hover:bg-white/5
       `}
       title="テーマ切り替え"
@@ -36,12 +68,19 @@ export default function Header() {
     `}>
       <div className="flex items-center gap-2">
         <img src="/icon.svg" className="w-8 h-8" alt="Rubox Logo" />
-        <span className="text-lg font-logo font-bold text-slate-800 dark:text-gray-100 tracking-tight">
+        <span className={`
+          text-lg font-logo font-bold tracking-tight
+          text-slate-800
+          dark:text-gray-100
+        `}>
           Rubox
         </span>
       </div>
 
-      <ThemeToggleButton />
+      <div className="flex items-center gap-2">
+        <RunButton />
+        <ThemeToggleButton />
+      </div>
     </header>
   )
 }
