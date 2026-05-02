@@ -12,8 +12,8 @@ export default function App() {
   const { theme } = useSnapshot(app)
 
   useEffect(() => {
-    run('RUBY_VERSION').then((version) => {
-      setVersion(version)
+    run('puts RUBY_VERSION').then((version) => {
+      setVersion(version.trim())
       setPhase('ready')
     })
   }, [])
