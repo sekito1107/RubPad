@@ -31,7 +31,7 @@ test.describe('エディタ機能', () => {
     await page.keyboard.insertText(testCode);
 
     await expect.poll(async () => {
-      return await page.evaluate(() => localStorage.getItem('TODO_UNDEFINED_CODE_KEY'));
+      return await page.evaluate(() => localStorage.getItem('rubox_code'));
     }).toBe(testCode);
 
     await page.reload();
