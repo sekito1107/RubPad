@@ -8,12 +8,10 @@ const module = await initRubyWasm();
 const { vm } = await DefaultRubyVM(module);
 vm.eval('require "js"');
 
-postMessage({ type: 'ready' });
-
 self.onmessage = event => handleRequest(vm, event);
 
 function handleRequest(vm: RubyVM, event: MessageEvent) {
-  const { code } = event.data;
+  const code = event.data;
   const escapedCode = JSON.stringify(code);
 
   const result = vm.eval(`
@@ -27,5 +25,5 @@ function handleRequest(vm: RubyVM, event: MessageEvent) {
     $stdout.string
   `);
 
-  postMessage({ type: 'output', payload: result.toString() });
+  postMessage(result.toString());
 }
