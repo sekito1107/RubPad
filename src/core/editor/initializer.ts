@@ -1,15 +1,16 @@
 import * as monaco from 'monaco-editor';
-import { editor, updateCode } from '../../state/editor';
-import { app } from '../../state/app';
-import { saveCode } from '../persistence/editor';
 
-export function run(htmlElement: HTMLElement | null) {
-  if (!htmlElement) return;
+export function run(
+  htmlElement: HTMLElement | null,
+  value: string,
+  theme: string
+) {
+  if (!htmlElement) return null;
 
-  const instance = monaco.editor.create(htmlElement, {
-    value: editor.code,
+  return monaco.editor.create(htmlElement, {
+    value: value,
     language: 'ruby',
-    theme: app.theme === 'dark' ? 'vs-dark' : 'vs',
+    theme: theme,
     automaticLayout: true,
     fontSize: 14,
     fontFamily: 'JetBrains Mono, Menlo, Monaco, "Courier New", monospace',
@@ -18,12 +19,4 @@ export function run(htmlElement: HTMLElement | null) {
     lineNumbers: 'on',
     padding: { top: 16, bottom: 16 },
   });
-
-  instance.onDidChangeModelContent(() => {
-    const newCode = instance.getValue();
-    updateCode(newCode);
-    saveCode(newCode);
-  });
-
-  return () => instance.dispose();
 }
