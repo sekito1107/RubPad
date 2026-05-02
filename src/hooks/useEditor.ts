@@ -24,6 +24,10 @@ export const useEditor = () => {
         updateCode(newCode);
         saveCode(newCode);
       });
+
+      return () => {
+        instance.dispose();
+      };
     }
   }, []);
 
