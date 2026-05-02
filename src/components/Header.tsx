@@ -59,6 +59,20 @@ function ThemeToggleButton() {
   )
 }
 
+function RubyVersion() {
+  const { phase, version } = useSnapshot(yarv)
+
+  return (
+    <div className={`
+      text-[10px] font-mono px-1.5 py-0.5 rounded border transition-colors select-none
+      text-slate-400 bg-slate-100 border-slate-200
+      dark:text-slate-500 dark:bg-white/5 dark:border-white/10
+    `}>
+      {phase === 'loading' ? 'Now loading...' : version}
+    </div>
+  )
+}
+
 export default function Header() {
   return (
     <header className={`
@@ -66,15 +80,18 @@ export default function Header() {
       bg-white border-slate-200
       dark:bg-[#0D1117] dark:border-white/5
     `}>
-      <div className="flex items-center gap-2">
-        <img src="/icon.svg" className="w-8 h-8" alt="Rubox Logo" />
-        <span className={`
-          text-lg font-logo font-bold tracking-tight
-          text-slate-800
-          dark:text-gray-100
-        `}>
-          Rubox
-        </span>
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <img src="/icon.svg" className="w-8 h-8" alt="Rubox Logo" />
+          <span className={`
+            text-lg font-logo font-bold tracking-tight
+            text-slate-800
+            dark:text-gray-100
+          `}>
+            Rubox
+          </span>
+        </div>
+        <RubyVersion />
       </div>
 
       <div className="flex items-center gap-2">
