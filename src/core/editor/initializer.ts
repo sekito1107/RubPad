@@ -1,6 +1,7 @@
 import * as monaco from 'monaco-editor';
 import { editor, updateCode } from '../../state/editor';
 import { app } from '../../state/app';
+import { saveCode } from '../persistence/editor';
 
 export function run(htmlElement: HTMLElement | null) {
   if (!htmlElement) return;
@@ -19,7 +20,9 @@ export function run(htmlElement: HTMLElement | null) {
   });
 
   instance.onDidChangeModelContent(() => {
-    updateCode(instance.getValue());
+    const newCode = instance.getValue();
+    updateCode(newCode);
+    saveCode(newCode);
   });
 
   return () => instance.dispose();
