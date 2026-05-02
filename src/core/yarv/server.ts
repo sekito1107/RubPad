@@ -1,14 +1,18 @@
 import { DefaultRubyVM } from '@ruby/wasm-wasi/dist/browser';
-// @ts-ignore
-import initRubyWasm from '../../../public/ruby/rubox.wasm?init';
-
 type RubyVM = Awaited<ReturnType<typeof DefaultRubyVM>>['vm'];
 
-const module = await initRubyWasm();
-const { vm } = await DefaultRubyVM(module);
-vm.eval('require "js"');
+const vmPromise = (async () => {
+  const response = await fetch('/ruby/rubox.wasm');
+  const module = await WebAssembly.compileStreaming(response);
+  const { vm } = await DefaultRubyVM(module);
+  vm.eval('require "js"');
+  return vm;
+})();
 
-self.onmessage = event => handleRequest(vm, event);
+self.onmessage = async event => {
+  const vm = await vmPromise;
+  handleRequest(vm, event);
+};
 
 function handleRequest(vm: RubyVM, event: MessageEvent) {
   const code = event.data;

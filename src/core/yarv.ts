@@ -7,7 +7,9 @@ let returnResult: (value: string) => void;
 
 server.onmessage = (event: MessageEvent) => {
   const payload = event.data;
-  returnResult(payload);
+  if (returnResult) {
+    returnResult(payload);
+  }
 };
 
 export const run = (code: string): Promise<string> => {
