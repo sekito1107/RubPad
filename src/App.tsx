@@ -2,6 +2,7 @@ import { useSnapshot } from 'valtio'
 import clsx from 'clsx'
 import { app } from './state/app'
 import Header from './components/Header'
+import Editor from './components/Editor'
 
 export default function App() {
   const { theme } = useSnapshot(app)
@@ -15,7 +16,7 @@ export default function App() {
     )}>
       <Header />
       <main className="flex-1 flex items-center justify-center">
-        <h1 className="text-2xl font-bold text-red-600">Rubox Rebuild</h1>
+        <Editor />
       </main>
     </div>
   )
