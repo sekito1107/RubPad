@@ -4,7 +4,7 @@ class CodeExecutionTest < SystemTest
   def test_Rubyコードを入力して実行し出力が表示されること
     visit "/"
 
-    assert_selector "#run-button:not([disabled])"
+    wait_wasm_loading
 
     find(".monaco-editor").click
     send_keys([:control, "a"], :backspace)
@@ -20,7 +20,7 @@ class CodeExecutionTest < SystemTest
   def test_不正なRubyコードを実行した際にエラーが出力されること
     visit "/"
 
-    assert_selector "#run-button:not([disabled])"
+    wait_wasm_loading
 
     find(".monaco-editor").click
     send_keys([:control, "a"], :backspace)
