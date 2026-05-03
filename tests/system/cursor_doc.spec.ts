@@ -11,16 +11,12 @@ test.describe('カーソルドキュメント（Hover Doc）機能の検証', ()
     test('メソッド名にホバーした際にドキュメントパネルが表示されること', async ({ page }) => {
         const editor = page.locator('.monaco-editor');
 
-        // OS や環境に依存せず確実にエディタをクリア
         await clearEditor(page);
 
-        // コードを入力
         await page.keyboard.insertText('"hello".upcase');
 
-        // サジェストボックスがホバーを妨害しないように閉じる
         await page.keyboard.press('Escape');
 
-        // サイドバーに解析結果（Integer）が現れるのを待つ
         const methodName = page.locator('#method-list [data-role="methodName"]:text-is("upcase")');
         await expect(methodName).toBeVisible();
 

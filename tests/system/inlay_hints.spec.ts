@@ -16,7 +16,6 @@ test.describe('Inlay Hints', () => {
 
         await page.keyboard.insertText('n = 10\nresult = n * 2\nputs result\n');
 
-        // サジェストボックスがホバーを妨害しないように閉じる
         await page.keyboard.press('Escape');
 
         await expect(page.locator('#method-list')).toContainText('Integer');

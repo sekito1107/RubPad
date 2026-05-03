@@ -9,7 +9,6 @@ test.beforeEach(async ({ page }) => {
 test('サンプルコード（FizzBuzz）が正常にロードされること', async ({ page }) => {
     await page.locator('#examples-button').click();
     await page.locator('#examples-menu button[data-key="fizzbuzz"]').click();
-    
-    // エディタ内に FizzBuzz のコードが含まれていることを検証
+
     await expect(page.locator('.monaco-editor')).toContainText('1.upto(100) do |i|');
 });
