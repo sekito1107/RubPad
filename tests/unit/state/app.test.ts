@@ -1,12 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { app, toggleTheme } from '../../../src/state/app';
 import { DEFAULT_THEME } from '../../../src/types/app';
 
-describe('state/app', () => {
-  beforeEach(() => {
-    app.theme = DEFAULT_THEME;
-  });
-
+describe.sequential('state/app', () => {
   it('初期テーマが DEFAULT_THEME であること', () => {
     expect(app.theme).toBe(DEFAULT_THEME);
   });
