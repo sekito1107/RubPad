@@ -8,7 +8,7 @@
     "build": "vite build",
     "test": "npm run build && npm run test:unit && npm run test:system",
     "test:unit": "vitest run",
-    "test:system": "ruby -I tests -e \"Dir.glob('./tests/system/**/*_test.rb').each { |test_file| require test_file }\"",
+    "test:system": "bundle exec ruby -I tests -e \"Dir.glob('./tests/system/**/*_test.rb').each { |test_file| require test_file }\"",
     "lint": "eslint src",
     "format": "prettier --write 'src/**/*.ts'"
   },
