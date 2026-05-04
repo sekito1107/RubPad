@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { editor } from '../state/editor';
 import { analysis } from '../state/analysis';
+import { scan } from '../core/ruby';
 
 export const useAnalysis = () => {
   const { code } = useSnapshot(editor);
@@ -12,7 +13,13 @@ export const useAnalysis = () => {
         analysis.methods = [];
         return;
       }
-      // TODO
+
+      try {
+        const result = await scan(code);
+        analysis.methods = result;
+      } catch {
+        // 失敗時は何もしない
+      }
     }, 500);
 
     return () => clearTimeout(timer);
