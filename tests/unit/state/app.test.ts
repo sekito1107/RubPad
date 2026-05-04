@@ -15,4 +15,10 @@ describe.sequential('state/app', () => {
     toggleTheme();
     expect(app.theme).toBe('dark');
   });
+
+  it('status の初期値がすべて false であること', () => {
+    expect(app.status.editorReady).toBe(false);
+    expect(app.status.wasmReady).toBe(false);
+    expect(app.status.rbsReady).toBe(false);
+  });
 });
