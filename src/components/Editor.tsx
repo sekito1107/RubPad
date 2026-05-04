@@ -1,9 +1,9 @@
 import { useEditor } from '../hooks/useEditor';
-import { useAnalyze } from '../hooks/useAnalyze';
+import { useDiagnostics } from '../hooks/useDiagnostics';
 
 export default function Editor() {
   useEditor();
-  useAnalyze();
+  useDiagnostics();
 
   return (
     <div
