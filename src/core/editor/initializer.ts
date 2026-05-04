@@ -1,4 +1,14 @@
 import * as monaco from 'monaco-editor';
+// @ts-ignore
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+
+// monaco-editorのworkerを明示的に指定、workerを正しく指定しないとフォールバックモードでmonacoが起動する
+function ensureMonacoEnvironment() {
+  if (self.MonacoEnvironment) return;
+  self.MonacoEnvironment = {
+    getWorker: () => new editorWorker(),
+  };
+}
 
 export function run(
   htmlElement: HTMLElement | null,
@@ -6,6 +16,8 @@ export function run(
   theme: string
 ) {
   if (!htmlElement) return null;
+
+  ensureMonacoEnvironment();
 
   return monaco.editor.create(htmlElement, {
     value: value,
