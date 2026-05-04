@@ -1,5 +1,5 @@
 // @ts-ignore
-import YarvServer from './yarv/server?worker';
+import YarvServer from './ruby/yarv?worker';
 
 const server = new YarvServer();
 

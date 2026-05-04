@@ -4,7 +4,7 @@ import { app, toggleTheme } from '../state/app'
 import { editor } from '../state/editor'
 import { yarv, setPhase } from '../state/yarv'
 import { updateOutput } from '../state/terminal'
-import { run } from '../core/yarv'
+import { run } from '../core/ruby'
 import { saveTheme } from '../core/persistence/app'
 
 function RunButton() {

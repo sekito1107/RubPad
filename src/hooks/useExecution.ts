@@ -1,4 +1,4 @@
-import { run } from '../core/yarv';
+import { run } from '../core/ruby';
 import { setPhase, yarv } from '../state/yarv';
 import { updateOutput } from '../state/terminal';
 import { editor } from '../state/editor';
