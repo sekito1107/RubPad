@@ -9,10 +9,10 @@ export const useDiagnostics = () => {
 
   useEffect(() => {
     const timer = setTimeout(async () => {
-      const results = await analyze(code);
+      const markers = await analyze(code);
       const model = monaco.editor.getModels()[0];
       if (model) {
-        monaco.editor.setModelMarkers(model, 'ruby', JSON.parse(results));
+        monaco.editor.setModelMarkers(model, 'ruby', markers);
       }
     }, 1000);
 
