@@ -2,6 +2,7 @@ $LOADED_FEATURES << "socket" << "io/console"
 
 require "js"
 require "pathname"
+require "rubygems"
 require "rbs"
 require "typeprof"
 require "typeprof/lsp"
@@ -9,18 +10,25 @@ require "json"
 
 module Analyzer
   def self.init
-    # RBSを仮想ファイルシステムに書き込む
-    response = JS.global.fetch("/rbs/ruby-stdlib.rbs").await
-    rbs_data = response.text().await
-    File.write("/stdlib.rbs", rbs_data.to_s)
+    return if @service || @initializing
+    @initializing = true
 
-    # RBSを利用してTypeProfを初期化
-    loader = RBS::EnvironmentLoader.new(core_root: nil)
-    loader.add(path: Pathname.new("/stdlib.rbs"))
-    @service = TypeProf::Core::Service.new(rbs_env: RBS::Environment.from_loader(loader))
+    JS.global.fetch("/rbs/ruby-stdlib.rbs")
+      .then { |res| res.text }
+      .then do |rbs_data|
+        File.write("/stdlib.rbs", rbs_data.to_s)
+
+        loader = RBS::EnvironmentLoader.new(core_root: nil)
+        loader.add(path: Pathname.new("/stdlib.rbs"))
+        @service = TypeProf::Core::Service.new(rbs_env: RBS::Environment.from_loader(loader))
+
+        @initializing = false
+      end
   end
 
   def self.run(code)
-    # TODO
+    init unless @service
+    return "[]" unless @service
+    "[]"
   end
 end
