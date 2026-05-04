@@ -32,4 +32,18 @@ class CodeExecutionTest < SystemTest
       assert_text "syntax error"
     end
   end
+
+  def test_ショートカットキーCtrl_Enterでコードを実行できること
+    visit "/"
+    wait_wasm_loading
+
+    find(".monaco-editor").click
+    send_keys([:control, "a"], :backspace)
+    send_keys("puts 'Shortcut Worked'")
+    send_keys([:control, :enter])
+
+    within "#terminal-panel" do
+      assert_text "Shortcut Worked"
+    end
+  end
 end
