@@ -29,6 +29,11 @@ module Diagnostics
   def self.run(code)
     init unless @service
     return "[]" unless @service
-    "[]"
+
+    @service.update_rb_file("main.rb", code)
+
+    results = []
+    @service.diagnostics("main.rb") { |result| results << result.to_lsp }
+    results.to_json
   end
 end
