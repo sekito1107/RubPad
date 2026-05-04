@@ -3,7 +3,7 @@ import { useSnapshot } from 'valtio'
 import clsx from 'clsx'
 import { app } from './state/app'
 import { setPhase, setVersion } from './state/yarv'
-import { run } from './core/ruby'
+import { execute } from './core/ruby'
 import Header from './components/Header'
 import Editor from './components/Editor'
 import Terminal from './components/Terminal'
@@ -12,7 +12,7 @@ export default function App() {
   const { theme } = useSnapshot(app)
 
   useEffect(() => {
-    run('puts RUBY_VERSION').then((version) => {
+    execute('puts RUBY_VERSION').then((version) => {
       setVersion(version.trim())
       setPhase('ready')
     })

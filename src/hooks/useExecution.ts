@@ -1,4 +1,4 @@
-import { run } from '../core/ruby';
+import { execute as rubyExecute } from '../core/ruby';
 import { setPhase, yarv } from '../state/yarv';
 import { updateOutput } from '../state/terminal';
 import { editor } from '../state/editor';
@@ -8,7 +8,7 @@ export const useExecution = () => {
     if (yarv.phase !== 'ready') return;
 
     setPhase('running');
-    const result = await run(editor.code);
+    const result = await rubyExecute(editor.code);
     updateOutput(result);
     setPhase('ready');
   };

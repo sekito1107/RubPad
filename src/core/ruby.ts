@@ -12,9 +12,16 @@ server.onmessage = (event: MessageEvent) => {
   }
 };
 
-export const run = (code: string): Promise<string> => {
+export const execute = (code: string): Promise<string> => {
   return new Promise((resolve) => {
     returnResult = resolve;
-    server.postMessage(code);
+    server.postMessage(`Executor.run(${JSON.stringify(code)})`);
+  });
+};
+
+export const analyze = (code: string): Promise<string> => {
+  return new Promise((resolve) => {
+    returnResult = resolve;
+    server.postMessage(`Analyzer.run(${JSON.stringify(code)})`);
   });
 };
