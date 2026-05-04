@@ -8,7 +8,7 @@ require "typeprof"
 require "typeprof/lsp"
 require "json"
 
-module Analyzer
+module Diagnostics
   def self.init
     return if @service || @initializing
     @initializing = true
