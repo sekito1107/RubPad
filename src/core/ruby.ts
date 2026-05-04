@@ -32,6 +32,8 @@ export const initAnalyzer = () => {
 };
 
 export const checkAnalyzerReady = async (): Promise<boolean> => {
-  const result = await send('!!Diagnostics.instance_variable_get(:@service)');
-  return result === 'true';
+  const result = await send(
+    'defined?(Diagnostics) && Diagnostics.instance_variable_get(:@service) ? "ok" : "no"'
+  );
+  return result === 'ok';
 };
