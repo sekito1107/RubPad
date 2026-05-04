@@ -11,12 +11,10 @@ function ensureMonacoEnvironment() {
 }
 
 export function run(
-  htmlElement: HTMLElement | null,
+  htmlElement: HTMLElement,
   value: string,
   theme: string
-) {
-  if (!htmlElement) return null;
-
+): monaco.editor.IStandaloneCodeEditor {
   ensureMonacoEnvironment();
 
   return monaco.editor.create(htmlElement, {
