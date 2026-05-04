@@ -7,6 +7,7 @@ export default function StatusIndicator() {
   return (
     <div className="flex items-center gap-2">
       <Badge 
+        testId="status-editor"
         icon="⌨️" 
         label="Editor" 
         ready={status.editorReady} 
@@ -15,6 +16,7 @@ export default function StatusIndicator() {
         tooltip="Monaco Editor is ready"
       />
       <Badge 
+        testId="status-runtime"
         icon="💎" 
         label="Runtime" 
         ready={status.wasmReady} 
@@ -23,6 +25,7 @@ export default function StatusIndicator() {
         tooltip="Ruby WASM Runtime is ready"
       />
       <Badge 
+        testId="status-analyzer"
         icon="🔍" 
         label="Analyzer" 
         ready={status.rbsReady} 
@@ -35,6 +38,7 @@ export default function StatusIndicator() {
 }
 
 interface BadgeProps {
+  testId: string;
   icon: string;
   label: string;
   ready: boolean;
@@ -43,10 +47,12 @@ interface BadgeProps {
   tooltip: string;
 }
 
-function Badge({ icon, label, ready, activeColor, shadowColor, tooltip }: BadgeProps) {
+function Badge({ testId, icon, label, ready, activeColor, shadowColor, tooltip }: BadgeProps) {
   return (
     <div 
       title={tooltip}
+      data-testid={testId}
+      data-ready={ready}
       className={`
         flex items-center gap-2 px-2 py-1 rounded-md 
         bg-white/50 dark:bg-zinc-800/50 

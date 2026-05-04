@@ -10,6 +10,7 @@ Capybara.app = Rack::Static.new(
 )
 
 Capybara.default_driver = :selenium_chrome_headless
+Capybara.default_max_wait_time = 5
 
 class SystemTest < Minitest::Test
   include Capybara::DSL
@@ -17,7 +18,12 @@ class SystemTest < Minitest::Test
 
   # Ruby (WASM) の初期化完了を待機
   def wait_wasm_loading
-    assert_text "4.0.0"
+    find("[data-testid='status-runtime'][data-ready='true']", wait: 30)
+  end
+
+  # 解析エンジン (RBS) の初期化完了を待機
+  def wait_analyzer_ready
+    find("[data-testid='status-analyzer'][data-ready='true']", wait: 30)
   end
 
   def teardown
