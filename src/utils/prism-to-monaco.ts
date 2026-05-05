@@ -11,9 +11,12 @@ export const prismToMonaco = (items: any[]): MethodCall[] => {
       // TypeProf の出力 ("Integer#+" or "Integer") からクラス名部分を抽出
       const rawClass = item.type_info.split('#')[0];
       
+      // ジェネリクス部分 (例: Enumerator[int]) を除去
+      const cleanClass = rawClass.replace(/\[.*\]$/, '');
+
       // "???" を含む不明な型情報は null として扱う
-      if (rawClass && !rawClass.includes('???')) {
-        className = rawClass;
+      if (cleanClass && !cleanClass.includes('???')) {
+        className = cleanClass;
       }
     }
 
