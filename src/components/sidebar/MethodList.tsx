@@ -1,6 +1,6 @@
 import { useSnapshot } from 'valtio';
 import { analysis } from '../../state/analysis';
-import { getReferenceUrl } from '../../core/reference/url_generator';
+import { getReferenceUrl } from '../../core/ruby/reference';
 
 export default function MethodList() {
   const { methods } = useSnapshot(analysis);
