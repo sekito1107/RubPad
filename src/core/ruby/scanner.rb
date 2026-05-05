@@ -2,49 +2,56 @@ require 'prism'
 require 'json'
 
 module Scanner
-  class MethodVisitor < Prism::Visitor
+  class AnalysisVisitor < Prism::Visitor
     def initialize
-      @calls = []
+      @methods = []
+      @variables = []
     end
 
-    # 通常のメソッド呼び出しを見つけたとき
     def visit_call_node(node)
-      add_call(node.name.to_s, node.location)
+      @methods << {
+        name: node.name.to_s,
+        line: node.location.start_line,
+        col: node.location.start_column
+      }
       super
     end
 
-    # &:to_s のようなショートハンドを見つけたとき
+    def visit_local_variable_write_node(node)
+      @variables << {
+        name: node.name.to_s,
+        line: node.location.start_line,
+        col: node.location.start_column
+      }
+      super
+    end
+
     def visit_block_argument_node(node)
       expression = node.expression
       if expression.is_a?(Prism::SymbolNode)
-        add_call(expression.unescaped, expression.location)
+        @methods << {
+          name: expression.unescaped,
+          line: expression.location.start_line,
+          col: expression.location.start_column
+        }
       end
       super
     end
 
     def results
-      @calls
-    end
-
-    private
-
-    def add_call(name, location)
-      @calls << {
-        name: name,
-        line: location.start_line,
-        col: location.start_column
-      }
+      { methods: @methods, variables: @variables }
     end
   end
 
   class << self
     def scan(code)
-      return "[]" if code.nil? || code.empty?
+      fallback = { methods: [], variables: [] }.to_json
+      return fallback if code.nil? || code.empty?
 
       result = Prism.parse(code)
-      return "[]" unless result.success?
+      return fallback unless result.success?
 
-      visitor = MethodVisitor.new
+      visitor = AnalysisVisitor.new
       result.value.accept(visitor)
       visitor.results.to_json
     end
