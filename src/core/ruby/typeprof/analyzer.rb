@@ -1,7 +1,7 @@
 require "json"
 
-module TypeProf
-  class Analyzer < Prism::Visitor
+module Analyzer
+  class Visitor < Prism::Visitor
     def initialize(service)
       @service = service
       @methods = []
@@ -59,7 +59,7 @@ module TypeProf
       result = Prism.parse(code)
       return { methods: [], variables: [] }.to_json unless result.success?
 
-      visitor = Analyzer.new(service)
+      visitor = Visitor.new(service)
       result.value.accept(visitor)
       
       visitor.results.to_json
