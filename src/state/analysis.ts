@@ -1,17 +1,27 @@
 import { proxy } from 'valtio';
 
-type Entry = {
+export type MethodInfo = {
   name: string;
   line: number;
   col: number;
-  className: string | null;
+  info: {
+    owner: string | null;
+    method_name: string | null;
+    owner_type: 'class' | 'module' | null;
+    is_singleton_call: boolean;
+    has_instance: boolean;
+    has_singleton: boolean;
+  };
 };
 
-export type MethodCall = Entry;
-export type VariableDefinition = Entry;
+export type VariableDefinition = {
+  name: string;
+  line: number;
+  col: number;
+};
 
 export const analysis = proxy<{
-  methods: MethodCall[];
+  methods: MethodInfo[];
   variables: VariableDefinition[];
 }>({
   methods: [],
