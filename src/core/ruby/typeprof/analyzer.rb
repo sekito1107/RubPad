@@ -41,35 +41,34 @@ module Analyzer
     end
 
     def create_entry(name, node)
-      # メソッド名そのものの座標 (message_loc) を優先することで、ピンポイントな解析を可能にする
       query_loc = (node.message_loc if node.respond_to?(:message_loc)) || node.location
-      type_info = resolve_type_info(query_loc)
+      info = resolve_info(query_loc)
 
       {
         name: name.to_s,
         line: query_loc.start_line,
         col: query_loc.start_column,
-        type_info: type_info
+        info: info
       }
     end
 
-    def resolve_type_info(loc)
+    def resolve_info(loc)
       return nil unless (service = @service)
 
       pos = TypeProf::CodePosition.new(loc.start_line, loc.start_column)
       # TypeProf 内部の解析済み AST キャッシュに直接アクセス (非公開 API)
       root = service.instance_variable_get(:@rb_text_nodes)["main.rb"]
       
-      type_info = nil
-      # retrieve_at で最も内側のノードから探索し、精密なメソッド解決を優先する
+      info = nil
       root&.retrieve_at(pos) do |n|
         if method_call_node?(n)
-          type_info = resolve_method_call(n, service)
-          break if type_info
+          info = resolve_method_call(n, service)
+          break if info
         end
       end
       
-      type_info ||= service.hover("main.rb", pos)
+      info ||= { display_text: service.hover("main.rb", pos) }
+      info
     end
 
     def method_call_node?(node)
@@ -80,27 +79,30 @@ module Analyzer
       info = nil
       node.boxes(:mcall) do |box|
         box.resolve(service.genv, nil) do |me, _ty, mid, orig_ty|
-          owner = find_method_owner(me)
+          info = extract_method_metadata(me)
           
-          if owner
-            info = "#{owner}##{mid}"
-          elsif orig_ty
-            base_ty = orig_ty.base_type(service.genv)
-            info = "#{base_ty.show}##{mid}"
-          end
+          info[:owner] ||= orig_ty&.base_type(service.genv)&.show
+          info[:method_name] = mid.to_s
         end
       end
       info
     end
 
-    def find_method_owner(me)
-      return nil unless me
-      
+    private
+
+    def extract_method_metadata(me)
+      return {} unless me
+
       # 公式定義 (decls) または 実定義 (defs) のいずれかから代表的な一つを取得
       # (TypeProf の内部的な Set クラスは .first を持たないため、一度配列化してから取得)
-      target = me.decls.to_a.first || me.defs.to_a.first
-      
-      target.respond_to?(:cpath) ? target.cpath.join("::") : nil
+      source = me.decls.to_a.first || me.defs.to_a.first
+      return {} unless source
+
+      {
+        owner: source.respond_to?(:cpath) ? source.cpath.join("::") : nil,
+        is_singleton: source.respond_to?(:singleton?) && source.singleton?,
+        is_module: source.respond_to?(:mod) && source.mod.respond_to?(:is_module?) && source.mod.is_module?
+      }
     end
   end
 
