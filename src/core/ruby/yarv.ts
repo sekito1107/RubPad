@@ -3,13 +3,13 @@ import { DefaultRubyVM } from '@ruby/wasm-wasi/dist/browser';
 // @ts-ignore
 import executor from './executor.rb?raw';
 // @ts-ignore
-import scanner from './scanner.rb?raw';
-// @ts-ignore
 import typeprof from './typeprof.rb?raw';
 // @ts-ignore
 import diagnostics from './typeprof/diagnostics.rb?raw';
+// @ts-ignore
+import analyzer from './typeprof/analyzer.rb?raw';
 
-const scripts = [executor, scanner, typeprof, diagnostics];
+const scripts = [executor, typeprof, diagnostics, analyzer];
 
 const vmPromise = (async () => {
   const response = await fetch('/ruby/rubox.wasm');
