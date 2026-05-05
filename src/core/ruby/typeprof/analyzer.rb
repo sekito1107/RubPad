@@ -42,7 +42,9 @@ module Analyzer
 
     def create_entry(name, node)
       loc = node.location
-      pos = TypeProf::CodePosition.new(loc.start_line - 1, loc.start_column)
+      query_node = (node.receiver if node.respond_to?(:receiver)) || node
+      query_loc = query_node.location
+      pos = TypeProf::CodePosition.new(query_loc.start_line - 1, query_loc.start_column)
       {
         name: name.to_s,
         line: loc.start_line,
