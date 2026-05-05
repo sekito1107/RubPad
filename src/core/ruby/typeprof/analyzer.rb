@@ -13,39 +13,41 @@ module TypeProf
     end
 
     def visit_call_node(node)
-      res = @service.hover("main.rb", node.location.start_line - 1, node.location.start_column)
-      @methods << {
-        name: node.name.to_s,
-        line: node.location.start_line,
-        col: node.location.start_column,
-        type_info: res
-      }
+      add_method(node.name, node)
       super
     end
 
     def visit_local_variable_write_node(node)
-      res = @service.hover("main.rb", node.location.start_line - 1, node.location.start_column)
-      @variables << {
-        name: node.name.to_s,
-        line: node.location.start_line,
-        col: node.location.start_column,
-        type_info: res
-      }
+      add_variable(node.name, node)
       super
     end
 
     def visit_block_argument_node(node)
       expression = node.expression
       if expression.is_a?(Prism::SymbolNode)
-        res = @service.hover("main.rb", expression.location.start_line - 1, expression.location.start_column)
-        @methods << {
-          name: expression.unescaped,
-          line: expression.location.start_line,
-          col: expression.location.start_column,
-          type_info: res
-        }
+        add_method(expression.unescaped, expression)
       end
       super
+    end
+
+    private
+
+    def add_method(name, node)
+      @methods << create_entry(name, node)
+    end
+
+    def add_variable(name, node)
+      @variables << create_entry(name, node)
+    end
+
+    def create_entry(name, node)
+      loc = node.location
+      {
+        name: name.to_s,
+        line: loc.start_line,
+        col: loc.start_column,
+        type_info: @service.hover("main.rb", loc.start_line - 1, loc.start_column)
+      }
     end
   end
 
