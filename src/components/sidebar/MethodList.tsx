@@ -42,9 +42,9 @@ export default function MethodList() {
               {method.name}
             </span>
             <span className={clsx(
-              "text-[10px] font-mono leading-tight",
-              "text-zinc-400",
-              "dark:text-zinc-500"
+              "text-[10px] font-mono leading-tight transition-colors",
+              "text-blue-600/70",
+              "dark:text-blue-400/60"
             )}>
               {method.className ? `${method.className}#${method.name}` : method.name}
             </span>
