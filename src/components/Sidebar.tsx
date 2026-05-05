@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import MethodList from './MethodList'
+import MethodList from './sidebar/MethodList'
 
 export default function Sidebar() {
   return (
