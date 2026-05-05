@@ -43,7 +43,7 @@ module Analyzer
     def create_entry(name, node)
       # メソッド呼び出しの場合はメソッド名の位置を優先し、それ以外はノードの開始位置を使用する
       query_loc = (node.message_loc if node.respond_to?(:message_loc)) || node.location
-      pos = TypeProf::CodePosition.new(query_loc.start_line - 1, query_loc.start_column)
+      pos = TypeProf::CodePosition.new(query_loc.start_line, query_loc.start_column)
       {
         name: name.to_s,
         line: query_loc.start_line,
