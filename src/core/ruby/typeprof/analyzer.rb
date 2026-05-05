@@ -41,15 +41,14 @@ module Analyzer
     end
 
     def create_entry(name, node)
-      loc = node.location
-      query_node = (node.receiver if node.respond_to?(:receiver)) || node
-      query_loc = query_node.location
+      # メソッド呼び出しの場合はメソッド名の位置を優先し、それ以外はノードの開始位置を使用する
+      query_loc = node.respond_to?(:message_loc) ? (node.message_loc || node.location) : node.location
       pos = TypeProf::CodePosition.new(query_loc.start_line - 1, query_loc.start_column)
       {
         name: name.to_s,
-        line: loc.start_line,
-        col: loc.start_column,
-        type_info: @service.hover("main.rb", pos)
+        line: query_loc.start_line,
+        col: query_loc.start_column,
+        type_info: @service&.hover("main.rb", pos)
       }
     end
   end
