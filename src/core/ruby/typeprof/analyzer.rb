@@ -1,4 +1,5 @@
-require "json"
+require "prism"
+require "typeprof"
 
 module Analyzer
   class Visitor < Prism::Visitor
@@ -67,20 +68,27 @@ module Analyzer
         end
       end
       
-      info ||= { display_text: service.hover("main.rb", pos) }
+      info ||= {
+        owner: service.hover("main.rb", pos),
+        method_name: nil,
+        owner_type: "class",
+        is_singleton_call: false,
+        has_instance: false,
+        has_singleton: false
+      }
       info
     end
 
     def method_call_node?(node)
-      node.respond_to?(:boxes) && node.boxes(:mcall) { break true }
+      node.is_a?(Prism::CallNode) || node.is_a?(Prism::SymbolNode)
     end
 
     def resolve_method_call(node, service)
       info = nil
       node.boxes(:mcall) do |box|
         box.resolve(service.genv, nil) do |me, _ty, mid, orig_ty|
-          info = extract_method_metadata(me)
-          
+          info = extract_method_metadata(me, service)
+
           info[:owner] ||= orig_ty&.base_type(service.genv)&.show
           info[:method_name] = mid.to_s
         end
@@ -90,7 +98,7 @@ module Analyzer
 
     private
 
-    def extract_method_metadata(me)
+    def extract_method_metadata(me, service)
       return {} unless me
 
       # 公式定義 (decls) または 実定義 (defs) のいずれかから代表的な一つを取得
@@ -100,9 +108,26 @@ module Analyzer
 
       {
         owner: source.respond_to?(:cpath) ? source.cpath.join("::") : nil,
-        is_singleton: source.respond_to?(:singleton?) && source.singleton?,
-        is_module: source.respond_to?(:mod) && source.mod.respond_to?(:is_module?) && source.mod.is_module?
+        owner_type: get_owner_type(source.mod, service),
+        is_singleton_call: !!source&.singleton?,
+        has_instance: !!source.mod&.get_method(me.mid, false),
+        has_singleton: !!source.mod&.get_method(me.mid, true)
       }
+    end
+
+    def get_owner_type(mod, service)
+      return "class" unless mod.respond_to?(:cpath)
+      
+      last_name = mod.cpath.last
+      namespace = RBS::Namespace.new(path: mod.cpath[0...-1], absolute: true)
+      typename = RBS::TypeName.new(name: last_name, namespace: namespace)
+      
+      decl = service.rbs_env.class_decls[typename]
+      if decl && decl.entry.is_a?(RBS::Environment::ModuleEntry)
+        "module"
+      else
+        "class"
+      end
     end
   end
 
