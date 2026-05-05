@@ -7,6 +7,7 @@ import { useTheme } from './hooks/useTheme'
 import Header from './components/Header'
 import Editor from './components/Editor'
 import Terminal from './components/Terminal'
+import Sidebar from './components/Sidebar'
 
 export default function App() {
   const { theme } = useSnapshot(app)
@@ -22,13 +23,17 @@ export default function App() {
       { 'dark': theme === 'dark' }
     )}>
       <Header />
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-hidden">
-          <Editor />
+      <main className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-hidden">
+            <Editor />
+          </div>
+          <div className="h-1/3 border-t border-zinc-200 dark:border-zinc-800">
+            <Terminal />
+          </div>
         </div>
-        <div className="h-1/3 border-t border-zinc-200 dark:border-zinc-800">
-          <Terminal />
-        </div>
+
+        <Sidebar />
       </main>
     </div>
   )
