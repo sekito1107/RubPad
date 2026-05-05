@@ -42,11 +42,12 @@ module Analyzer
 
     def create_entry(name, node)
       loc = node.location
+      pos = TypeProf::CodePosition.new(loc.start_line - 1, loc.start_column)
       {
         name: name.to_s,
         line: loc.start_line,
         col: loc.start_column,
-        type_info: @service.hover("main.rb", loc.start_line - 1, loc.start_column)
+        type_info: @service.hover("main.rb", pos)
       }
     end
   end
