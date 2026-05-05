@@ -4,6 +4,7 @@ type Entry = {
   name: string;
   line: number;
   col: number;
+  className: string | null;
 };
 
 export type MethodCall = Entry;
