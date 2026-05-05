@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import MethodList from './MethodList'
 
 export default function Sidebar() {
   return (
@@ -18,9 +19,7 @@ export default function Sidebar() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 text-xs text-zinc-400 italic">
-          No methods detected yet.
-        </div>
+        <MethodList />
       </div>
     </aside>
   )
