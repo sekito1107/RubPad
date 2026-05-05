@@ -11,12 +11,14 @@ export const useAnalysis = () => {
     const timer = setTimeout(async () => {
       if (!code) {
         analysis.methods = [];
+        analysis.variables = [];
         return;
       }
 
       try {
         const result = await scan(code);
-        analysis.methods = result;
+        analysis.methods = result.methods;
+        analysis.variables = result.variables;
       } catch {
         // 失敗時は何もしない
       }
