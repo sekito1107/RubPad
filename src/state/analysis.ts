@@ -1,15 +1,17 @@
 import { proxy } from 'valtio';
 
-
-export interface AnalysisSymbol {
+type Entry = {
   name: string;
   line: number;
   col: number;
-}
+};
+
+export type MethodCall = Entry;
+export type VariableDefinition = Entry;
 
 export const analysis = proxy<{
-  methods: AnalysisSymbol[];
-  variables: AnalysisSymbol[];
+  methods: MethodCall[];
+  variables: VariableDefinition[];
 }>({
   methods: [],
   variables: [],
