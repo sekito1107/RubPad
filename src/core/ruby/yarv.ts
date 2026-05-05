@@ -4,8 +4,10 @@ import { DefaultRubyVM } from '@ruby/wasm-wasi/dist/browser';
 import executor from './executor.rb?raw';
 // @ts-ignore
 import diagnostics from './diagnostics.rb?raw';
+// @ts-ignore
+import scanner from './scanner.rb?raw';
 
-const scripts = [executor, diagnostics];
+const scripts = [executor, diagnostics, scanner];
 
 const vmPromise = (async () => {
   const response = await fetch('/ruby/rubox.wasm');
