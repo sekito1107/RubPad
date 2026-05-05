@@ -3,6 +3,7 @@ import * as monaco from 'monaco-editor';
 import YarvServer from './ruby/yarv?worker';
 import { lspToMonaco } from '../utils/lsp-to-monaco';
 import { MethodCall, VariableDefinition } from '../state/analysis';
+import { prismToMonaco } from '../utils/prism-to-monaco';
 
 
 const server = new YarvServer();
@@ -31,7 +32,11 @@ export const analyze = async (code: string): Promise<monaco.editor.IMarkerData[]
 
 export const scan = async (code: string): Promise<{ methods: MethodCall[], variables: VariableDefinition[] }> => {
   const raw = await send(`Analyzer.run(${JSON.stringify(code)})`);
-  return JSON.parse(raw);
+  const { methods, variables } = JSON.parse(raw);
+  return {
+    methods: prismToMonaco(methods),
+    variables: prismToMonaco(variables)
+  };
 };
 
 export const initAnalyzer = () => {
