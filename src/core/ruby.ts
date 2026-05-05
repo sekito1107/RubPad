@@ -30,17 +30,17 @@ export const analyze = async (code: string): Promise<monaco.editor.IMarkerData[]
 };
 
 export const scan = async (code: string): Promise<{ methods: MethodCall[], variables: VariableDefinition[] }> => {
-  const raw = await send(`Scanner.scan(${JSON.stringify(code)})`);
+  const raw = await send(`Analyzer.run(${JSON.stringify(code)})`);
   return JSON.parse(raw);
 };
 
 export const initAnalyzer = () => {
-  send('Diagnostics.init');
+  send('TypeProfEngine.init');
 };
 
 export const checkAnalyzerReady = async (): Promise<boolean> => {
   const result = await send(
-    'defined?(Diagnostics) && Diagnostics.instance_variable_get(:@service) ? "ok" : "no"'
+    'defined?(TypeProfEngine) && TypeProfEngine.service ? "ok" : "no"'
   );
   return result === 'ok';
 };
