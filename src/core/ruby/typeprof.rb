@@ -28,5 +28,10 @@ module TypeProfEngine
           @initializing = false
         end
     end
+
+    def update(code)
+      init unless @service
+      @service&.update_rb_file("main.rb", code)
+    end
   end
 end
