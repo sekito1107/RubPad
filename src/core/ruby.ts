@@ -39,6 +39,11 @@ export const scan = async (code: string): Promise<{ methods: MethodCall[], varia
   };
 };
 
+export const pick = async (code: string, line: number, col: number) => {
+  const raw = await send(`Picker.run(${JSON.stringify(code)}, ${line}, ${col})`);
+  return JSON.parse(raw);
+};
+
 export const initAnalyzer = () => {
   send('TypeProfEngine.init');
 };

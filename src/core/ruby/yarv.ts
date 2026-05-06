@@ -8,8 +8,12 @@ import typeprof from './typeprof.rb?raw';
 import diagnostics from './typeprof/diagnostics.rb?raw';
 // @ts-ignore
 import analyzer from './typeprof/analyzer.rb?raw';
+// @ts-ignore
+import selector from './picker/selector.rb?raw';
+// @ts-ignore
+import picker from './picker.rb?raw';
 
-const scripts = [executor, typeprof, diagnostics, analyzer];
+const scripts = [executor, typeprof, diagnostics, analyzer, selector, picker];
 
 const vmPromise = (async () => {
   const response = await fetch('/ruby/rubox.wasm');

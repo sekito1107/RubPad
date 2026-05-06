@@ -28,5 +28,8 @@ export function run(
     scrollBeyondLastLine: false,
     lineNumbers: 'on',
     padding: { top: 16, bottom: 16 },
+    inlayHints: {
+      enabled: 'on'
+    }
   });
 }

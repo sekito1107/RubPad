@@ -1,14 +1,18 @@
 import { useEffect } from 'react';
 import { registerHoverProvider } from '../core/editor/hover';
+import { registerCommands } from '../core/editor/command';
+import { registerInlayHintsProvider } from '../core/editor/inlay-hints';
 
 export const useEditorProviders = () => {
   useEffect(() => {
-    // ホバー機能を登録
     const hoverProvider = registerHoverProvider();
+    const commands = registerCommands();
+    const inlayHintsProvider = registerInlayHintsProvider();
 
-    // コンポーネントのアンマウント時に登録を解除
     return () => {
       hoverProvider.dispose();
+      commands.dispose();
+      inlayHintsProvider.dispose();
     };
   }, []);
 };

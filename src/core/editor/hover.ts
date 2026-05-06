@@ -1,14 +1,21 @@
 import * as monaco from 'monaco-editor';
+import { pick } from '../ruby';
+import { monacoToPrism } from '../../utils/monaco-to-prism';
 
 export const registerHoverProvider = () => {
   return monaco.languages.registerHoverProvider('ruby', {
-    provideHover: (model, position) => {
-      const word = model.getWordAtPosition(position);
-      if (!word) return null;
+    provideHover: async (model, position) => {
+      const pos = monacoToPrism(position);
+      const target = await pick(model.getValue(), pos.line, pos.col);
+
+      if (!target || !target.expression) return null;
 
       return {
         contents: [
-          { value: `ここに「値を確認: ${word.word}」ボタンを出す予定です` }
+          { 
+            value: `[🔍 値を確認: ${target.expression}](command:rubox.inspectValue?${encodeURIComponent(JSON.stringify(target))})`,
+            isTrusted: true
+          }
         ]
       };
     }
