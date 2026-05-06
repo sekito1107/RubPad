@@ -1,5 +1,5 @@
 import * as monaco from 'monaco-editor';
-import { capturedValues } from '../../state/captured-values';
+import { capturedValues, removeCapturedValue } from '../../state/captured-values';
 import { subscribe } from 'valtio';
 
 export const registerInlayHintsProvider = () => {
@@ -20,9 +20,37 @@ export const registerInlayHintsProvider = () => {
         const lineNum = Number(line);
         if (lineNum < 1 || lineNum > model.getLineCount()) return;
 
+        const validValues = values.filter(v => {
+          const lines = v.content.split('\n');
+          const endLineNumber = v.contentLine + lines.length - 1;
+          const endColumn = lines.length === 1
+            ? v.contentCol + lines[0].length + 1
+            : lines[lines.length - 1].length + 1;
+
+          if (endLineNumber > model.getLineCount()) {
+            setTimeout(() => removeCapturedValue(lineNum, v.col), 0);
+            return false;
+          }
+
+          const currentText = model.getValueInRange({
+            startLineNumber: v.contentLine,
+            startColumn: v.contentCol + 1,
+            endLineNumber: endLineNumber,
+            endColumn: endColumn
+          });
+
+          if (currentText !== v.content) {
+            setTimeout(() => removeCapturedValue(lineNum, v.col), 0);
+            return false;
+          }
+          return true;
+        });
+
+        if (validValues.length === 0) return;
+
         const lineLength = model.getLineContent(lineNum).length;
 
-        const label = "# => " + values.map(v => {
+        const label = "# => " + validValues.map(v => {
           const fullChain = [];
           if (v.isVariable && v.history.length > 0) {
             fullChain.push(v.history[0].initial);
@@ -34,7 +62,7 @@ export const registerInlayHintsProvider = () => {
             displayValue += ` -> ... -> ${v.lastValue}`;
           }
 
-          return `${v.expression}: ${displayValue}`;
+          return `${v.label}: ${displayValue}`;
         }).join(', ');
 
         hints.push({

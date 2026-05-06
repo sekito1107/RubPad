@@ -23,13 +23,20 @@ class Selector
     leaf = path.last
     leaf_type = leaf.class.name.split('::').last
 
+    target = leaf
     if LITERAL_NODES.include?(leaf_type)
-      target = path.reverse.find do |node|
+      collection = path.reverse.find do |node|
         COLLECTION_NODES.include?(node.class.name.split('::').last)
       end
-      return target if target
+      target = collection if collection
     end
-    leaf
+
+    statement = path.find do |node|
+      type = node.class.name.split('::').last
+      type != 'ProgramNode' && type != 'StatementsNode'
+    end
+
+    { target: target, statement: statement || target }
   end
 
   private

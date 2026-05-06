@@ -4,24 +4,34 @@ require "json"
 module Picker
   def self.run(code, line, col)
     result = Prism.parse(code)
-    node = Selector.find_node(result.value, line, col)
-    return {}.to_json unless node
+    nodes = Selector.find_node(result.value, line, col)
+    return {}.to_json unless nodes
 
-    node_type = node.class.name.split('::').last
+    target = nodes[:target]
+    statement = nodes[:statement]
+
+    node_type = target.class.name.split('::').last
     is_variable = node_type.end_with?("WriteNode") || node_type.end_with?("TargetNode")
 
     if is_variable
-      expression = node.name.to_s
-      loc = node.name_loc
+      label = target.name.to_s
     else
-      expression = node.slice
-      loc = node.location
+      label = target.slice
     end
 
+    content = statement.slice
+    target_loc = target.location
+    statement_loc = statement.location
+
     {
-      expression: expression,
-      line: loc.start_line,
-      col: loc.start_column,
+      label: label,
+      content: content,
+      line: target_loc.start_line,
+      col: target_loc.start_column,
+      contentLine: statement_loc.start_line,
+      contentCol: statement_loc.start_column,
+      endLine: statement_loc.end_line,
+      endCol: statement_loc.end_column,
       isVariable: is_variable
     }.to_json
   end

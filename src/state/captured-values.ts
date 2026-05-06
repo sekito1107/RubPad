@@ -8,7 +8,10 @@ export type ExecutionSnapshot = {
 export type CapturedValue = {
   line: number;
   col: number;
-  expression: string;
+  contentLine: number;
+  contentCol: number;
+  label: string;
+  content: string;
   isVariable: boolean;
   history: ExecutionSnapshot[];
   totalCalls: number;
@@ -37,4 +40,15 @@ export const addCapturedValue = (cv: CapturedValue) => {
 
 export const clearCapturedValues = () => {
   capturedValues.entries = {};
+};
+
+export const removeCapturedValue = (line: number, col: number) => {
+  const lineValues = [...(capturedValues.entries[line] || [])];
+  const newValues = lineValues.filter(v => v.col !== col);
+
+  if (newValues.length === 0) {
+    delete capturedValues.entries[line];
+  } else {
+    capturedValues.entries[line] = newValues;
+  }
 };
