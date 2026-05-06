@@ -44,6 +44,11 @@ export const pick = async (code: string, line: number, col: number) => {
   return JSON.parse(raw);
 };
 
+export const inspect = async (code: string, expression: string, line: number, isVariable: boolean = false) => {
+  const raw = await send(`Inspector.run(${JSON.stringify(code)}, ${JSON.stringify(expression)}, ${line}, ${isVariable})`);
+  return JSON.parse(raw);
+};
+
 export const initAnalyzer = () => {
   send('TypeProfEngine.init');
 };

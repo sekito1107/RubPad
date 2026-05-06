@@ -7,10 +7,22 @@ module Picker
     node = Selector.find_node(result.value, line, col)
     return {}.to_json unless node
 
+    node_type = node.class.name.split('::').last
+    is_variable = node_type.end_with?("WriteNode") || node_type.end_with?("TargetNode")
+
+    if is_variable
+      expression = node.name.to_s
+      loc = node.name_loc
+    else
+      expression = node.slice
+      loc = node.location
+    end
+
     {
-      expression: node.slice,
-      line: node.location.start_line,
-      col: node.location.start_column
+      expression: expression,
+      line: loc.start_line,
+      col: loc.start_column,
+      isVariable: is_variable
     }.to_json
   end
 end

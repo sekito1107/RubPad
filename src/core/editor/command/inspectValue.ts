@@ -1,15 +1,23 @@
 import * as monaco from 'monaco-editor';
 import { addCapturedValue } from '../../../state/captured-values';
+import { inspect } from '../../ruby';
 
 export const registerInspectValueCommand = () => {
-  return monaco.editor.registerCommand('rubox.inspectValue', (_accessor, target: any) => {
+  return monaco.editor.registerCommand('rubox.inspectValue', async (_accessor, target: any) => {
     if (!target) return;
+
+    const model = monaco.editor.getModels()[0];
+    const code = model.getValue();
+
+    const captured = await inspect(code, target.expression, target.line, target.isVariable);
 
     addCapturedValue({
       line: target.line,
       col: target.col,
       expression: target.expression,
-      value: "..."
+      history: captured.history,
+      totalCalls: captured.totalCalls,
+      lastValue: captured.lastValue
     });
   });
 };

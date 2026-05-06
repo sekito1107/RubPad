@@ -20,7 +20,16 @@ export const registerInlayHintsProvider = () => {
         const lineNum = Number(line);
         const lineLength = model.getLineContent(lineNum).length;
 
-        const label = "# => " + values.map(v => `${v.expression}: ${v.value}`).join(', ');
+        const label = "# => " + values.map(v => {
+          const fullChain = [v.history[0].initial, ...v.history.map(h => h.result)];
+
+          let displayValue = fullChain.join(' -> ');
+          if (v.totalCalls > v.history.length) {
+            displayValue += ` -> ... -> ${v.lastValue}`;
+          }
+
+          return `${v.expression}: ${displayValue}`;
+        }).join(', ');
 
         hints.push({
           position: { lineNumber: lineNum, column: lineLength + 1 },

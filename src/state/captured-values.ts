@@ -1,10 +1,17 @@
 import { proxy } from 'valtio';
 
+export type ExecutionSnapshot = {
+  initial: string;
+  result: string;
+};
+
 export type CapturedValue = {
   line: number;
   col: number;
   expression: string;
-  value: string;
+  history: ExecutionSnapshot[];
+  totalCalls: number;
+  lastValue: string;
 };
 
 export const capturedValues = proxy<{
