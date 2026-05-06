@@ -9,6 +9,7 @@ export type CapturedValue = {
   line: number;
   col: number;
   expression: string;
+  isVariable: boolean;
   history: ExecutionSnapshot[];
   totalCalls: number;
   lastValue: string;
@@ -22,7 +23,7 @@ export const capturedValues = proxy<{
 
 export const addCapturedValue = (cv: CapturedValue) => {
   const lineValues = [...(capturedValues.entries[cv.line] || [])];
-  
+
   const index = lineValues.findIndex(v => v.col === cv.col);
   if (index >= 0) {
     lineValues[index] = cv;
@@ -30,7 +31,7 @@ export const addCapturedValue = (cv: CapturedValue) => {
     lineValues.push(cv);
     lineValues.sort((a, b) => a.col - b.col);
   }
-  
+
   capturedValues.entries[cv.line] = lineValues;
 };
 

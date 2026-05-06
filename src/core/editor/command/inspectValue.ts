@@ -15,6 +15,7 @@ export const registerInspectValueCommand = () => {
       line: target.line,
       col: target.col,
       expression: target.expression,
+      isVariable: target.isVariable,
       history: captured.history,
       totalCalls: captured.totalCalls,
       lastValue: captured.lastValue

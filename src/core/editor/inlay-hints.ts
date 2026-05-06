@@ -21,7 +21,11 @@ export const registerInlayHintsProvider = () => {
         const lineLength = model.getLineContent(lineNum).length;
 
         const label = "# => " + values.map(v => {
-          const fullChain = [v.history[0].initial, ...v.history.map(h => h.result)];
+          const fullChain = [];
+          if (v.isVariable && v.history.length > 0) {
+            fullChain.push(v.history[0].initial);
+          }
+          v.history.forEach(h => fullChain.push(h.result));
 
           let displayValue = fullChain.join(' -> ');
           if (v.totalCalls > v.history.length) {
