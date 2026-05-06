@@ -5,7 +5,7 @@ import { subscribe } from 'valtio';
 export const registerInlayHintsProvider = () => {
   const onDidChangeInlayHints = new monaco.Emitter<void>();
 
-  subscribe(capturedValues.entries, () => {
+  subscribe(capturedValues, () => {
     onDidChangeInlayHints.fire();
   });
 

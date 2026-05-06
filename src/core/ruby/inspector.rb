@@ -1,4 +1,5 @@
 require "json"
+require "stringio"
 
 module Inspector
   def self.run(code, expression, target_line, is_variable = false)
@@ -49,12 +50,19 @@ module Inspector
       end
     end
 
+    original_stdout = $stdout
+    original_stderr = $stderr
+    $stdout = StringIO.new
+    $stderr = StringIO.new
+
     begin
       tp.enable do
         TOPLEVEL_BINDING.eval(code)
       end
     rescue => _e
     ensure
+      $stdout = original_stdout
+      $stderr = original_stderr
       tp.disable if tp.enabled?
     end
 
