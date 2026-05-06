@@ -20,5 +20,14 @@ export const registerInspectValueCommand = () => {
       totalCalls: captured.totalCalls,
       lastValue: captured.lastValue
     });
+
+    // 旧実装から引き継いだ強制再描画ロジック: 設定をパタパタさせてキャッシュを無効化する
+    const editor = monaco.editor.getEditors().find(e => e.getModel() === model);
+    if (editor) {
+      editor.updateOptions({ inlayHints: { enabled: 'off' } });
+      setTimeout(() => {
+        editor.updateOptions({ inlayHints: { enabled: 'on' } });
+      }, 50);
+    }
   });
 };
