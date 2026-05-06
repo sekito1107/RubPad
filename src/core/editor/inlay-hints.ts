@@ -18,6 +18,8 @@ export const registerInlayHintsProvider = () => {
         if (values.length === 0) return;
 
         const lineNum = Number(line);
+        if (lineNum < 1 || lineNum > model.getLineCount()) return;
+
         const lineLength = model.getLineContent(lineNum).length;
 
         const label = "# => " + values.map(v => {
