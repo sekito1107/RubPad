@@ -13,8 +13,12 @@ export default function Sidebar() {
         'bg-zinc-100 border-zinc-200',
         'dark:bg-zinc-800/50 dark:border-zinc-700'
       )}>
-        <h2 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-white">
-          Available Methods
+        <h2 className={clsx(
+          'text-[10px] font-bold uppercase tracking-widest',
+          'text-zinc-500',
+          'dark:text-white'
+        )}>
+          Methods In Use
         </h2>
       </div>
 
