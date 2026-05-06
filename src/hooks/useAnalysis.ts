@@ -2,14 +2,16 @@ import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { editor } from '../state/editor';
 import { analysis } from '../state/analysis';
+import { app } from '../state/app';
 import { scan } from '../core/ruby';
 
 export const useAnalysis = () => {
   const { code } = useSnapshot(editor);
+  const { status } = useSnapshot(app);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
-      if (!code) {
+      if (!code || !status.rbsReady) {
         analysis.methods = [];
         analysis.variables = [];
         return;
@@ -25,5 +27,5 @@ export const useAnalysis = () => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [code]);
+  }, [code, status.rbsReady]);
 };
