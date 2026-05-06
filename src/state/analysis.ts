@@ -6,7 +6,6 @@ export type MethodInfo = {
   col: number;
   info: {
     owner: string | null;
-    method_name: string | null;
     owner_type: 'class' | 'module' | null;
     is_singleton_call: boolean;
     has_instance: boolean;
