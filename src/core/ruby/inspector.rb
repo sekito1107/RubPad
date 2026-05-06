@@ -55,9 +55,12 @@ module Inspector
     $stdout = StringIO.new
     $stderr = StringIO.new
 
+    # 実行ごとにクリーンなバインディングを作成し、変数の残留を防ぐ
+    clean_binding = Object.new.instance_eval { binding }
+
     begin
       tp.enable do
-        TOPLEVEL_BINDING.eval(code)
+        clean_binding.eval(code)
       end
     rescue => _e
     ensure
