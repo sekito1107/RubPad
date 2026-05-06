@@ -23,9 +23,9 @@ export default function App() {
       { 'dark': theme === 'dark' }
     )}>
       <Header />
-      <main className="flex-1 flex overflow-hidden">
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-hidden">
+      <main className="flex-1 flex">
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1">
             <Editor />
           </div>
           <div className="h-1/3 border-t border-zinc-200 dark:border-zinc-800">
