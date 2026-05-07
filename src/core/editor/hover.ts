@@ -8,12 +8,12 @@ export const registerHoverProvider = () => {
       const pos = monacoToPrism(position);
       const target = await pick(model.getValue(), pos.line, pos.col);
 
-      if (!target || !target.expression) return null;
+      if (!target || !target.label) return null;
 
       return {
         contents: [
           { 
-            value: `[🔍 値を確認: ${target.expression}](command:rubox.inspectValue?${encodeURIComponent(JSON.stringify(target))})`,
+            value: `[🔍 値を確認: ${target.label}](command:rubox.inspectValue?${encodeURIComponent(JSON.stringify(target))})`,
             isTrusted: true
           }
         ]

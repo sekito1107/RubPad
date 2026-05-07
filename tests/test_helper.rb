@@ -16,14 +16,14 @@ class SystemTest < Minitest::Test
   include Capybara::DSL
   include Capybara::Minitest::Assertions
 
-  # Ruby (WASM) の初期化完了を待機
+  # Ruby の初期化完了を待機
   def wait_wasm_loading
-    find("[data-testid='status-runtime'][data-ready='true']", wait: 30)
+    find("[data-testid='status-ruby'][data-ready='true']", wait: 30)
   end
 
-  # 解析エンジン (RBS) の初期化完了を待機
+  # 解析エンジンの初期化完了を待機
   def wait_analyzer_ready
-    find("[data-testid='status-analyzer'][data-ready='true']", wait: 30)
+    find("[data-testid='status-ruby'][data-ready='true']", wait: 30)
   end
 
   def teardown

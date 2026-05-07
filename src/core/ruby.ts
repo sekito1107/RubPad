@@ -44,8 +44,8 @@ export const pick = async (code: string, line: number, col: number) => {
   return JSON.parse(raw);
 };
 
-export const inspect = async (code: string, expression: string, line: number, kind: 'variable' | 'assignment' | 'expression', endLine: number) => {
-  const raw = await send(`Inspector.run(${JSON.stringify(code)}, ${JSON.stringify(expression)}, ${line}, ${JSON.stringify(kind)}, ${endLine})`);
+export const inspect = async (code: string, expression: string, line: number, kind: 'variable' | 'assignment' | 'expression', endLine: number, receiver: string | null = null) => {
+  const raw = await send(`Inspector.run(${JSON.stringify(code)}, ${JSON.stringify(expression)}, ${line}, ${JSON.stringify(kind)}, ${endLine}, ${JSON.stringify(receiver)})`);
   return JSON.parse(raw);
 };
 

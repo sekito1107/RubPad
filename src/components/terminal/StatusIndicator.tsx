@@ -5,6 +5,9 @@ import { app } from '../../state/app';
 export default function StatusIndicator() {
   const { status } = useSnapshot(app);
 
+  const isRubyReady = status.rbsReady;
+  const isRubyInitializing = status.wasmReady && !status.rbsReady;
+
   return (
     <div className="flex items-center gap-2">
       <Badge 
@@ -17,29 +20,21 @@ export default function StatusIndicator() {
         tooltip="Monaco Editor is ready"
       />
       <Badge 
-        testId="status-runtime"
+        testId="status-ruby"
         icon="💎" 
-        label="Runtime" 
-        ready={status.wasmReady} 
+        label="Ruby" 
+        ready={isRubyReady} 
+        initializing={isRubyInitializing}
         activeColor="bg-emerald-500" 
         shadowColor="shadow-emerald-500/50"
-        tooltip="Ruby WASM Runtime is ready"
-      />
-      <Badge 
-        testId="status-analyzer"
-        icon="🔍" 
-        label="Analyzer" 
-        ready={status.rbsReady} 
-        activeColor="bg-purple-500" 
-        shadowColor="shadow-purple-500/50"
-        tooltip="RBS Analyzer is ready"
+        tooltip={isRubyReady ? "Ruby is ready" : isRubyInitializing ? "Initializing..." : "Starting..."}
       />
       <span className={clsx(
         'text-[9px] italic ml-1 select-none whitespace-nowrap',
         'text-zinc-500',
         'dark:text-zinc-300'
       )}>
-        — Features activate as their indicators glow
+        — GLOW INDICATES SYSTEM IS READY TO USE
       </span>
     </div>
   );
@@ -50,12 +45,13 @@ interface BadgeProps {
   icon: string;
   label: string;
   ready: boolean;
+  initializing?: boolean;
   activeColor: string;
   shadowColor: string;
   tooltip: string;
 }
 
-function Badge({ testId, icon, label, ready, activeColor, shadowColor, tooltip }: BadgeProps) {
+function Badge({ testId, icon, label, ready, initializing, activeColor, shadowColor, tooltip }: BadgeProps) {
   return (
     <div 
       title={tooltip}
@@ -71,8 +67,8 @@ function Badge({ testId, icon, label, ready, activeColor, shadowColor, tooltip }
       <div className="relative">
         <div className={clsx(
           'w-1.5 h-1.5 rounded-full transition-all duration-700',
-          ready ? `${activeColor} ${shadowColor} shadow-[0_0_8px]` : 'bg-zinc-300',
-          ready ? '' : 'dark:bg-zinc-600'
+          ready ? `${activeColor} ${shadowColor} shadow-[0_0_8px]` : initializing ? 'bg-yellow-500 shadow-yellow-500/50 shadow-[0_0_8px] animate-pulse' : 'bg-zinc-300',
+          ready || initializing ? '' : 'dark:bg-zinc-600'
         )} />
       </div>
       <span className={clsx(

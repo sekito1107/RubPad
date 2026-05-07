@@ -16,20 +16,18 @@ module Picker
     kind = determine_kind(target.class.name.split('::').last)
     label = kind == 'expression' ? target.slice : target.name.to_s
 
-    content = statement.slice
-    target_loc = target.location
-    statement_loc = statement.location
-
     {
       label: label,
-      content: content,
-      line: target_loc.start_line,
-      col: target_loc.start_column,
-      contentLine: statement_loc.start_line,
-      contentCol: statement_loc.start_column,
-      endLine: statement_loc.end_line,
-      endCol: statement_loc.end_column,
-      kind: kind
+      content: statement.slice,
+      line: target.location.start_line,
+      col: target.location.start_column,
+      contentLine: statement.location.start_line,
+      contentCol: statement.location.start_column,
+      endLine: statement.location.end_line,
+      endCol: statement.location.end_column,
+      kind: kind,
+      expression: target.slice,
+      receiver: (target.receiver.slice rescue false)
     }.to_json
   end
 
