@@ -11,7 +11,7 @@ module Inspector
     waiting_for_after = false
 
     tp = TracePoint.new(:line, :return, :b_return, :b_call) do |t|
-      if (t.event == :line || t.event == :b_call) && t.lineno == target_line
+      if target_event?(t, kind, target_line)
         begin
           val = t.binding.eval(expression).inspect
         rescue NameError
@@ -86,4 +86,15 @@ module Inspector
       lastValue: last_value || "(not executed)"
     }.to_json
   end
+
+  def self.target_event?(tp, kind, target_line)
+    return false if tp.lineno != target_line
+
+    if kind == 'expression'
+      tp.event == :line
+    else
+      tp.event == :line || tp.event == :b_call
+    end
+  end
+  private_class_method :target_event?
 end

@@ -29,13 +29,16 @@ class Selector
     leaf = path.last
     leaf_type = leaf.class.name.split('::').last
 
-    # リーフから順に遡り、最初に現れる「解析可能なノード」をターゲットにする
+    # ターゲットが構造上のノード（Block, Arguments 等）の場合は解析を行わない
+    if INVALID_TARGET_NODES.include?(leaf_type)
+      return nil
+    end
+
     target = path.reverse.find do |node|
       type = node.class.name.split('::').last
       !INVALID_TARGET_NODES.include?(type)
     end
 
-    # リーフがリテラルの場合は、親のコレクション（配列等）を優先する既存ロジック
     if target && LITERAL_NODES.include?(leaf_type)
       collection = path.reverse.find do |node|
         COLLECTION_NODES.include?(node.class.name.split('::').last)
