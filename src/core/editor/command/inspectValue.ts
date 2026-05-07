@@ -8,6 +8,7 @@ export const registerInspectValueCommand = () => {
     col: number;
     contentLine: number;
     contentCol: number;
+    endLine: number;
     label: string;
     content: string;
     kind: 'variable' | 'assignment' | 'expression';
@@ -17,7 +18,7 @@ export const registerInspectValueCommand = () => {
     const model = monaco.editor.getModels()[0];
     const code = model.getValue();
 
-    const captured = await inspect(code, target.label, target.line, target.kind);
+    const captured = await inspect(code, target.label, target.line, target.kind, target.endLine);
 
     addCapturedValue({
       line: target.line,
@@ -28,7 +29,6 @@ export const registerInspectValueCommand = () => {
       content: target.content,
       kind: target.kind,
       history: captured.history,
-      totalCalls: captured.totalCalls,
       lastValue: captured.lastValue
     });
     // キャッシュの影響で再描写されない為、一時的に設定を変更して再描写させる

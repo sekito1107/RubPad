@@ -58,7 +58,7 @@ export const registerInlayHintsProvider = () => {
           v.history.forEach(h => fullChain.push(h.result));
 
           let displayValue = fullChain.join(' -> ');
-          if (v.totalCalls > v.history.length) {
+          if (v.history.length === 10 && v.lastValue !== v.history[v.history.length - 1].result) {
             displayValue += ` -> ... -> ${v.lastValue}`;
           }
 

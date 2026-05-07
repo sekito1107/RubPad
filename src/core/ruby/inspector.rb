@@ -2,9 +2,8 @@ require "json"
 require "stringio"
 
 module Inspector
-  def self.run(code, expression, target_line, kind)
+  def self.run(code, expression, target_line, kind, end_line)
     history = []
-    total_calls = 0
     last_value = nil
     
     current_before = nil
@@ -13,9 +12,16 @@ module Inspector
 
     tp = TracePoint.new(:line, :return, :b_return, :b_call) do |t|
       if (t.event == :line || t.event == :b_call) && t.lineno == target_line
-        total_calls += 1
         begin
           val = t.binding.eval(expression).inspect
+        rescue NameError
+          if kind == 'variable' || kind == 'assignment'
+            current_before = nil
+            current_binding = t.binding
+            waiting_for_after = true
+            next
+          end
+          val = "(error)"
         rescue => e
           val = "(error)"
         end
@@ -34,19 +40,17 @@ module Inspector
       end
 
       if waiting_for_after
-        begin
-          after_val = current_binding.eval(expression).inspect
-        rescue => e
-          after_val = "(error)"
+        if t.lineno > end_line || t.event == :return
+          begin
+            after_val = current_binding.eval(expression).inspect
+            if history.length < 10
+              history << { initial: current_before, result: after_val }
+            end
+            last_value = after_val
+          rescue => e
+          end
+          waiting_for_after = false
         end
-        
-        if history.length < 10
-          history << { initial: current_before, result: after_val }
-        end
-        
-        last_value = after_val
-        waiting_for_after = false
-        current_binding = nil
       end
     end
 
@@ -64,6 +68,14 @@ module Inspector
       end
     rescue => _e
     ensure
+      if waiting_for_after
+        begin
+          after_val = current_binding.eval(expression).inspect
+          history << { initial: current_before, result: after_val } if history.length < 10
+          last_value = after_val
+        rescue => _e
+        end
+      end
       $stdout = original_stdout
       $stderr = original_stderr
       tp.disable if tp.enabled?
@@ -71,7 +83,6 @@ module Inspector
 
     { 
       history: history,
-      totalCalls: total_calls,
       lastValue: last_value || "(not executed)"
     }.to_json
   end

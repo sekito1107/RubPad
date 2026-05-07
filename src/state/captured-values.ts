@@ -14,7 +14,6 @@ export type CapturedValue = {
   content: string;
   kind: 'variable' | 'assignment' | 'expression';
   history: ExecutionSnapshot[];
-  totalCalls: number;
   lastValue: string;
 };
 
