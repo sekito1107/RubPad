@@ -14,9 +14,9 @@ module Inspector
       if target_event?(t, kind, target_line) && !waiting_for_after
         if kind == 'assignment' || receiver
           begin
-            # 実行前にレシーバがあれば評価、なければ nil とする。
-            # 副作用を避けるため、ここでは式全体(expression)を eval しない。
             current_before = receiver ? t.binding.eval(receiver).inspect : nil
+          rescue NameError
+            current_before = "nil"
           rescue => e
             current_before = "(error)"
           end

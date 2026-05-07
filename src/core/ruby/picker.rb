@@ -15,6 +15,7 @@ module Picker
 
     kind = determine_kind(target.class.name.split('::').last)
     label = kind == 'expression' ? target.slice : target.name.to_s
+    receiver = determine_receiver(target, kind)
 
     {
       label: label,
@@ -27,11 +28,21 @@ module Picker
       endCol: statement.location.end_column,
       kind: kind,
       expression: target.slice,
-      receiver: (target.receiver.slice rescue false)
+      receiver: receiver
     }.to_json
   end
 
   private
+
+  def self.determine_receiver(target, kind)
+    if target.respond_to?(:receiver) && target.receiver
+      target.receiver.slice
+    elsif kind == 'assignment' && target.respond_to?(:name)
+      target.name.to_s
+    else
+      false
+    end
+  end
 
   def self.determine_kind(node_type)
     return 'assignment' if ASSIGNMENT_KEYWORDS.any? { |kw| node_type.include?(kw) }
