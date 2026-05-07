@@ -2,7 +2,7 @@ require "json"
 require "stringio"
 
 module Inspector
-  def self.run(code, expression, target_line, is_variable = false)
+  def self.run(code, expression, target_line, kind)
     history = []
     total_calls = 0
     last_value = nil
@@ -11,8 +11,8 @@ module Inspector
     current_binding = nil
     waiting_for_after = false
 
-    tp = TracePoint.new(:line, :return, :b_return) do |t|
-      if t.event == :line && t.lineno == target_line
+    tp = TracePoint.new(:line, :return, :b_return, :b_call) do |t|
+      if (t.event == :line || t.event == :b_call) && t.lineno == target_line
         total_calls += 1
         begin
           val = t.binding.eval(expression).inspect
@@ -20,13 +20,13 @@ module Inspector
           val = "(error)"
         end
 
-        if is_variable
+        if kind == 'assignment'
           current_before = val
           current_binding = t.binding
           waiting_for_after = true
         else
           if history.length < 10
-            history << { initial: val, result: val }
+            history << { initial: nil, result: val }
           end
           last_value = val
         end

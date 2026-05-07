@@ -10,14 +10,14 @@ export const registerInspectValueCommand = () => {
     contentCol: number;
     label: string;
     content: string;
-    isVariable: boolean;
+    kind: 'variable' | 'assignment' | 'expression';
   }) => {
     if (!target) return;
 
     const model = monaco.editor.getModels()[0];
     const code = model.getValue();
 
-    const captured = await inspect(code, target.label, target.line, target.isVariable);
+    const captured = await inspect(code, target.label, target.line, target.kind);
 
     addCapturedValue({
       line: target.line,
@@ -26,7 +26,7 @@ export const registerInspectValueCommand = () => {
       contentCol: target.contentCol,
       label: target.label,
       content: target.content,
-      isVariable: target.isVariable,
+      kind: target.kind,
       history: captured.history,
       totalCalls: captured.totalCalls,
       lastValue: captured.lastValue

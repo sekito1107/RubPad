@@ -2,22 +2,19 @@ require "prism"
 require "json"
 
 module Picker
+  VARIABLE_KEYWORDS = ["Variable", "Parameter", "Constant"]
+  ASSIGNMENT_KEYWORDS = ["WriteNode", "TargetNode"]
+
   def self.run(code, line, col)
     result = Prism.parse(code)
     nodes = Selector.find_node(result.value, line, col)
-    return {}.to_json unless nodes
+    return {}.to_json if !nodes || nodes[:target].nil?
 
     target = nodes[:target]
     statement = nodes[:statement]
 
-    node_type = target.class.name.split('::').last
-    is_variable = node_type.end_with?("WriteNode") || node_type.end_with?("TargetNode")
-
-    if is_variable
-      label = target.name.to_s
-    else
-      label = target.slice
-    end
+    kind = determine_kind(target.class.name.split('::').last)
+    label = kind == 'expression' ? target.slice : target.name.to_s
 
     content = statement.slice
     target_loc = target.location
@@ -32,7 +29,15 @@ module Picker
       contentCol: statement_loc.start_column,
       endLine: statement_loc.end_line,
       endCol: statement_loc.end_column,
-      isVariable: is_variable
+      kind: kind
     }.to_json
+  end
+
+  private
+
+  def self.determine_kind(node_type)
+    return 'assignment' if ASSIGNMENT_KEYWORDS.any? { |kw| node_type.include?(kw) }
+    return 'variable' if VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) }
+    'expression'
   end
 end

@@ -52,7 +52,7 @@ export const registerInlayHintsProvider = () => {
 
         const label = "# => " + validValues.map(v => {
           const fullChain = [];
-          if (v.isVariable && v.history.length > 0) {
+          if (v.kind === 'assignment' && v.history.length > 0 && v.history[0].initial !== null) {
             fullChain.push(v.history[0].initial);
           }
           v.history.forEach(h => fullChain.push(h.result));

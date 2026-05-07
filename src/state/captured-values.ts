@@ -12,7 +12,7 @@ export type CapturedValue = {
   contentCol: number;
   label: string;
   content: string;
-  isVariable: boolean;
+  kind: 'variable' | 'assignment' | 'expression';
   history: ExecutionSnapshot[];
   totalCalls: number;
   lastValue: string;

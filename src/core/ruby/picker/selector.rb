@@ -15,6 +15,12 @@ class Selector
     'ImaginaryNode'
   ]
 
+  INVALID_TARGET_NODES = [
+    'BlockNode',
+    'BlockParametersNode',
+    'ParametersNode'
+  ]
+
   def self.find_node(root, line, col)
     path = []
     found = search_path(root, line, col, path)
@@ -23,8 +29,14 @@ class Selector
     leaf = path.last
     leaf_type = leaf.class.name.split('::').last
 
-    target = leaf
-    if LITERAL_NODES.include?(leaf_type)
+    # リーフから順に遡り、最初に現れる「解析可能なノード」をターゲットにする
+    target = path.reverse.find do |node|
+      type = node.class.name.split('::').last
+      !INVALID_TARGET_NODES.include?(type)
+    end
+
+    # リーフがリテラルの場合は、親のコレクション（配列等）を優先する既存ロジック
+    if target && LITERAL_NODES.include?(leaf_type)
       collection = path.reverse.find do |node|
         COLLECTION_NODES.include?(node.class.name.split('::').last)
       end
@@ -36,7 +48,7 @@ class Selector
       type != 'ProgramNode' && type != 'StatementsNode'
     end
 
-    { target: target, statement: statement || target }
+    { target: target, statement: statement || leaf }
   end
 
   private
