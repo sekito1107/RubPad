@@ -50,9 +50,9 @@ export const registerInlayHintsProvider = () => {
 
         const lineLength = model.getLineContent(lineNum).length;
 
-        const label = "# => " + validValues.map(v => {
+        const label = validValues.map(v => {
           const fullChain = [];
-          if (v.kind === 'assignment' && v.history.length > 0 && v.history[0].initial !== null) {
+          if (v.history.length > 0 && v.history[0].initial !== null) {
             fullChain.push(v.history[0].initial);
           }
           v.history.forEach(h => fullChain.push(h.result));

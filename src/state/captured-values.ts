@@ -24,17 +24,23 @@ export const capturedValues = proxy<{
 });
 
 export const addCapturedValue = (cv: CapturedValue) => {
-  const lineValues = [...(capturedValues.entries[cv.line] || [])];
+  // 表示用データとしての側面を考慮し、ラベルが長すぎる場合は切り詰める
+  const processedLabel = cv.label.length > 15
+    ? cv.label.substring(0, 12) + '...'
+    : cv.label;
 
-  const index = lineValues.findIndex(v => v.col === cv.col);
+  const processedCv = { ...cv, label: processedLabel };
+  const lineValues = [...(capturedValues.entries[processedCv.line] || [])];
+
+  const index = lineValues.findIndex(v => v.col === processedCv.col);
   if (index >= 0) {
-    lineValues[index] = cv;
+    lineValues[index] = processedCv;
   } else {
-    lineValues.push(cv);
+    lineValues.push(processedCv);
     lineValues.sort((a, b) => a.col - b.col);
   }
 
-  capturedValues.entries[cv.line] = lineValues;
+  capturedValues.entries[processedCv.line] = lineValues;
 };
 
 export const clearCapturedValues = () => {
