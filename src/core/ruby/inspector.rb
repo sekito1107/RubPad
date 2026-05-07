@@ -1,5 +1,5 @@
-require "json"
 require "stringio"
+require "prism"
 
 module Inspector
   class Session
@@ -69,7 +69,21 @@ module Inspector
     end
 
     def execution_finished?(tp)
-      [:return, :b_return, :c_return].include?(tp.event) || (tp.event == :line && tp.lineno > @end_line)
+      name = target_method_name
+      if name
+        # メソッドを追っている時は、そのメソッドの戻り値(return/c_return)かつ名前が一致した時だけが「完了」
+        return [:return, :c_return].include?(tp.event) && tp.method_id == name
+      end
+
+      # 変数などを追っている時は、ブロックの終了(b_return)や行の移動が「完了」の合図
+      tp.event == :b_return || (tp.event == :line && tp.lineno > @end_line)
+    end
+
+    def target_method_name
+      return nil unless @kind == 'expression'
+      parsed = Prism.parse(@expression)
+      node = parsed.value.statements.body.first
+      node.is_a?(Prism::CallNode) ? node.name.to_sym : nil
     end
 
     # --- キャプチャ実行メソッド ---
@@ -90,7 +104,7 @@ module Inspector
     end
 
     def extract_result_from(tp)
-      if [:return, :b_return, :c_return].include?(tp.event)
+      if [:return, :c_return].include?(tp.event) && tp.method_id == target_method_name
         tp.return_value
       else
         target = (@kind == 'assignment') ? @pre_execution_target : @expression
