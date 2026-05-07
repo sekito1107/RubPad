@@ -2,7 +2,7 @@ require "json"
 require "stringio"
 
 module Inspector
-  def self.run(code, expression, target_line, kind, end_line)
+  def self.run(code, expression, target_line, kind, end_line, receiver)
     history = []
     last_value = nil
     
@@ -11,30 +11,24 @@ module Inspector
     waiting_for_after = false
 
     tp = TracePoint.new(:line, :return, :b_return, :b_call) do |t|
-      if target_event?(t, kind, target_line)
-        begin
-          val = t.binding.eval(expression).inspect
-        rescue NameError
-          if kind == 'variable' || kind == 'assignment'
-            current_before = nil
-            current_binding = t.binding
-            waiting_for_after = true
-            next
+      if target_event?(t, kind, target_line) && !waiting_for_after
+        if kind == 'assignment' || receiver
+          begin
+            # 実行前にレシーバがあれば評価、なければ nil とする。
+            # 副作用を避けるため、ここでは式全体(expression)を eval しない。
+            current_before = receiver ? t.binding.eval(receiver).inspect : nil
+          rescue => e
+            current_before = "(error)"
           end
-          val = "(error)"
-        rescue => e
-          val = "(error)"
-        end
-
-        if kind == 'assignment'
-          current_before = val
           current_binding = t.binding
           waiting_for_after = true
         else
-          if history.length < 10
-            history << { initial: nil, result: val }
+          begin
+            val = t.binding.eval(expression).inspect
+            history << { initial: nil, result: val } if history.length < 10
+            last_value = val
+          rescue => e
           end
-          last_value = val
         end
         next
       end
@@ -90,10 +84,10 @@ module Inspector
   def self.target_event?(tp, kind, target_line)
     return false if tp.lineno != target_line
 
-    if kind == 'expression'
-      tp.event == :line
-    else
+    if kind == 'assignment'
       tp.event == :line || tp.event == :b_call
+    else
+      tp.event == :line
     end
   end
   private_class_method :target_event?
