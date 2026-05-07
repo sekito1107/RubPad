@@ -15,7 +15,9 @@ module Picker
 
     kind = determine_kind(target.class.name.split('::').last)
     label = kind == 'expression' ? target.slice : target.name.to_s
-    receiver = determine_receiver(target, kind)
+    
+    # 実行前の状態を測るためのターゲット（レシーバまたは代入対象の変数名）
+    pre_execution_target = determine_pre_execution_target(target, kind)
 
     {
       label: label,
@@ -28,17 +30,17 @@ module Picker
       endCol: statement.location.end_column,
       kind: kind,
       expression: target.slice,
-      receiver: receiver
+      receiver: pre_execution_target
     }.to_json
   end
 
   private
 
-  def self.determine_receiver(target, kind)
+  def self.determine_pre_execution_target(target, kind)
     if target.respond_to?(:receiver) && target.receiver
       target.receiver.slice
     elsif kind == 'assignment' && target.respond_to?(:name)
-      target.name.to_s
+      target.name.to_s # 代入時は変数名をターゲットにする
     else
       false
     end
