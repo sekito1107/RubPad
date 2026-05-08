@@ -15,8 +15,6 @@ module Picker
 
     kind = determine_kind(target.class.name.split('::').last)
     label = kind == 'expression' ? target.slice : target.name.to_s
-    
-    # 実行前の状態を測るためのターゲット（レシーバまたは代入対象の変数名）
     pre_execution_target = determine_pre_execution_target(target, kind)
 
     {
@@ -40,7 +38,7 @@ module Picker
     if target.respond_to?(:receiver) && target.receiver
       target.receiver.slice
     elsif kind == 'assignment' && target.respond_to?(:name)
-      target.name.to_s # 代入時は変数名をターゲットにする
+      target.name.to_s
     else
       false
     end
