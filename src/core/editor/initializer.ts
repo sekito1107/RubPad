@@ -2,7 +2,7 @@ import * as monaco from 'monaco-editor';
 // @ts-ignore
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import { loadWASM as loadOnigurumaEngine, OnigScanner, OnigString } from 'vscode-oniguruma';
-import { Registry, parseRawGrammar } from 'vscode-textmate';
+import { INITIAL, Registry, parseRawGrammar } from 'vscode-textmate';
 
 function ensureMonacoEnvironment() {
   if (self.MonacoEnvironment) return;
@@ -11,7 +11,7 @@ function ensureMonacoEnvironment() {
   };
 }
 
-async function setupTextMate(editorInstance: monaco.editor.IStandaloneCodeEditor) {
+async function setupTextMate() {
   // WASMとテーマファイルを並列で読み込み
   const [onigRes, themeRes] = await Promise.all([
     fetch('/onig.wasm'),
@@ -44,18 +44,49 @@ async function setupTextMate(editorInstance: monaco.editor.IStandaloneCodeEditor
   // Registryにテーマを適用
   registry.setTheme(theme);
 
-  // Monaco側にテーマを定義
+  // TextMateのテーマをMonacoのルール形式に変換
+  const monacoRules: monaco.editor.ITokenThemeRule[] = [];
+  if (theme.settings) {
+    theme.settings.forEach((setting: any) => {
+      if (!setting.scope) return;
+      const scopes = Array.isArray(setting.scope) ? setting.scope : [setting.scope];
+      scopes.forEach((scope) => {
+        monacoRules.push({
+          token: scope,
+          foreground: setting.settings.foreground,
+          fontStyle: setting.settings.fontStyle
+        });
+      });
+    });
+  }
+
+  // Monaco側にネイティブなテーマとして定義
   monaco.editor.defineTheme('vscode-dark', {
     base: 'vs-dark',
     inherit: true,
-    rules: [],
+    rules: monacoRules,
     colors: theme.colors
   });
   monaco.editor.setTheme('vscode-dark');
 
-  // 言語ID（ruby）とスコープ名（source.ruby）のマッピング
-  const grammars = new Map();
-  grammars.set('ruby', 'source.ruby');
+  // 文法のロード
+  const grammar = await registry.loadGrammar('source.ruby');
+  if (!grammar) return;
+
+  // Monacoのトークナイザーを上書き
+  monaco.languages.setTokensProvider('ruby', {
+    getInitialState: () => INITIAL,
+    tokenize: (line, state) => {
+      const res = grammar.tokenizeLine(line, state as any);
+      return {
+        tokens: res.tokens.map(t => ({
+          startIndex: t.startIndex,
+          scopes: t.scopes[t.scopes.length - 1]
+        })),
+        endState: res.ruleStack
+      };
+    }
+  });
 }
 
 export function run(
@@ -76,13 +107,16 @@ export function run(
     scrollBeyondLastLine: false,
     lineNumbers: 'on',
     padding: { top: 16, bottom: 16 },
+    bracketPairColorization: {
+      enabled: true
+    },
     inlayHints: {
       enabled: 'on'
     }
   });
 
   // バックグラウンドでTextMateのセットアップを開始
-  setupTextMate(editorInstance);
+  setupTextMate();
 
   return editorInstance;
 }
