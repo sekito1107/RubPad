@@ -48,10 +48,10 @@ class InlayHintsTest < SystemTest
   end
 
   def test_長い変数名の省略表示
-    type_code("very_long_name = 1")
-    find(".monaco-editor .mtk1", text: "very_long_name").hover
-    find("a", text: "値を確認: very_long_name").click
-    assert_text "very_long_va...: nil -> 1"
+    type_code("a_very_long_variable_name = 1")
+    find(".monaco-editor .mtk1", text: "a_very_long_variable_name").hover
+    find("a", text: "値を確認: a_very_long_variable_name").click
+    assert_text "a_very_long_...: nil -> 1"
   end
 
   def test_メソッドチェーンの中間状態の表示
