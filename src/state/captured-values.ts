@@ -30,17 +30,9 @@ export const addCapturedValue = (cv: CapturedValue) => {
     : cv.label;
 
   const processedCv = { ...cv, label: processedLabel };
-  const lineValues = [...(capturedValues.entries[processedCv.line] || [])];
-
-  const index = lineValues.findIndex(v => v.col === processedCv.col);
-  if (index >= 0) {
-    lineValues[index] = processedCv;
-  } else {
-    lineValues.push(processedCv);
-    lineValues.sort((a, b) => a.col - b.col);
-  }
-
-  capturedValues.entries[processedCv.line] = lineValues;
+  
+  // 1行につきヒントは1つのみ表示する（最新のもので上書き）
+  capturedValues.entries[processedCv.line] = [processedCv];
 };
 
 export const clearCapturedValues = () => {
