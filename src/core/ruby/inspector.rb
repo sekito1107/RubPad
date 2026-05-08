@@ -31,7 +31,7 @@ module Inspector
     def create_observer
       TracePoint.new(:line, :return, :b_return, :c_return) do |tp|
         if initial_value_captured?
-          record_post_execution_result(tp) if execution_finished?(tp)
+          record_post_execution_result(tp) if capture_ready?(tp)
         elsif reached_target_line?(tp)
           @saved_binding = tp.binding
           record_pre_execution_state(tp)
@@ -71,14 +71,16 @@ module Inspector
       tp.event == :line && tp.lineno == @target_line
     end
 
-    def execution_finished?(tp)
-      name = target_method_name
-      if name
-        # メソッドを追っている時は、そのメソッドの戻り値(return/c_return)かつ名前が一致した時だけが「完了」
-        return [:return, :c_return].include?(tp.event) && tp.method_id == name
+    def capture_ready?(tp)
+      # 変数参照の場合は、ターゲット行に到達した時点ですでに準備完了
+      return true if @kind == 'variable'
+
+      if target_method_name
+         # メソッド呼び出しの場合は、そのメソッドの終了時が準備完了
+        return [:return, :c_return].include?(tp.event) && tp.method_id == target_method_name
       end
 
-      # 変数などを追っている時は、ブロックの終了(b_return)や行の移動が「完了」の合図
+      # その他（代入など）は、行の実行が終わった時が準備完了
       [:return, :c_return, :b_return].include?(tp.event) || (tp.event == :line && tp.lineno > @end_line)
     end
 
