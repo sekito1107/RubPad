@@ -5,6 +5,8 @@ import { lspToMonaco } from '../utils/lsp-to-monaco';
 import { MethodCall, VariableDefinition } from '../state/analysis';
 import { prismToMonaco } from '../utils/prism-to-monaco';
 
+const encode = (str: string) => btoa(unescape(encodeURIComponent(str)));
+
 
 const server = new YarvServer();
 const queue: ((value: string) => void)[] = [];
@@ -22,16 +24,16 @@ const send = (code: string): Promise<string> => {
 };
 
 export const execute = (code: string): Promise<string> => {
-  return send(`Executor.run(${JSON.stringify(code)})`);
+  return send(`require 'base64'; Executor.run(Base64.decode64('${encode(code)}').force_encoding('UTF-8'))`);
 };
 
 export const analyze = async (code: string): Promise<monaco.editor.IMarkerData[]> => {
-  const raw = await send(`Diagnostics.run(${JSON.stringify(code)})`);
+  const raw = await send(`require 'base64'; Diagnostics.run(Base64.decode64('${encode(code)}').force_encoding('UTF-8'))`);
   return lspToMonaco(JSON.parse(raw));
 };
 
 export const scan = async (code: string): Promise<{ methods: MethodCall[], variables: VariableDefinition[] }> => {
-  const raw = await send(`Analyzer.run(${JSON.stringify(code)})`);
+  const raw = await send(`require 'base64'; Analyzer.run(Base64.decode64('${encode(code)}').force_encoding('UTF-8'))`);
   const { methods, variables } = JSON.parse(raw);
   return {
     methods: prismToMonaco(methods),
@@ -40,12 +42,16 @@ export const scan = async (code: string): Promise<{ methods: MethodCall[], varia
 };
 
 export const pick = async (code: string, line: number, col: number) => {
-  const raw = await send(`Picker.run(${JSON.stringify(code)}, ${line}, ${col})`);
+  const raw = await send(`require 'base64'; Picker.run(Base64.decode64('${encode(code)}').force_encoding('UTF-8'), ${line}, ${col})`);
   return JSON.parse(raw);
 };
 
 export const inspect = async (code: string, expression: string, line: number, kind: 'variable' | 'assignment' | 'expression', endLine: number, receiver: string | null = null) => {
-  const raw = await send(`Inspector.run(${JSON.stringify(code)}, ${JSON.stringify(expression)}, ${line}, ${JSON.stringify(kind)}, ${endLine}, ${JSON.stringify(receiver)})`);
+  const encodedCode = encode(code);
+  const encodedExpr = encode(expression);
+  const encodedReceiver = receiver ? `Base64.decode64('${encode(receiver)}').force_encoding('UTF-8')` : 'nil';
+  
+  const raw = await send(`require 'base64'; Inspector.run(Base64.decode64('${encodedCode}').force_encoding('UTF-8'), Base64.decode64('${encodedExpr}').force_encoding('UTF-8'), ${line}, ${JSON.stringify(kind)}, ${endLine}, ${encodedReceiver})`);
   return JSON.parse(raw);
 };
 
