@@ -1,3 +1,4 @@
+require "json"
 require "stringio"
 require "prism"
 
@@ -16,6 +17,7 @@ module Inspector
       @history = []
       @last_value = nil
       @initial_value = UNDEFINED
+      @saved_binding = nil
     end
 
     def execute(code)
@@ -31,6 +33,7 @@ module Inspector
         if initial_value_captured?
           record_post_execution_result(tp) if execution_finished?(tp)
         elsif reached_target_line?(tp)
+          @saved_binding = tp.binding
           record_pre_execution_state(tp)
         end
       end
@@ -76,14 +79,25 @@ module Inspector
       end
 
       # 変数などを追っている時は、ブロックの終了(b_return)や行の移動が「完了」の合図
-      tp.event == :b_return || (tp.event == :line && tp.lineno > @end_line)
+      [:return, :c_return, :b_return].include?(tp.event) || (tp.event == :line && tp.lineno > @end_line)
     end
 
     def target_method_name
-      return nil unless @kind == 'expression'
-      parsed = Prism.parse(@expression)
-      node = parsed.value.statements.body.first
-      node.is_a?(Prism::CallNode) ? node.name.to_sym : nil
+      return nil if @kind == 'variable'
+      return @target_method_name if defined?(@target_method_name)
+      @target_method_name = begin
+        parsed = Prism.parse(@expression)
+        return nil unless parsed.success?
+        node = parsed.value.statements.body.first
+        
+        if node.is_a?(Prism::CallNode)
+          node.name.to_sym
+        elsif node.respond_to?(:value) && node.value.is_a?(Prism::CallNode)
+          node.value.name.to_sym
+        end
+      rescue
+        nil
+      end
     end
 
     # --- キャプチャ実行メソッド ---
@@ -108,7 +122,8 @@ module Inspector
         tp.return_value
       else
         target = (@kind == 'assignment') ? @pre_execution_target : @expression
-        tp.binding.eval(target)
+        binding_to_use = @saved_binding || tp.binding
+        binding_to_use.eval(target)
       end
     rescue
       "(error)"
