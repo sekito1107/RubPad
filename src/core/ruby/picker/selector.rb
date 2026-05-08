@@ -80,4 +80,5 @@ class Selector
     end
     true
   end
+
 end
