@@ -37,7 +37,7 @@ module Picker
   def self.determine_pre_execution_target(target, kind)
     if target.respond_to?(:receiver) && target.receiver
       target.receiver.slice
-    elsif kind == 'assignment' && target.respond_to?(:name)
+    elsif (kind == 'assignment' || kind == 'variable') && target.respond_to?(:name)
       target.name.to_s
     else
       false
