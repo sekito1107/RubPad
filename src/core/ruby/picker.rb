@@ -2,7 +2,8 @@ require "prism"
 require "json"
 
 module Picker
-  VARIABLE_KEYWORDS = ["Variable", "Parameter", "Constant"]
+  BLOCK_VARIABLE_KEYWORDS = ["Parameter"]
+  VARIABLE_KEYWORDS = ["Variable", "Constant"]
   ASSIGNMENT_KEYWORDS = ["WriteNode", "TargetNode"]
 
   def self.run(code, line, col)
@@ -13,7 +14,7 @@ module Picker
     target = nodes[:target]
     statement = nodes[:statement]
 
-    kind = determine_kind(target.class.name.split('::').last)
+    kind = determine_kind(target.class.name.split('::').last, nodes[:path])
     label = kind == 'expression' ? target.slice : target.name.to_s
     pre_execution_target = determine_pre_execution_target(target, kind)
 
@@ -37,15 +38,22 @@ module Picker
   def self.determine_pre_execution_target(target, kind)
     if target.respond_to?(:receiver) && target.receiver
       target.receiver.slice
-    elsif (kind == 'assignment' || kind == 'variable') && target.respond_to?(:name)
+    elsif (kind == 'assignment' || kind == 'variable' || kind == 'block_variable') && target.respond_to?(:name)
       target.name.to_s
     else
       false
     end
   end
 
-  def self.determine_kind(node_type)
+  def self.determine_kind(node_type, path)
     return 'assignment' if ASSIGNMENT_KEYWORDS.any? { |kw| node_type.include?(kw) }
+    
+    if BLOCK_VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) } ||
+       (VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) } && 
+        path.any? { |n| n.class.name.include?('BlockNode') || n.class.name.include?('LambdaNode') })
+      return 'block_variable'
+    end
+
     return 'variable' if VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) }
     'expression'
   end

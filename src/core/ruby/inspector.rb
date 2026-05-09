@@ -29,7 +29,7 @@ module Inspector
     private
 
     def create_observer
-      TracePoint.new(:line, :return, :b_return, :c_return) do |tp|
+      TracePoint.new(:line, :b_call, :return, :b_return, :c_return) do |tp|
         if initial_value_captured?
           record_post_execution_result(tp) if capture_ready?(tp)
         elsif reached_target_line?(tp)
@@ -68,12 +68,13 @@ module Inspector
     end
 
     def reached_target_line?(tp)
-      tp.event == :line && tp.lineno == @target_line
+      return false if tp.lineno != @target_line
+      @kind == 'block_variable' ? tp.event == :b_call : tp.event == :line
     end
 
     def capture_ready?(tp)
       # 変数参照の場合は、ターゲット行に到達した時点ですでに準備完了
-      return true if @kind == 'variable'
+      return true if ['variable', 'block_variable'].include?(@kind)
 
       if target_method_name
          # メソッド呼び出しの場合は、そのメソッドの終了時が準備完了
@@ -85,7 +86,7 @@ module Inspector
     end
 
     def target_method_name
-      return nil if @kind == 'variable'
+      return nil if ['variable', 'block_variable'].include?(@kind)
       return @target_method_name if defined?(@target_method_name)
       @target_method_name = begin
         parsed = Prism.parse(@expression)

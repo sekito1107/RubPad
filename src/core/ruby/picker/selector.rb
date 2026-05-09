@@ -51,7 +51,7 @@ class Selector
       type != 'ProgramNode' && type != 'StatementsNode'
     end
 
-    { target: target, statement: statement || leaf }
+    { target: target, statement: statement || leaf, path: path }
   end
 
   private
