@@ -14,6 +14,7 @@ type HoverData = {
   value: string;
   reference: string;
   kind: 'method' | 'variable';
+  onPin: () => void;
 };
 
 
@@ -183,7 +184,13 @@ export const useHoverAnalysis = (
             receiver: target.receiver || 'None',
             value: details.lastValue || 'None',
             reference,
-            kind
+            kind,
+            onPin: () => {
+              const editor = monaco.editor.getEditors()[0];
+              if (editor) {
+                editor.trigger('hover', 'rubox.inspectValue', target);
+              }
+            }
           });
         } else {
           hide();

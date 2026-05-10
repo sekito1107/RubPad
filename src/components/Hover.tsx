@@ -69,15 +69,25 @@ export const Hover = () => {
           )}
         </div>
 
-        {/* Value */}
+        {/* Value Section */}
         <div className={clsx(
-          'text-[10px]',
-          'text-zinc-500',
-          'dark:text-zinc-400'
-        )}>Value: {data.value}</div>
+          'mt-auto p-2 rounded border flex flex-col gap-0.5',
+          'bg-zinc-50 border-zinc-200',
+          'dark:bg-white/5 dark:border-zinc-700'
+        )}>
+          <div className="text-[8px] uppercase tracking-widest text-zinc-400 font-bold">Runtime Value</div>
+          <div className={clsx(
+            'text-sm font-bold truncate font-mono',
+            'text-blue-600',
+            'dark:text-blue-400'
+          )}>
+            {data.value}
+          </div>
+        </div>
 
         {/* アクションボタン */}
         <button
+          onClick={data.onPin}
           disabled={data.value === 'None'}
           className={clsx(
             'text-[10px] px-2 py-1.5 rounded font-medium transition-all duration-200',
