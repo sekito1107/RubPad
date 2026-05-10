@@ -10,6 +10,7 @@ export type MethodInfo = {
     is_singleton_call: boolean;
     has_instance: boolean;
     has_singleton: boolean;
+    type_info: string | null;
   };
 };
 
@@ -17,12 +18,15 @@ export type VariableDefinition = {
   name: string;
   line: number;
   col: number;
+  type_info: string | null;
 };
 
 export const analysis = proxy<{
   methods: MethodInfo[];
   variables: VariableDefinition[];
+  literals: VariableDefinition[];
 }>({
   methods: [],
   variables: [],
+  literals: [],
 });
