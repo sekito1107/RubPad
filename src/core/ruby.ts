@@ -3,7 +3,7 @@ import * as monaco from 'monaco-editor';
 import YarvServer from './ruby/yarv?worker';
 import { lspToMonaco } from '../utils/lsp-to-monaco';
 import { MethodCall, VariableDefinition } from '../state/analysis';
-import { prismToMonaco } from '../utils/prism-to-monaco';
+import { prismToMonaco, convertPrismPosition } from '../utils/prism-to-monaco';
 
 const encode = (str: string) => btoa(unescape(encodeURIComponent(str)));
 
@@ -32,12 +32,29 @@ export const analyze = async (code: string): Promise<monaco.editor.IMarkerData[]
   return lspToMonaco(JSON.parse(raw));
 };
 
-export const scan = async (code: string): Promise<{ methods: MethodCall[], variables: VariableDefinition[] }> => {
+export const scan = async (code: string): Promise<{ methods: MethodCall[], variables: VariableDefinition[], literals: VariableDefinition[] }> => {
   const raw = await send(`require 'base64'; Analyzer.run(Base64.decode64('${encode(code)}').force_encoding('UTF-8'))`);
-  const { methods, variables } = JSON.parse(raw);
+  const { methods, variables, literals } = JSON.parse(raw);
   return {
     methods: prismToMonaco(methods),
-    variables: prismToMonaco(variables)
+    variables: variables.map((v: any) => {
+      const pos = convertPrismPosition(v.line, v.col);
+      return {
+        name: v.name,
+        line: pos.line,
+        col: pos.column,
+        type_info: v.type_info
+      };
+    }),
+    literals: (literals || []).map((v: any) => {
+      const pos = convertPrismPosition(v.line, v.col);
+      return {
+        name: v.name,
+        line: pos.line,
+        col: pos.column,
+        type_info: v.type_info
+      };
+    })
   };
 };
 

@@ -14,6 +14,7 @@ export const useAnalysis = () => {
       if (!code || !status.rbsReady) {
         analysis.methods = [];
         analysis.variables = [];
+        analysis.literals = [];
         return;
       }
 
@@ -21,6 +22,7 @@ export const useAnalysis = () => {
         const result = await scan(code);
         analysis.methods = result.methods;
         analysis.variables = result.variables;
+        analysis.literals = result.literals;
       } catch {
         // 失敗時は何もしない
       }
