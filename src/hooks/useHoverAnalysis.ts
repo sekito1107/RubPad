@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import * as monaco from 'monaco-editor';
-import { useSnapshot } from 'valtio';
 import { pick, inspect } from '../core/ruby';
 import { monacoToPrism } from '../utils/monaco-to-prism';
 import { analysis, MethodInfo } from '../state/analysis';
@@ -124,10 +123,14 @@ export const useHoverAnalysis = (
       const newPos = e.target.position;
       if (!newPos) return hide();
 
+      if (e.target.type === monaco.editor.MouseTargetType.CONTENT_EMPTY) {
+        return hide();
+      }
+
       // 空白チェック：Monaco の getLineContent を使用して該当座標の文字を確認
       const lineContent = model.getLineContent(newPos.lineNumber);
       const char = lineContent[newPos.column - 1];
-      if (!char || char.trim().length === 0) {
+      if (!char || !char.trim()) {
         return hide();
       }
 
@@ -153,7 +156,6 @@ export const useHoverAnalysis = (
           target.receiver
         );
 
-        // 原本 (analysis) から最新の状態を直接取得することで、クロージャのしがらみを回避
         const { label, reference, type_info, kind } = resolveHoverMetaData(
           analysis.methods as MethodInfo[],
           Array.from(analysis.variables) as any[],
