@@ -119,18 +119,18 @@ export default function MethodList() {
   };
 
   return (
-    <div className="flex flex-col">
+    <div data-testid="method-list" className="flex flex-col">
       {officialMethods.length > 0 && (
-        <>
+        <div data-testid="official-section" className="flex flex-col">
           <SectionHeader title="Official" />
           {officialMethods.map(renderMethodItem)}
-        </>
+        </div>
       )}
       {userMethods.length > 0 && (
-        <>
+        <div data-testid="user-defined-section" className="flex flex-col">
           <SectionHeader title="User Defined" />
           {userMethods.map(renderMethodItem)}
-        </>
+        </div>
       )}
     </div>
   );
