@@ -165,7 +165,7 @@ export const useHoverAnalysis = (
             target.line,
             target.kind,
             target.endLine,
-            target.receiver
+            target.preExecutionTarget
           );
 
           const { expression, referenceLabel, reference, type_info, kind } = resolveHoverMetaData(
