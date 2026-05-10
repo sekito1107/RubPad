@@ -13,6 +13,7 @@ module Picker
 
     target = nodes[:target]
     statement = nodes[:statement]
+    label_loc = target.respond_to?(:message_loc) ? target.message_loc : nil
 
     kind = determine_kind(target.class.name.split('::').last, nodes[:path])
     label = kind == 'expression' ? target.slice : target.name.to_s
@@ -23,6 +24,8 @@ module Picker
       content: statement.slice,
       line: target.location.start_line,
       col: target.location.start_column,
+      labelLine: label_loc&.start_line,
+      labelCol: label_loc&.start_column,
       contentLine: statement.location.start_line,
       contentCol: statement.location.start_column,
       endLine: statement.location.end_line,

@@ -36,7 +36,7 @@ class Selector
 
     target = path.reverse.find do |node|
       type = node.class.name.split('::').last
-      !INVALID_TARGET_NODES.include?(type)
+      !INVALID_TARGET_NODES.include?(type) && type != 'ProgramNode' && type != 'StatementsNode'
     end
 
     if target && LITERAL_NODES.include?(leaf_type)
