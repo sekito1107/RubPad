@@ -18,6 +18,11 @@ module Analyzer
       add_method(node.name, node)
       super
     end
+    
+    def visit_def_node(node)
+      add_method(node.name, node)
+      super
+    end
 
     def visit_local_variable_write_node(node)
       add_variable(node.name, node)
@@ -156,8 +161,6 @@ module Analyzer
       info || {
         owner: nil,
         owner_type: nil,
-        is_singleton_call: false,
-        has_instance: false,
         has_singleton: false,
         type_info: nil
       }
