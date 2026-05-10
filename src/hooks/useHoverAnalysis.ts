@@ -15,8 +15,6 @@ type HoverData = {
   kind: 'method' | 'variable';
 };
 
-// モジュールスコープで直前の解析座標を保持（useEffect の再実行を防ぐ）
-let globalLastPrismPos = { line: -1, col: -1 };
 
 const resolveHoverMetaData = (
   methods: MethodInfo[],
@@ -25,51 +23,54 @@ const resolveHoverMetaData = (
   target: any,
   fallbackLabel: string = ''
 ): { label: string; reference: string; type_info: string; kind: 'method' | 'variable' } => {
-  const targetPos = convertPrismPosition(target.line, target.col);
-  const matchLine = targetPos.line;
-  const matchCol = targetPos.column;
+  // メソッド呼び出しの照合
+  if (target.labelLine != null && target.labelCol != null) {
+    const methodPos = convertPrismPosition(target.labelLine, target.labelCol);
+    const method = methods.find(m => m.line === methodPos.line && m.col === methodPos.column);
+    if (method) {
+      const { info, name } = method;
+      const label = info.owner ? `${info.owner}${info.is_singleton_call ? '.' : '#'}${name}` : name;
+      const reference = getReferenceUrl(method as any) || 'None';
+      return {
+        label,
+        reference,
+        type_info: `ReturnType: ${info.type_info || 'Unknown'}`,
+        kind: 'method'
+      };
+    }
+  }
 
-  // 変数・代入・ブロック変数の場合
-  if (['variable', 'assignment', 'block_variable'].includes(target.kind)) {
-    const v = variables.find(v => v.line === matchLine && v.col === matchCol);
+  // 変数・代入・定数・リテラルの照合
+  const generalPos = convertPrismPosition(target.line, target.col);
+
+  const v = variables.find(v => v.line === generalPos.line && v.col === generalPos.column);
+  if (v) {
+    const reference = 'None';
     return {
-      label: target.label,
-      reference: 'None',
-      type_info: v?.type_info || 'Unknown',
+      label: v.name || target.label,
+      reference,
+      type_info: `Type: ${v.type_info || 'Unknown'}`,
       kind: 'variable'
     };
   }
 
-  // リテラルの場合
-  if (target.kind === 'expression') {
-    const l = literals.find(l => l.line === matchLine && l.col === matchCol);
+  const l = literals.find(l => l.line === generalPos.line && l.col === generalPos.column);
+  if (l) {
     return {
       label: target.label,
       reference: 'None',
-      type_info: l?.type_info || 'Unknown',
+      type_info: `Type: ${l.type_info || 'Unknown'}`,
       kind: 'variable'
     };
   }
 
-  // メソッドの場合
-  let methodLine = target.labelLine;
-  let methodCol = target.labelCol;
-  if (methodLine !== undefined && methodCol !== undefined) {
-    const pos = convertPrismPosition(methodLine, methodCol);
-    methodLine = pos.line;
-    methodCol = pos.column;
-  }
-
-  const method = methods.find(m => m.line === methodLine && m.col === methodCol);
-  if (!method) {
-    return { label: fallbackLabel, reference: 'None', type_info: 'Unknown', kind: 'method' };
-  }
-
-  const { info, name } = method;
-  const label = info.owner ? `${info.owner}${info.is_singleton_call ? '.' : '#'}${name}` : name;
-  const reference = getReferenceUrl(method as any) || 'None';
-
-  return { label, reference, type_info: info.type_info || 'Unknown', kind: 'method' };
+  // フォールバック
+  return {
+    label: fallbackLabel,
+    reference: 'None',
+    type_info: 'ReturnType: Unknown',
+    kind: 'method'
+  };
 };
 
 export const useHoverAnalysis = (
@@ -88,6 +89,7 @@ export const useHoverAnalysis = (
     if (!editor || !model) return;
 
     let hideTimer: ReturnType<typeof setTimeout> | null = null;
+    let analysisTimer: ReturnType<typeof setTimeout> | null = null;
 
     const clearHideTimer = () => {
       if (hideTimer) {
@@ -102,7 +104,10 @@ export const useHoverAnalysis = (
         if (!isMouseOverWidget) {
           setData(null);
           setPos(null);
-          globalLastPrismPos = { line: -1, col: -1 };
+          if (analysisTimer) {
+            clearTimeout(analysisTimer);
+            analysisTimer = null;
+          }
           domNode.style.display = 'none';
         }
       }, 150);
@@ -123,6 +128,11 @@ export const useHoverAnalysis = (
       const newPos = e.target.position;
       if (!newPos) return hide();
 
+      if (analysisTimer) {
+        clearTimeout(analysisTimer);
+        analysisTimer = null;
+      }
+
       if (e.target.type === monaco.editor.MouseTargetType.CONTENT_EMPTY) {
         return hide();
       }
@@ -130,51 +140,49 @@ export const useHoverAnalysis = (
       // 空白チェック：Monaco の getLineContent を使用して該当座標の文字を確認
       const lineContent = model.getLineContent(newPos.lineNumber);
       const char = lineContent[newPos.column - 1];
-      if (!char || !char.trim()) {
+      if (!char || char.trim().length === 0) {
         return hide();
       }
 
-      const prismPos = monacoToPrism(newPos);
-      if (prismPos.line === globalLastPrismPos.line && prismPos.col === globalLastPrismPos.col) return;
+      analysisTimer = setTimeout(async () => {
+        const prismPos = monacoToPrism(newPos);
+        const code = model.getValue();
+        const target = await pick(code, prismPos.line, prismPos.col);
 
-      globalLastPrismPos = prismPos;
+        if (target.label) {
+          clearHideTimer();
+          setPos(newPos);
+          domNode.style.display = 'block';
 
-      const code = model.getValue();
-      const target = await pick(code, prismPos.line, prismPos.col);
+          const details = await inspect(
+            code,
+            target.expression,
+            target.line,
+            target.kind,
+            target.endLine,
+            target.receiver
+          );
 
-      if (target.label) {
-        clearHideTimer();
-        setPos(newPos);
-        domNode.style.display = 'block';
+          const { label, reference, type_info, kind } = resolveHoverMetaData(
+            analysis.methods as MethodInfo[],
+            Array.from(analysis.variables) as any[],
+            Array.from(analysis.literals) as any[],
+            target,
+            target.label
+          );
 
-        const details = await inspect(
-          code,
-          target.expression,
-          target.line,
-          target.kind,
-          target.endLine,
-          target.receiver
-        );
-
-        const { label, reference, type_info, kind } = resolveHoverMetaData(
-          analysis.methods as MethodInfo[],
-          Array.from(analysis.variables) as any[],
-          Array.from(analysis.literals) as any[],
-          target,
-          target.label
-        );
-
-        setData({
-          label,
-          type: type_info,
-          receiver: target.receiver || 'None',
-          value: details.lastValue || 'None',
-          reference,
-          kind
-        });
-      } else {
-        hide();
-      }
+          setData({
+            label,
+            type: type_info,
+            receiver: target.receiver || 'None',
+            value: details.lastValue || 'None',
+            reference,
+            kind
+          });
+        } else {
+          hide();
+        }
+      }, 150);
     });
 
     const leaveListener = editor.onMouseLeave(() => {
