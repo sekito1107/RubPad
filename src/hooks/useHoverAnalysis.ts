@@ -13,32 +13,66 @@ type HoverData = {
   receiver: string;
   value: string;
   reference: string;
+  kind: 'method' | 'variable';
 };
 
 // モジュールスコープで直前の解析座標を保持（useEffect の再実行を防ぐ）
 let globalLastPrismPos = { line: -1, col: -1 };
 
-const resolveMethodReference = (
+const resolveHoverMetaData = (
   methods: MethodInfo[],
-  labelLine?: number,
-  labelCol?: number,
+  variables: any[],
+  literals: any[],
+  target: any,
   fallbackLabel: string = ''
-) => {
-  const method = methods.find(m => m.line === labelLine && m.col === labelCol);
+): { label: string; reference: string; type_info: string; kind: 'method' | 'variable' } => {
+  const targetPos = convertPrismPosition(target.line, target.col);
+  const matchLine = targetPos.line;
+  const matchCol = targetPos.column;
+
+  // 変数・代入・ブロック変数の場合
+  if (['variable', 'assignment', 'block_variable'].includes(target.kind)) {
+    const v = variables.find(v => v.line === matchLine && v.col === matchCol);
+    return {
+      label: target.label,
+      reference: 'None',
+      type_info: v?.type_info || 'Unknown',
+      kind: 'variable'
+    };
+  }
+
+  // リテラルの場合
+  if (target.kind === 'expression') {
+    const l = literals.find(l => l.line === matchLine && l.col === matchCol);
+    return {
+      label: target.label,
+      reference: 'None',
+      type_info: l?.type_info || 'Unknown',
+      kind: 'variable'
+    };
+  }
+
+  // メソッドの場合
+  let methodLine = target.labelLine;
+  let methodCol = target.labelCol;
+  if (methodLine !== undefined && methodCol !== undefined) {
+    const pos = convertPrismPosition(methodLine, methodCol);
+    methodLine = pos.line;
+    methodCol = pos.column;
+  }
+
+  const method = methods.find(m => m.line === methodLine && m.col === methodCol);
   if (!method) {
-    return { label: fallbackLabel, reference: 'None' };
+    return { label: fallbackLabel, reference: 'None', type_info: 'Unknown', kind: 'method' };
   }
 
   const { info, name } = method;
   const label = info.owner ? `${info.owner}${info.is_singleton_call ? '.' : '#'}${name}` : name;
   const reference = getReferenceUrl(method as any) || 'None';
 
-  return { label, reference };
+  return { label, reference, type_info: info.type_info || 'Unknown', kind: 'method' };
 };
 
-/**
- * マウス移動の監視と Ruby 解析を担当するフック
- */
 export const useHoverAnalysis = (
   domNode: HTMLElement,
   isMouseOverWidget: boolean,
@@ -46,7 +80,6 @@ export const useHoverAnalysis = (
 ) => {
   const [data, setData] = useState<HoverData | null>(null);
   const [pos, setPos] = useState<monaco.IPosition | null>(null);
-  const { methods } = useSnapshot(analysis);
 
   useEffect(() => {
     if (!editorReady) return;
@@ -100,7 +133,7 @@ export const useHoverAnalysis = (
 
       const prismPos = monacoToPrism(newPos);
       if (prismPos.line === globalLastPrismPos.line && prismPos.col === globalLastPrismPos.col) return;
-      
+
       globalLastPrismPos = prismPos;
 
       const code = model.getValue();
@@ -120,27 +153,22 @@ export const useHoverAnalysis = (
           target.receiver
         );
 
-        let matchLine = target.labelLine;
-        let matchCol = target.labelCol;
-        if (matchLine !== undefined && matchCol !== undefined) {
-          const pos = convertPrismPosition(matchLine, matchCol);
-          matchLine = pos.line;
-          matchCol = pos.column;
-        }
-
-        const { label, reference } = resolveMethodReference(
-          methods as MethodInfo[],
-          matchLine,
-          matchCol,
+        // 原本 (analysis) から最新の状態を直接取得することで、クロージャのしがらみを回避
+        const { label, reference, type_info, kind } = resolveHoverMetaData(
+          analysis.methods as MethodInfo[],
+          Array.from(analysis.variables) as any[],
+          Array.from(analysis.literals) as any[],
+          target,
           target.label
         );
 
         setData({
           label,
-          type: 'Unknown',
+          type: type_info,
           receiver: target.receiver || 'None',
           value: details.lastValue || 'None',
-          reference
+          reference,
+          kind
         });
       } else {
         hide();
@@ -156,7 +184,7 @@ export const useHoverAnalysis = (
       moveListener.dispose();
       leaveListener.dispose();
     };
-  }, [editorReady, isMouseOverWidget, domNode, methods]);
+  }, [editorReady, isMouseOverWidget, domNode]);
 
   return { data, pos };
 };
