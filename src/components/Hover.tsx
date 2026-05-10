@@ -4,7 +4,8 @@ import { useSnapshot } from 'valtio';
 import clsx from 'clsx';
 import { app } from '../state/app';
 import { useHoverWidget } from '../hooks/useHoverWidget';
-import { useHoverAnalysis } from '../hooks/useHoverAnalysis';
+import { useHoverPosition } from '../hooks/useHoverPosition';
+import { useHoverData } from '../hooks/useHoverData';
 
 const hoverDomNode = document.createElement('div');
 
@@ -12,14 +13,17 @@ export const Hover = () => {
   const { status } = useSnapshot(app);
   const [isMouseOverWidget, setIsMouseOverWidget] = useState(false);
 
-  // カスタムフックにロジックを委譲
-  const { data, pos } = useHoverAnalysis(hoverDomNode, isMouseOverWidget, status.editorReady);
+  // 位置の特定とデータの取得を分離
+  const pos = useHoverPosition(isMouseOverWidget, status.editorReady);
+  const data = useHoverData(pos);
+  
   useHoverWidget(hoverDomNode, pos, status.editorReady);
 
   if (!data) return null;
 
   return createPortal(
     <div
+      data-testid="hover-widget"
       onMouseEnter={() => setIsMouseOverWidget(true)}
       onMouseLeave={() => setIsMouseOverWidget(false)}
       className={clsx(
@@ -29,7 +33,7 @@ export const Hover = () => {
       )}
     >
         {/* ラベル（種類） */}
-        <div className={clsx(
+        <div data-testid="expression" className={clsx(
           'font-bold text-sm',
           'text-zinc-800',
           'dark:text-zinc-100'
@@ -76,7 +80,7 @@ export const Hover = () => {
           'dark:bg-white/5 dark:border-zinc-700'
         )}>
           <div className="text-[8px] uppercase tracking-widest text-zinc-400 font-bold">Runtime Value</div>
-          <div className={clsx(
+          <div data-testid="runtime-value" className={clsx(
             'text-sm font-bold truncate font-mono',
             'text-blue-600',
             'dark:text-blue-400'
@@ -87,6 +91,7 @@ export const Hover = () => {
 
         {/* アクションボタン */}
         <button
+          data-testid="pin-button"
           onClick={data.onPin}
           disabled={data.value === 'None'}
           className={clsx(
