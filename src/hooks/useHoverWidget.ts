@@ -20,8 +20,8 @@ export const useHoverWidget = (
       getPosition: () => pos ? {
         position: pos,
         preference: [
-          monaco.editor.ContentWidgetPositionPreference.ABOVE,
-          monaco.editor.ContentWidgetPositionPreference.BELOW
+          monaco.editor.ContentWidgetPositionPreference.BELOW,
+          monaco.editor.ContentWidgetPositionPreference.ABOVE
         ]
       } : null
     };

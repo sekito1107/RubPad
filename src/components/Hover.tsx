@@ -19,18 +19,15 @@ export const Hover = () => {
   if (!data) return null;
 
   return createPortal(
-    <div 
+    <div
       onMouseEnter={() => setIsMouseOverWidget(true)}
       onMouseLeave={() => setIsMouseOverWidget(false)}
-      className="pt-2 -mt-2" // 透明な「橋渡し」パディング。ターゲットとウィンドウの隙間を埋める
+      className={clsx(
+        'px-3 py-2 rounded shadow-lg text-xs font-mono select-none flex flex-col gap-2 min-w-[200px] border',
+        'bg-white/95 border-zinc-200 text-zinc-900',
+        'dark:bg-zinc-900/95 dark:border-zinc-700 dark:text-zinc-200'
+      )}
     >
-      <div 
-        className={clsx(
-          'px-3 py-2 rounded shadow-lg text-xs font-mono select-none flex flex-col gap-2 min-w-[200px] border',
-          'bg-white/95 border-zinc-200 text-zinc-900',
-          'dark:bg-zinc-900/95 dark:border-zinc-700 dark:text-zinc-200'
-        )}
-      >
         {/* ラベル（種類） */}
         <div className={clsx(
           'font-bold text-sm',
@@ -59,7 +56,7 @@ export const Hover = () => {
           'dark:text-zinc-400'
         )}>
           Reference: {data.reference.startsWith('http') ? (
-            <a 
+            <a
               href={data.reference}
               target="_blank"
               rel="noopener noreferrer"
@@ -91,8 +88,7 @@ export const Hover = () => {
         >
           値をエディタに固定
         </button>
-      </div>
-    </div>,
+      </div>,
     hoverDomNode
   );
 };
