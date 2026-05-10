@@ -7,10 +7,11 @@ module Analyzer
       @service = service
       @methods = []
       @variables = []
+      @literals = []
     end
 
     def results
-      { methods: @methods, variables: @variables }
+      { methods: @methods, variables: @variables, literals: @literals }
     end
 
     def visit_call_node(node)
@@ -20,6 +21,71 @@ module Analyzer
 
     def visit_local_variable_write_node(node)
       add_variable(node.name, node)
+      super
+    end
+
+    def visit_local_variable_read_node(node)
+      add_variable(node.name, node)
+      super
+    end
+
+    def visit_block_local_variable_node(node)
+      add_variable(node.name, node)
+      super
+    end
+
+    def visit_required_parameter_node(node)
+      add_variable(node.name, node)
+      super
+    end
+
+    def visit_optional_parameter_node(node)
+      add_variable(node.name, node)
+      super
+    end
+
+    def visit_integer_node(node)
+      add_literal(node)
+      super
+    end
+
+    def visit_float_node(node)
+      add_literal(node)
+      super
+    end
+
+    def visit_string_node(node)
+      add_literal(node)
+      super
+    end
+
+    def visit_symbol_node(node)
+      add_literal(node)
+      super
+    end
+
+    def visit_true_node(node)
+      add_literal(node)
+      super
+    end
+
+    def visit_false_node(node)
+      add_literal(node)
+      super
+    end
+
+    def visit_nil_node(node)
+      add_literal(node)
+      super
+    end
+
+    def visit_array_node(node)
+      add_literal(node)
+      super
+    end
+
+    def visit_hash_node(node)
+      add_literal(node)
       super
     end
 
@@ -47,18 +113,31 @@ module Analyzer
 
     def add_variable(name, node)
       loc = node.location
+      info = resolve_info(loc) || { type_info: nil }
+
       @variables << {
         name: name.to_s,
         line: loc.start_line,
-        col: loc.start_column
+        col: loc.start_column,
+        type_info: info[:type_info]
+      }
+    end
+
+    def add_literal(node)
+      loc = node.location
+      info = resolve_info(loc) || { type_info: nil }
+
+      @literals << {
+        name: node.slice,
+        line: loc.start_line,
+        col: loc.start_column,
+        type_info: info[:type_info]
       }
     end
 
     def resolve_info(loc)
       return nil unless (service = @service)
       pos = TypeProf::CodePosition.new(loc.start_line, loc.start_column)
-
-      # TypeProf 内部の解析済み AST キャッシュに直接アクセス (非公開 API)
       root = service.instance_variable_get(:@rb_text_nodes)["main.rb"]
       
       info = nil
@@ -67,16 +146,21 @@ module Analyzer
           info = resolve_method_call(n, service)
           break if info
         end
+
+        if info.nil? && n.respond_to?(:ret) && n.ret
+          info = { type_info: (n.ret.show rescue n.ret.to_s) }
+          break
+        end
       end
       
-      info ||= {
+      info || {
         owner: nil,
         owner_type: nil,
         is_singleton_call: false,
         has_instance: false,
-        has_singleton: false
+        has_singleton: false,
+        type_info: nil
       }
-      info
     end
 
     def method_call_node?(node)
@@ -91,6 +175,7 @@ module Analyzer
 
           info = extract_method_metadata(me, service)
           info[:owner] ||= orig_ty&.base_type(service.genv)&.show
+          info[:type_info] = _ty.show if _ty.respond_to?(:show)
         end
       end
       info
@@ -119,10 +204,10 @@ module Analyzer
   class << self
     def run(code)
       TypeProfEngine.update(code)
-      return { methods: [], variables: [] }.to_json unless (service = TypeProfEngine.service)
+      service = TypeProfEngine.service
 
       result = Prism.parse(code)
-      return { methods: [], variables: [] }.to_json unless result.success?
+      return { methods: [], variables: [], literals: [] }.to_json unless result.success?
 
       visitor = Visitor.new(service)
       result.value.accept(visitor)
