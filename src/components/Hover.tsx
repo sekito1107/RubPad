@@ -33,7 +33,7 @@ export const Hover = () => {
           'font-bold text-sm',
           'text-zinc-800',
           'dark:text-zinc-100'
-        )}>{data.label}</div>
+        )}>{data.expression}</div>
 
         {/* 型 / シグネチャ */}
         <div className={clsx(
@@ -62,7 +62,7 @@ export const Hover = () => {
               rel="noopener noreferrer"
               className="text-blue-500 hover:underline dark:text-blue-400 font-medium"
             >
-              {data.label} docs.ruby-lang.org ↗
+              {data.referenceLabel} docs.ruby-lang.org ↗
             </a>
           ) : (
             data.reference

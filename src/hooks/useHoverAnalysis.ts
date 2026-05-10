@@ -7,7 +7,8 @@ import { getReferenceUrl } from '../core/ruby/reference';
 import { convertPrismPosition } from '../utils/prism-to-monaco';
 
 type HoverData = {
-  label: string;
+  expression: string;
+  referenceLabel: string;
   type: string;
   receiver: string;
   value: string;
@@ -22,17 +23,18 @@ const resolveHoverMetaData = (
   literals: any[],
   target: any,
   fallbackLabel: string = ''
-): { label: string; reference: string; type_info: string; kind: 'method' | 'variable' } => {
+): { expression: string; referenceLabel: string; reference: string; type_info: string; kind: 'method' | 'variable' } => {
   // メソッド呼び出しの照合
   if (target.labelLine != null && target.labelCol != null) {
     const methodPos = convertPrismPosition(target.labelLine, target.labelCol);
     const method = methods.find(m => m.line === methodPos.line && m.col === methodPos.column);
     if (method) {
       const { info, name } = method;
-      const label = info.owner ? `${info.owner}${info.is_singleton_call ? '.' : '#'}${name}` : name;
+      const canonicalName = info.owner ? `${info.owner}${info.is_singleton_call ? '.' : '#'}${name}` : name;
       const reference = getReferenceUrl(method as any) || 'None';
       return {
-        label,
+        expression: target.label,
+        referenceLabel: canonicalName,
         reference,
         type_info: `ReturnType: ${info.type_info || 'Unknown'}`,
         kind: 'method'
@@ -47,7 +49,8 @@ const resolveHoverMetaData = (
   if (v) {
     const reference = 'None';
     return {
-      label: v.name || target.label,
+      expression: target.label,
+      referenceLabel: v.name || target.label,
       reference,
       type_info: `Type: ${v.type_info || 'Unknown'}`,
       kind: 'variable'
@@ -57,7 +60,8 @@ const resolveHoverMetaData = (
   const l = literals.find(l => l.line === generalPos.line && l.col === generalPos.column);
   if (l) {
     return {
-      label: target.label,
+      expression: target.label,
+      referenceLabel: target.label,
       reference: 'None',
       type_info: `Type: ${l.type_info || 'Unknown'}`,
       kind: 'variable'
@@ -66,7 +70,8 @@ const resolveHoverMetaData = (
 
   // フォールバック
   return {
-    label: fallbackLabel,
+    expression: fallbackLabel,
+    referenceLabel: fallbackLabel,
     reference: 'None',
     type_info: 'ReturnType: Unknown',
     kind: 'method'
@@ -163,7 +168,7 @@ export const useHoverAnalysis = (
             target.receiver
           );
 
-          const { label, reference, type_info, kind } = resolveHoverMetaData(
+          const { expression, referenceLabel, reference, type_info, kind } = resolveHoverMetaData(
             analysis.methods as MethodInfo[],
             Array.from(analysis.variables) as any[],
             Array.from(analysis.literals) as any[],
@@ -172,7 +177,8 @@ export const useHoverAnalysis = (
           );
 
           setData({
-            label,
+            expression,
+            referenceLabel,
             type: type_info,
             receiver: target.receiver || 'None',
             value: details.lastValue || 'None',
