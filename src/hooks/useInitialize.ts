@@ -2,10 +2,11 @@ import { useEffect } from 'react';
 import * as monaco from 'monaco-editor';
 import { app } from '../state/app';
 import { editor, updateCode } from '../state/editor';
-import { setPhase, setVersion } from '../state/yarv';
+import { yarv, setPhase, setVersion } from '../state/yarv';
 import { initialize } from '../core/editor';
 import { saveCode } from '../core/persistence/editor';
 import { execute, initAnalyzer, checkAnalyzerReady } from '../core/ruby';
+import { updateOutput } from '../state/terminal';
 
 export const useInitialize = () => {
   useEffect(() => {
@@ -29,9 +30,14 @@ function initEditor(): monaco.editor.IStandaloneCodeEditor {
 
   app.status.editorReady = true;
 
-  instance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+  instance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, async () => {
+    if (yarv.phase !== 'ready') return;
+
+    setPhase('running');
     const code = instance.getValue();
-    execute(`Executor.run(${JSON.stringify(code)})`);
+    const result = await execute(code);
+    updateOutput(result);
+    setPhase('ready');
   });
 
   instance.onDidChangeModelContent(() => {
