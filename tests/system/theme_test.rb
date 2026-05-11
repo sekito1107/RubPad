@@ -9,11 +9,11 @@ class ThemeTest < SystemTest
 
     click_on "theme-toggle-button"
     assert_selector "#app-container:not(.dark)"
-    assert_selector ".monaco-editor.vs"
+    assert_selector ".monaco-editor.vs-dark"
 
     visit "/"
     assert_selector "#app-container:not(.dark)"
-    assert_selector ".monaco-editor.vs"
+    assert_selector ".monaco-editor.vs-dark"
 
     click_on "theme-toggle-button"
     assert_selector "#app-container.dark"
