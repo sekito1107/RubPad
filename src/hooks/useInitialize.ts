@@ -25,7 +25,7 @@ function initEditor(): monaco.editor.IStandaloneCodeEditor {
   const instance = initialize(
     htmlElement,
     editor.code,
-    app.theme === 'dark' ? 'vs-dark' : 'vs'
+    'vs-dark'
   );
 
   app.status.editorReady = true;
