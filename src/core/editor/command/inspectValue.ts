@@ -11,7 +11,7 @@ export const registerInspectValueCommand = () => {
     endLine: number;
     label: string;
     content: string;
-    kind: 'variable' | 'assignment' | 'expression';
+    kind: 'variable' | 'assignment' | 'expression' | 'block_variable';
     expression: string;
     preExecutionTarget: string | null;
   }) => {

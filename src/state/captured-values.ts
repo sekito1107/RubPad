@@ -12,7 +12,7 @@ export type CapturedValue = {
   contentCol: number;
   label: string;
   content: string;
-  kind: 'variable' | 'assignment' | 'expression';
+  kind: 'variable' | 'assignment' | 'expression' | 'block_variable';
   history: ExecutionSnapshot[];
   lastValue: string;
 };

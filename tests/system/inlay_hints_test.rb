@@ -89,7 +89,8 @@ class InlayHintsTest < SystemTest
     find("[data-testid='pin-button']").click
     assert_text "a: nil -> 1"
     
-    find(".monaco-editor").click
+    find(".monaco-editor .view-line", text: "a = 1").click
+    send_keys(:escape)
     send_keys(:end, :backspace, "2")
     refute_text "a: nil -> 1"
   end

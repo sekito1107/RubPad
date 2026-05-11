@@ -51,11 +51,22 @@ export const registerInlayHintsProvider = () => {
         const lineLength = model.getLineContent(lineNum).length;
 
         const label = validValues.map(v => {
-          const fullChain = [];
-          if (v.history.length > 0 && (v.history[0].initial !== null || v.kind === 'assignment')) {
-            fullChain.push(v.history[0].initial ?? 'nil');
+          const fullChain: string[] = [];
+
+          if (v.kind === 'variable' || v.kind === 'block_variable') {
+            // 変数参照の場合は、その式が評価される直前の値を表示する
+            v.history.forEach(h => {
+              fullChain.push(h.initial ?? 'nil');
+            });
+          } else {
+            // 代入やメソッド呼び出しの場合は、実行前後の変化を表示する
+            if (v.history.length > 0 && (v.history[0].initial !== null || v.kind === 'assignment')) {
+              fullChain.push(v.history[0].initial ?? 'nil');
+            }
+            v.history.forEach(h => {
+              fullChain.push(h.result);
+            });
           }
-          v.history.forEach(h => fullChain.push(h.result));
 
           let displayValue = fullChain.join(' -> ');
           if (v.history.length === 10 && v.lastValue !== v.history[v.history.length - 1].result) {

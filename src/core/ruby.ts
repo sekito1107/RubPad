@@ -63,7 +63,7 @@ export const pick = async (code: string, line: number, col: number) => {
   return JSON.parse(raw);
 };
 
-export const inspect = async (code: string, expression: string, line: number, kind: 'variable' | 'assignment' | 'expression', endLine: number, receiver: string | null = null) => {
+export const inspect = async (code: string, expression: string, line: number, kind: 'variable' | 'assignment' | 'expression' | 'block_variable', endLine: number, receiver: string | null = null) => {
   const encodedCode = encode(code);
   const encodedExpr = encode(expression);
   const encodedReceiver = receiver ? `Base64.decode64('${encode(receiver)}').force_encoding('UTF-8')` : 'nil';
