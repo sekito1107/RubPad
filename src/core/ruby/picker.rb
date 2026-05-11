@@ -12,6 +12,10 @@ module Picker
     return {}.to_json if !nodes || nodes[:target].nil?
 
     target = nodes[:target]
+    
+    # パラメータ宣言ノード（|b|など）の場合はホバーを無効化する
+    node_type = target.class.name.split('::').last
+    return {}.to_json if BLOCK_VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) }
     statement = nodes[:statement]
     label_loc = target.respond_to?(:message_loc) ? target.message_loc : nil
 

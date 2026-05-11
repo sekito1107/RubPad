@@ -51,7 +51,21 @@ export const useHoverData = (pos: monaco.IPosition | null) => {
         let referenceLabel = target.label;
         let reference = 'None';
         let type_info = 'ReturnType: Unknown';
-        let kind: 'method' | 'variable' | 'block_variable' = 'method';
+        
+        let kind: 'method' | 'variable' | 'block_variable' | 'assignment';
+        switch (target.kind) {
+          case 'block_variable':
+            kind = 'block_variable';
+            break;
+          case 'assignment':
+            kind = 'assignment';
+            break;
+          case 'variable':
+            kind = 'variable';
+            break;
+          default:
+            kind = 'method';
+        }
 
         if (target.labelLine != null && target.labelCol != null) {
           const methodPos = convertPrismPosition(target.labelLine, target.labelCol);

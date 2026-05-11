@@ -152,10 +152,12 @@ module Analyzer
           break if info
         end
 
-        if info.nil? && n.respond_to?(:ret) && n.ret
-          info = { type_info: (n.ret.show rescue n.ret.to_s) }
-          break
+        if n.respond_to?(:ret) && n.ret
+          info ||= {}
+          info[:type_info] = (n.ret.show rescue n.ret.to_s)
         end
+
+        break if info
       end
       
       info || {
@@ -167,7 +169,9 @@ module Analyzer
     end
 
     def method_call_node?(node)
-      !!node&.boxes(:mcall) { break true }
+      return false unless node.respond_to?(:boxes)
+      node.boxes(:mcall) { return true }
+      false
     end
 
     def resolve_method_call(node, service)
