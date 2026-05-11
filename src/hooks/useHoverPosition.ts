@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import * as monaco from 'monaco-editor';
+import { useSnapshot } from 'valtio';
+import { hoverStatus } from '../components/Hover';
 
 export const useHoverPosition = (
-  isMouseOverWidget: boolean,
   editorReady: boolean
 ) => {
   const [pos, setPos] = useState<monaco.IPosition | null>(null);
+  const snap = useSnapshot(hoverStatus);
 
   useEffect(() => {
     if (!editorReady) return;
@@ -17,13 +19,13 @@ export const useHoverPosition = (
 
     const moveListener = editor.onMouseMove((e) => {
       const currentPos = e.target.position;
-      const isWord = currentPos && model.getWordAtPosition(currentPos);
+      const isOnChar = e.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT;
 
       clearTimeout(timer);
 
-      if (!isWord) {
+      if (!isOnChar || !currentPos) {
         timer = setTimeout(() => {
-          if (!isMouseOverWidget) {
+          if (!snap.visible) {
             setPos(null);
           }
         }, 150);
@@ -36,7 +38,7 @@ export const useHoverPosition = (
     const leaveListener = editor.onMouseLeave(() => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        if (!isMouseOverWidget) {
+        if (!snap.visible) {
           setPos(null);
         }
       }, 150);
@@ -47,7 +49,7 @@ export const useHoverPosition = (
       moveListener.dispose();
       leaveListener.dispose();
     };
-  }, [editorReady, isMouseOverWidget]);
+  }, [editorReady, snap.visible]);
 
   return pos;
 };

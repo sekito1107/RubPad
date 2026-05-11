@@ -1,20 +1,49 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useSnapshot } from 'valtio';
+import { proxy, useSnapshot } from 'valtio';
+import * as monaco from 'monaco-editor';
 import clsx from 'clsx';
 import { app } from '../state/app';
 import { useHoverWidget } from '../hooks/useHoverWidget';
 import { useHoverPosition } from '../hooks/useHoverPosition';
 import { useHoverData } from '../hooks/useHoverData';
 
+/**
+ * ホバーの表示状態を管理する共有フラグ
+ */
+export const hoverStatus = proxy({ 
+  visible: false 
+});
+
 const hoverDomNode = document.createElement('div');
 
 export const Hover = () => {
   const { status } = useSnapshot(app);
-  const [isMouseOverWidget, setIsMouseOverWidget] = useState(false);
+
+  // エディタの操作でホバーを強制的に閉じるためのリスナー
+  useEffect(() => {
+    if (!status.editorReady) return;
+    const editor = monaco.editor.getEditors()[0];
+    if (!editor) return;
+
+    const keyListener = editor.onKeyDown((e) => {
+      if (e.keyCode === monaco.KeyCode.Escape) {
+        hoverStatus.visible = false;
+      }
+    });
+
+    const clickListener = editor.onMouseDown(() => {
+      hoverStatus.visible = false;
+    });
+
+    return () => {
+      keyListener.dispose();
+      clickListener.dispose();
+    };
+  }, [status.editorReady]);
 
   // 位置の特定とデータの取得を分離
-  const pos = useHoverPosition(isMouseOverWidget, status.editorReady);
+  const pos = useHoverPosition(status.editorReady);
   const data = useHoverData(pos);
   
   useHoverWidget(hoverDomNode, pos, status.editorReady);
@@ -24,8 +53,8 @@ export const Hover = () => {
   return createPortal(
     <div
       data-testid="hover-widget"
-      onMouseEnter={() => setIsMouseOverWidget(true)}
-      onMouseLeave={() => setIsMouseOverWidget(false)}
+      onMouseEnter={() => { hoverStatus.visible = true; }}
+      onMouseLeave={() => { hoverStatus.visible = false; }}
       className={clsx(
         'px-3 py-2 rounded shadow-lg text-xs font-mono select-none flex flex-col gap-2 min-w-[200px] border',
         'bg-white/95 border-zinc-200 text-zinc-900',
