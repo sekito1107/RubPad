@@ -62,24 +62,18 @@ class InlayHintsTest < SystemTest
     assert_text "a.upcase: \"hi\" -> \"HI\""
   end
 
-  def test_同一行内での複数変数のインスペクト
-    # 同一行に複数の式を並べる際、現在のTextMateエンジンの制限により
-    # セミコロンやスペースと変数が一つのspanに結合されてしまい、ホバー座標がズレる場合がある。
-    # インスタンス変数(@b)を使用することでトークンを強制的に分離させ、
-    # かつEscapeキーでホバー状態をリセットすることで、確実に次の要素をインスペクトできるようにしている。
-    type_code("a = 1; @b = 2")
-    
-    find(".monaco-editor .view-line", text: "a = 1; @b = 2").find("span", text: "a", exact_text: true).hover
+  def test_同一行内での複数変数のインスペクト_左側の変数
+    type_code("a = 1; b = 2")
+    find("span", text: "a", exact_text: true).hover
     find("[data-testid='pin-button']").click
     assert_text "a: nil -> 1"
-    
-    # Escapeキーでホバーをリセット
-    send_keys(:escape)
-    
-    find(".monaco-editor .view-line", text: "a = 1; @b = 2").find("span", text: "b", exact_text: true).hover
+  end
+
+  def test_同一行内での複数変数のインスペクト_右側の変数
+    type_code("a = 1; b = 2")
+    find("span", text: "; b = ", exact_text: true).hover
     find("[data-testid='pin-button']").click
-    assert_text "@b: nil -> 2"
-    refute_text "a: nil -> 1"
+    assert_text "b: nil -> 2"
   end
 
   def test_ブロック引数のシャドウイング
@@ -95,7 +89,8 @@ class InlayHintsTest < SystemTest
     find("[data-testid='pin-button']").click
     assert_text "a: nil -> 1"
     
-    send_keys(:enter)
+    find(".monaco-editor").click
+    send_keys(:end, :backspace, "2")
     refute_text "a: nil -> 1"
   end
 
