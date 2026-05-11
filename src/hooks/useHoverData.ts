@@ -14,7 +14,7 @@ export type HoverData = {
   receiver: string;
   value: string;
   reference: string;
-  kind: 'method' | 'variable' | 'block_variable';
+  kind: 'method' | 'variable' | 'block_variable' | 'assignment' | 'expression';
   onPin: () => void;
 };
 
@@ -52,20 +52,7 @@ export const useHoverData = (pos: monaco.IPosition | null) => {
         let reference = 'None';
         let type_info = 'ReturnType: Unknown';
         
-        let kind: 'method' | 'variable' | 'block_variable' | 'assignment';
-        switch (target.kind) {
-          case 'block_variable':
-            kind = 'block_variable';
-            break;
-          case 'assignment':
-            kind = 'assignment';
-            break;
-          case 'variable':
-            kind = 'variable';
-            break;
-          default:
-            kind = 'method';
-        }
+        let kind: HoverData['kind'] = target.kind as any;
 
         if (target.labelLine != null && target.labelCol != null) {
           const methodPos = convertPrismPosition(target.labelLine, target.labelCol);

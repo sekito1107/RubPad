@@ -75,32 +75,36 @@ export const Hover = () => {
           'dark:text-zinc-400'
         )}>{data.type}</div>
 
-        {/* Receiver */}
-        <div className={clsx(
-          'text-[10px]',
-          'text-zinc-500',
-          'dark:text-zinc-400'
-        )}>Receiver: {data.receiver}</div>
+        {/* Receiver (メソッド・式の場合のみ表示) */}
+        {(data.kind === 'expression' || data.kind === 'method') && (
+          <div className={clsx(
+            'text-[10px]',
+            'text-zinc-500',
+            'dark:text-zinc-400'
+          )}>Receiver: {data.receiver}</div>
+        )}
 
-        {/* Reference */}
-        <div className={clsx(
-          'text-[10px]',
-          'text-zinc-500',
-          'dark:text-zinc-400'
-        )}>
-          Reference: {data.reference.startsWith('http') ? (
-            <a
-              href={data.reference}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:underline dark:text-blue-400 font-medium"
-            >
-              {data.referenceLabel} docs.ruby-lang.org ↗
-            </a>
-          ) : (
-            data.reference
-          )}
-        </div>
+        {/* Reference (メソッド、または有効な参照がある場合のみ表示) */}
+        {(data.kind === 'expression' || data.kind === 'method' || data.reference !== 'None') && (
+          <div className={clsx(
+            'text-[10px]',
+            'text-zinc-500',
+            'dark:text-zinc-400'
+          )}>
+            Reference: {data.reference.startsWith('http') ? (
+              <a
+                href={data.reference}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline dark:text-blue-400 font-medium"
+              >
+                {data.referenceLabel} docs.ruby-lang.org ↗
+              </a>
+            ) : (
+              data.reference
+            )}
+          </div>
+        )}
 
         {/* Value Section */}
         <div className={clsx(
