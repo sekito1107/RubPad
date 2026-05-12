@@ -3,21 +3,25 @@ require "json"
 module Diagnostics
   class << self
     def run(code)
-      TypeProfEngine.init unless (service = TypeProfEngine.service)
-      return "[]" unless (service ||= TypeProfEngine.service)
-
       begin
-        RubyVM::InstructionSequence.compile(code)
-      rescue SyntaxError => e
-        return [format_syntax_error(e, code)].to_json
-      rescue
+        TypeProfEngine.init unless (service = TypeProfEngine.service)
+        return "[]" unless (service ||= TypeProfEngine.service)
+
+        begin
+          RubyVM::InstructionSequence.compile(code)
+        rescue SyntaxError => e
+          return [format_syntax_error(e, code)].to_json
+        rescue
+        end
+
+        service.update_rb_file("main.rb", code)
+
+        results = []
+        service.diagnostics("main.rb") { |result| results << result.to_lsp }
+        results.to_json
+      rescue => e
+        "[]"
       end
-
-      service.update_rb_file("main.rb", code)
-
-      results = []
-      service.diagnostics("main.rb") { |result| results << result.to_lsp }
-      results.to_json
     end
 
     private

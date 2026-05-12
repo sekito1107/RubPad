@@ -34,6 +34,28 @@ module Analyzer
       super
     end
 
+    def visit_local_variable_target_node(node)
+      add_variable(node.name, node)
+      super
+    end
+
+    def visit_instance_variable_target_node(node)
+      add_variable(node.name, node)
+      super
+    end
+
+    def visit_global_variable_target_node(node)
+      add_variable(node.name, node)
+      super
+    end
+
+    def visit_multi_write_node(node)
+      node.lefts.each { |l| l.accept(self) }
+      node.rest&.accept(self)
+      node.rights.each { |r| r.accept(self) }
+      node.value.accept(self)
+    end
+
     def visit_block_local_variable_node(node)
       add_variable(node.name, node)
       super
@@ -210,15 +232,19 @@ module Analyzer
 
   class << self
     def run(code)
-      TypeProfEngine.update(code)
-      service = TypeProfEngine.service
+      begin
+        TypeProfEngine.update(code)
+        service = TypeProfEngine.service
 
-      result = Prism.parse(code)
-      return { methods: [], variables: [], literals: [] }.to_json unless result.success?
+        result = Prism.parse(code)
+        return { methods: [], variables: [], literals: [] }.to_json unless result.success?
 
-      visitor = Visitor.new(service)
-      result.value.accept(visitor)
-      visitor.results.to_json
+        visitor = Visitor.new(service)
+        result.value.accept(visitor)
+        visitor.results.to_json
+      rescue => e
+        { methods: [], variables: [], literals: [] }.to_json
+      end
     end
   end
 end

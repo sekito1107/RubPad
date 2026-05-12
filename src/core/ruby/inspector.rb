@@ -86,7 +86,7 @@ module Inspector
     end
 
     def target_method_name
-      return nil if ['variable', 'block_variable'].include?(@kind)
+      return nil if ['variable', 'block_variable', 'assignment'].include?(@kind)
       return @target_method_name if defined?(@target_method_name)
       @target_method_name = begin
         parsed = Prism.parse(@expression)
