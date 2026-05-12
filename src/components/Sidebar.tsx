@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import MethodList from './sidebar/MethodList'
+import StdinInput from './sidebar/StdinInput'
 
 export default function Sidebar() {
   return (
@@ -8,22 +9,29 @@ export default function Sidebar() {
       'border-zinc-200 bg-zinc-50',
       'dark:border-zinc-800 dark:bg-[#0D1117]'
     )}>
-      <div className={clsx(
-        'py-2 px-4 border-b transition-colors',
-        'bg-zinc-100 border-zinc-200',
-        'dark:bg-zinc-800/50 dark:border-zinc-700'
-      )}>
-        <h2 className={clsx(
-          'text-[10px] font-bold uppercase tracking-widest',
-          'text-zinc-500',
-          'dark:text-white'
+      {/* Methods Section */}
+      <div className="flex-1 flex flex-col min-h-0 border-b border-zinc-200 dark:border-zinc-800">
+        <div className={clsx(
+          'py-2 px-4 border-b transition-colors',
+          'bg-zinc-100 border-zinc-200',
+          'dark:bg-zinc-800/50 dark:border-zinc-700'
         )}>
-          Methods In Use
-        </h2>
+          <h2 className={clsx(
+            'text-[10px] font-bold uppercase tracking-widest',
+            'text-zinc-500',
+            'dark:text-white'
+          )}>
+            Methods In Use
+          </h2>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <MethodList />
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <MethodList />
+      {/* Stdin Section (Visual Only) */}
+      <div className="shrink-0 flex flex-col">
+        <StdinInput />
       </div>
     </aside>
   )

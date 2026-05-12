@@ -3,6 +3,8 @@ import { DefaultRubyVM } from '@ruby/wasm-wasi/dist/browser';
 // @ts-ignore
 import executor from './executor.rb?raw';
 // @ts-ignore
+import stdin from './stdin.rb?raw';
+// @ts-ignore
 import typeprof from './typeprof.rb?raw';
 // @ts-ignore
 import diagnostics from './typeprof/diagnostics.rb?raw';
@@ -15,7 +17,7 @@ import picker from './picker.rb?raw';
 // @ts-ignore
 import inspector from './inspector.rb?raw';
 
-const scripts = [executor, typeprof, diagnostics, analyzer, selector, picker, inspector];
+const scripts = [stdin, executor, typeprof, diagnostics, analyzer, selector, picker, inspector];
 
 const vmPromise = (async () => {
   const response = await fetch('/ruby/rubox.wasm');

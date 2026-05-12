@@ -21,6 +21,7 @@ module Inspector
     end
 
     def execute(code)
+      $stdin = StringIO.new($rubox_stdin || "")
       observer = create_observer
       evaluate(code, observer)
       report
@@ -81,7 +82,10 @@ module Inspector
         return [:return, :c_return].include?(tp.event) && tp.method_id == target_method_name
       end
 
-      # その他（代入など）は、行の実行が終わった時が準備完了
+      if @kind == 'assignment'
+        return (tp.event == :line && tp.lineno > @end_line) || (tp.event == :c_return && tp.method_id == :eval)
+      end
+
       [:return, :c_return, :b_return].include?(tp.event) || (tp.event == :line && tp.lineno > @end_line)
     end
 

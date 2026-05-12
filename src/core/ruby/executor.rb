@@ -2,6 +2,7 @@ require "stringio"
 
 module Executor
   def self.run(code)
+    $stdin = StringIO.new($rubox_stdin || "")
     output = StringIO.new
     $stdout = $stderr = output
     begin 

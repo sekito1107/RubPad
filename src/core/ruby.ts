@@ -27,6 +27,10 @@ export const execute = (code: string): Promise<string> => {
   return send(`require 'base64'; Executor.run(Base64.decode64('${encode(code)}').force_encoding('UTF-8'))`);
 };
 
+export const syncStdin = (input: string) => {
+  send(`require 'base64'; Stdin.update(Base64.decode64('${encode(input)}').force_encoding('UTF-8'))`);
+};
+
 export const analyze = async (code: string): Promise<monaco.editor.IMarkerData[]> => {
   const raw = await send(`require 'base64'; Diagnostics.run(Base64.decode64('${encode(code)}').force_encoding('UTF-8'))`);
   return lspToMonaco(JSON.parse(raw));
