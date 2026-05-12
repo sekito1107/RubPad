@@ -18,7 +18,8 @@ class Selector
   INVALID_TARGET_NODES = [
     'BlockNode',
     'BlockParametersNode',
-    'ParametersNode'
+    'ParametersNode',
+    'MultiWriteNode'
   ]
 
   def self.find_node(root, line, col)
