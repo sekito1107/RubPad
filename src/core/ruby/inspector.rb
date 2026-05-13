@@ -46,6 +46,7 @@ module Inspector
 
       begin
         clean_binding = Object.new.instance_eval { binding }
+        Environment.prepare(code, clean_binding)
         observer.enable { clean_binding.eval(code) }
       rescue
         # 実行時エラーはここでは捕捉しない

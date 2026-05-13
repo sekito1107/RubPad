@@ -105,4 +105,11 @@ class InlayHintsTest < SystemTest
     send_keys(:down, "# comment")
     assert_text "a: nil -> 1"
   end
+
+  def test_グローバル変数の多重代入時のインレイヒント
+    type_code("$firstvar, $secondvar = [1, 2]")
+    find(".monaco-editor .view-line", text: "$firstvar").find("span", text: "firstvar", exact_text: true).hover
+    find("[data-testid='pin-button']").click
+    assert_text "$firstvar: nil -> 1"
+  end
 end
