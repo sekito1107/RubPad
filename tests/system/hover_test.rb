@@ -95,4 +95,17 @@ class HoverTest < SystemTest
       refute find("[data-testid='pin-button']").disabled?
     end
   end
+
+  def test_変数の多重代入
+    # 同一行の記号がないコードは仕様上一つの要素として出力されるので、インスタンス変数として検証することでテストコードの簡略性を確保している
+    type_code("@firstvar, @secondvar = [1, 2]")
+
+    line = find(".monaco-editor .view-line", text: "@firstvar")
+    
+    line.find("span", text: "firstvar", exact_text: true).hover
+    assert_selector("[data-testid='hover-widget']", text: "1")
+
+    line.find("span", text: "secondvar", exact_text: true).hover
+    assert_selector("[data-testid='hover-widget']", text: "2")
+  end
 end
