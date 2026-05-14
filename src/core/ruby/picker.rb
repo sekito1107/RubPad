@@ -12,7 +12,7 @@ module Picker
     return {}.to_json if !nodes || nodes[:target].nil?
 
     target = nodes[:target]
-    
+
     # パラメータ宣言ノード（|b|など）の場合はホバーを無効化する
     node_type = target.class.name.split('::').last
     return {}.to_json if BLOCK_VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) }
@@ -22,6 +22,12 @@ module Picker
     kind = determine_kind(target.class.name.split('::').last, nodes[:path])
     label = kind == 'expression' ? target.slice : target.name.to_s
     pre_execution_target = determine_pre_execution_target(target, kind)
+
+    block_depth = nil
+    block_order = nil
+    if kind == 'block_variable'
+      block_depth, block_order = calculate_block_info(result.value, nodes[:path], target.location.start_line)
+    end
 
     {
       label: label,
@@ -37,7 +43,9 @@ module Picker
       kind: kind,
       expression: target.slice,
       receiver: (target.respond_to?(:receiver) && target.receiver) ? target.receiver.slice : nil,
-      preExecutionTarget: pre_execution_target
+      preExecutionTarget: pre_execution_target,
+      blockDepth: block_depth,
+      blockOrder: block_order
     }.to_json
   end
 
@@ -55,14 +63,44 @@ module Picker
 
   def self.determine_kind(node_type, path)
     return 'assignment' if ASSIGNMENT_KEYWORDS.any? { |kw| node_type.include?(kw) }
-    
+
     if BLOCK_VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) } ||
-       (VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) } && 
+       (VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) } &&
         path.any? { |n| n.class.name.include?('BlockNode') || n.class.name.include?('LambdaNode') })
       return 'block_variable'
     end
 
     return 'variable' if VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) }
     'expression'
+  end
+
+  # block_variable のブロック識別情報を算出する
+  # @return [depth, order] の配列
+  def self.calculate_block_info(root, path, target_line)
+    depth = path.count { |n|
+      t = n.class.name.split('::').last
+      t == 'BlockNode' || t == 'LambdaNode'
+    }
+    enc = path.reverse.find { |n|
+      t = n.class.name.split('::').last
+      t == 'BlockNode' || t == 'LambdaNode'
+    }
+    blocks = collect_blocks_at_depth(root, target_line, depth)
+    order = blocks.index(enc)
+    [depth, order]
+  end
+
+  # target_line 上の target_depth に位置する BlockNode/LambdaNode を DFS 順で収集する
+  def self.collect_blocks_at_depth(node, target_line, target_depth, cur_depth = 0, result = [])
+    return result unless node
+    t = node.class.name.split('::').last
+    if t == 'BlockNode' || t == 'LambdaNode'
+      nd = cur_depth + 1
+      result << node if node.location.start_line == target_line && nd == target_depth
+      node.child_nodes.compact.each { |c| collect_blocks_at_depth(c, target_line, target_depth, nd, result) }
+    else
+      node.child_nodes.compact.each { |c| collect_blocks_at_depth(c, target_line, target_depth, cur_depth, result) }
+    end
+    result
   end
 end

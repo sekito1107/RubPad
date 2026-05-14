@@ -43,7 +43,9 @@ export const useHoverData = (pos: monaco.IPosition | null) => {
           target.line,
           target.kind,
           target.endLine,
-          target.preExecutionTarget
+          target.preExecutionTarget,
+          target.blockDepth ?? null,
+          target.blockOrder ?? null
         );
 
         // --- メタデータ解決ロジック ---

@@ -14,13 +14,15 @@ export const registerInspectValueCommand = () => {
     kind: 'variable' | 'assignment' | 'expression' | 'block_variable';
     expression: string;
     preExecutionTarget: string | null;
+    blockDepth: number | null;
+    blockOrder: number | null;
   }) => {
     if (!target) return;
 
     const model = monaco.editor.getModels()[0];
     const code = model.getValue();
 
-    const captured = await inspect(code, target.expression, target.line, target.kind, target.endLine, target.preExecutionTarget);
+    const captured = await inspect(code, target.expression, target.line, target.kind, target.endLine, target.preExecutionTarget, target.blockDepth ?? null, target.blockOrder ?? null);
 
     addCapturedValue({
       line: target.line,
