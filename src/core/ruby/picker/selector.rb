@@ -40,19 +40,7 @@ class Selector
       !INVALID_TARGET_NODES.include?(type) && type != 'ProgramNode' && type != 'StatementsNode'
     end
 
-    if target && LITERAL_NODES.include?(leaf_type)
-      collection = path.reverse.find do |node|
-        COLLECTION_NODES.include?(node.class.name.split('::').last)
-      end
-      target = collection if collection
-    end
-
-    statement = path.find do |node|
-      type = node.class.name.split('::').last
-      type != 'ProgramNode' && type != 'StatementsNode'
-    end
-
-    { target: target, statement: statement || leaf, path: path }
+    { target: target, statement: target || leaf, path: path }
   end
 
   private
