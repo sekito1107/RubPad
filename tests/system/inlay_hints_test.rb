@@ -83,6 +83,31 @@ class InlayHintsTest < SystemTest
     assert_text "a: 1"
   end
 
+  def test_1行内の複数ブロック
+    type_code("[1].each { |a| a }.map { |b| b }")
+    find(".monaco-editor .view-line", text: ".map").all("span", text: "b").last.hover
+    find("[data-testid='pin-button']").click
+    assert_text "b: 1"
+  end
+
+  def test_1行ブロック内での破壊的変更
+    # (s) とすることで、s を確実に独立したスパンにする
+    type_code("s = 'hi'\n[1].each { |i| (s).upcase! }")
+    # 単独のスパンになった s をホバー
+    find(".monaco-editor .view-line", text: "upcase!").find("span", text: "s", exact_text: true).hover
+    find("[data-testid='pin-button']").click
+    assert_text 's: "hi"'
+  end
+
+  def test_複数行ループ内での変数遷移
+    type_code("a = 0\n3.times do |i|\n  a += 1\n  a\nend")
+    # 4行目の a をホバー
+    find(".monaco-editor .view-line", text: "  a", exact_text: true).hover
+    find("[data-testid='pin-button']").click
+    # 1回目(1), 2回目(2), 3回目(3) の遷移が表示されることを期待
+    assert_text "a: 1 -> 2 -> 3"
+  end
+
   def test_編集によるヒントの消去
     type_code("a = 1")
     find(".monaco-editor .view-line", text: "a = 1").find("span", text: "a", exact_text: true).hover
