@@ -14,7 +14,7 @@ module Inspector
     # この場合、最初のブロック（order=0）の値として両方のイテレーションが記録される。
     # 異なる行、または異なる変数名であれば問題なく動作する。
 
-    def initialize(expression, target_line, kind, end_line, pre_execution_target, block_depth = nil, block_order = nil)
+    def initialize(expression, target_line, kind, end_line, pre_execution_target, block_depth = nil, block_order = nil, block_start_line = nil)
       @expression = expression
       @target_line = target_line
       @kind = kind
@@ -22,6 +22,7 @@ module Inspector
       @pre_execution_target = pre_execution_target
       @block_depth = block_depth
       @block_order = block_order
+      @block_start_line = block_start_line
 
       @history = []
       @last_value = nil
@@ -47,17 +48,21 @@ module Inspector
     end
 
     # block_variable かつ block_depth/block_order が指定されている場合の Observer
-    # local_variables の変化でブロック遷移を検出し、正しいブロックのみキャプチャする
+    # blockStartLine を使ってブロック遷移を検出し、正しいブロックのみキャプチャする
+    # 複数行ブロックでは :line イベントでターゲット行到達時に pre_execution をキャプチャする
     def create_block_variable_observer
       current_depth = 0
       block_idx     = 0
       in_my_block   = false
       prev_locals   = nil
+      pre_captured  = false
+      # blockStartLine があれば使う（複数行ブロック対応）、なければ target_line にフォールバック
+      match_line = @block_start_line || @target_line
 
-      TracePoint.new(:b_call, :b_return) do |tp|
+      TracePoint.new(:b_call, :b_return, :line) do |tp|
         case tp.event
         when :b_call
-          if tp.lineno == @target_line && current_depth == @block_depth
+          if tp.lineno == match_line && current_depth == @block_depth
             curr_locals = tp.binding.local_variables
             block_idx += 1 if prev_locals && curr_locals != prev_locals
             prev_locals = curr_locals
@@ -65,16 +70,30 @@ module Inspector
             if block_idx == @block_order
               in_my_block    = true
               @saved_binding = tp.binding
-              record_pre_execution_state(tp)
+              pre_captured   = false
+              # 1行ブロック（match_line == target_line）の場合は b_call 時点でキャプチャ
+              if match_line == @target_line
+                record_pre_execution_state(tp)
+                pre_captured = true
+              end
             end
           end
           current_depth += 1
 
+        when :line
+          # 複数行ブロックの場合、ターゲット行に初めて到達した時点でキャプチャ
+          if in_my_block && !pre_captured && tp.lineno == @target_line
+            @saved_binding = tp.binding
+            record_pre_execution_state(tp)
+            pre_captured = true
+          end
+
         when :b_return
           current_depth -= 1
-          if tp.lineno == @target_line && current_depth == @block_depth && in_my_block
+          if current_depth == @block_depth && in_my_block
             record_post_execution_result(tp)
-            in_my_block = false
+            in_my_block  = false
+            pre_captured = false
           end
         end
       end
@@ -199,7 +218,7 @@ module Inspector
     end
   end
 
-  def self.run(code, expression, target_line, kind, end_line, pre_execution_target, block_depth = nil, block_order = nil)
-    Session.new(expression, target_line, kind, end_line, pre_execution_target, block_depth, block_order).execute(code).to_json
+  def self.run(code, expression, target_line, kind, end_line, pre_execution_target, block_depth = nil, block_order = nil, block_start_line = nil)
+    Session.new(expression, target_line, kind, end_line, pre_execution_target, block_depth, block_order, block_start_line).execute(code).to_json
   end
 end
