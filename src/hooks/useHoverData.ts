@@ -86,8 +86,10 @@ export const useHoverData = (pos: monaco.IPosition | null) => {
           }
         }
 
-        // 実行履歴の整形
-        const joinedValues = details.history.map((h: any) => h.result).join(', ');
+        // 実行履歴の整形 (変数参照の場合は実行前、それ以外は実行後の値を表示)
+        const joinedValues = details.history.map((h: any) => 
+          (target.kind === 'variable' || target.kind === 'block_variable') ? (h.initial ?? 'nil') : h.result
+        ).join(', ');
         const displayValue = joinedValues.length > 20
           ? joinedValues.substring(0, 17) + '...'
           : (joinedValues || details.lastValue || 'None');
