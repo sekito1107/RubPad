@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import MethodList from './sidebar/MethodList'
 import StdinInput from './sidebar/StdinInput'
+import MethodSearchPanel from './sidebar/MethodSearchPanel'
 
 export default function Sidebar() {
   return (
@@ -9,6 +10,9 @@ export default function Sidebar() {
       'border-zinc-200 bg-zinc-50',
       'dark:border-zinc-800 dark:bg-[#0D1117]'
     )}>
+      {/* Method Search Panel */}
+      <MethodSearchPanel />
+
       {/* Methods Section */}
       <div className="flex-1 flex flex-col min-h-0 border-b border-zinc-200 dark:border-zinc-800">
         <div className={clsx(
