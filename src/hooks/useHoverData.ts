@@ -23,7 +23,6 @@ export const useHoverData = (pos: monaco.IPosition | null) => {
   const [hoverInfo, setHoverInfo] = useState<HoverData | null>(null);
 
   useEffect(() => {
-    // 初期化の見直し：副作用の開始時にまずクリアする
     setHoverInfo(null);
     if (!pos) return;
 
@@ -37,24 +36,29 @@ export const useHoverData = (pos: monaco.IPosition | null) => {
       const target = await pick(code, line, col);
 
       if (target.label) {
-        const details = await inspect(
-          code,
-          target.expression,
-          target.line,
-          target.kind,
-          target.endLine,
-          target.preExecutionTarget,
-          target.blockDepth ?? null,
-          target.blockOrder ?? null,
-          target.blockStartLine ?? null
-        );
+        let details: any = { history: [], lastValue: 'None' };
+        try {
+          details = await inspect(
+            code,
+            target.expression,
+            target.line,
+            target.kind,
+            target.endLine,
+            target.preExecutionTarget,
+            target.blockDepth ?? null,
+            target.blockOrder ?? null,
+            target.blockStartLine ?? null
+          );
+        } catch (e) {
+          console.warn("Hover inspect skipped due to syntax error:", e);
+        }
 
         // --- メタデータ解決ロジック ---
         let expression = target.label;
         let referenceLabel = target.label;
         let reference = 'None';
         let type_info = 'ReturnType: Unknown';
-        
+
         let kind: HoverData['kind'] = target.kind as any;
 
         if (target.labelLine != null && target.labelCol != null) {
