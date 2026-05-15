@@ -159,19 +159,30 @@ module Inspector
     end
 
     def capture_ready?(tp)
-      # 変数参照の場合は、ターゲット行に到達した時点ですでに準備完了
-      return true if ['variable', 'block_variable'].include?(@kind)
+      # 変数参照の場合は、最初のイベント（次の命令など）でキャプチャしてよいが、
+      # 同同一行内の別スコープ（ブロック等）への進入で誤認されないよう、
+      # 基本的には depth が変わらないイベントを待つ。
+      # ただし、Reachedで処理した直後の :line イベント自身では終了させない。
+      if ['variable', 'block_variable'].include?(@kind)
+        return tp.event != :line
+      end
 
       if target_method_name
         # メソッド呼び出しの場合は、そのメソッドの終了時が準備完了
         return [:return, :c_return].include?(tp.event) && tp.method_id == target_method_name
       end
 
-      if @kind == 'assignment'
-        return (tp.event == :line && tp.lineno > @end_line) || (tp.event == :c_return && tp.method_id == :eval)
-      end
+      # 共通の終了判定:
+      # 1. 行番号が進んだ (tp.lineno > @end_line)
+      # 2. 現在のスコープを抜けた (@entry_depth があればチェック)
+      # 3. 全体の実行が終了した (eval の c_return)
+      finished = (tp.event == :line && tp.lineno > @end_line) ||
+                 (@entry_depth && @current_depth < @entry_depth) ||
+                 (tp.event == :c_return && tp.method_id == :eval)
 
-      [:return, :c_return, :b_return].include?(tp.event) || (tp.event == :line && tp.lineno > @end_line)
+      return true if finished
+
+      false
     end
 
     def target_method_name
