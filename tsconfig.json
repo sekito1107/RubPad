@@ -15,6 +15,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "jsx": "react-jsx",
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -26,34 +27,14 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "utils/*": [
-        "src/utils/*"
-      ],
-      "controllers/*": [
-        "src/controllers/*"
-      ],
-      "lsp/*": [
-        "src/lsp/*"
-      ],
-      "analysis": [
-        "src/analysis.ts"
-      ],
-      "analysis/*": [
-        "src/analysis/*"
-      ],
-      "reference/*": [
-        "src/reference/*"
-      ],
-      "runtime/*": [
-        "src/runtime/*"
-      ],
-      "persistence/*": [
-        "src/persistence/*"
-      ]
+      "state/*": ["src/state/*"],
+      "core/*": ["src/core/*"],
+      "components/*": ["src/components/*"]
     }
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.tsx",
     "src/**/*.js",
     "tests/**/*.ts",
     "tests/**/*.js",
@@ -64,3 +45,4 @@
     "dist"
   ]
 }
+
