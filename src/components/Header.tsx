@@ -4,21 +4,17 @@ import { app, toggleTheme } from '../state/app'
 import { editor } from '../state/editor'
 import { yarv, setPhase } from '../state/yarv'
 import { updateOutput } from '../state/terminal'
-import { execute } from '../core/ruby'
+import { useExecution } from '../hooks/useExecution'
 import { saveTheme } from '../core/persistence/app'
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
 
 function RunButton() {
   const { phase } = useSnapshot(yarv)
-  const modifierKey = isMac ? '⌘' : 'Ctrl'
+  const { execute } = useExecution()
 
   const handleRun = async () => {
-    if (phase !== 'ready') return
-    setPhase('running')
-    const result = await execute(editor.code)
-    updateOutput(result)
-    setPhase('ready')
+    execute()
   }
 
   return (
@@ -26,19 +22,14 @@ function RunButton() {
       onClick={handleRun}
       disabled={phase !== 'ready'}
       className={`
-        flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-        bg-emerald-600 text-white hover:bg-emerald-700
-        dark:bg-emerald-600
+        flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
+        bg-rose-600 text-white hover:bg-rose-700
+        dark:bg-rose-600 shadow-[0_0_15px_rgba(225,29,72,0.2)]
       `}
       id="run-button"
     >
       <Play size={16} fill="currentColor" />
       <span>Run</span>
-      <div className="hidden sm:flex items-center gap-0.5 text-[10px] text-white/80 font-mono ml-1">
-        <kbd className="px-1 py-0.5 rounded bg-black/20 border border-black/10 dark:bg-black/30 dark:border-white/10">{modifierKey}</kbd>
-        <span>+</span>
-        <kbd className="px-1 py-0.5 rounded bg-black/20 border border-black/10 dark:bg-black/30 dark:border-white/10">Enter</kbd>
-      </div>
     </button>
   )
 }
@@ -102,7 +93,21 @@ export default function Header() {
         <RubyVersion />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-3 select-none">
+          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em] italic ml-2">
+            Quick Run
+          </span>
+          <div className="flex items-center gap-1.5">
+            <kbd className="min-w-[22px] h-5 flex items-center justify-center px-1.5 text-[10px] font-mono font-bold rounded bg-slate-100 dark:bg-amber-500/10 border border-slate-300 dark:border-amber-500/40 shadow-sm dark:shadow-[0_0_10px_rgba(245,158,11,0.2)] text-slate-500 dark:text-amber-400 transition-colors">
+              {isMac ? '⌘' : 'Ctrl'}
+            </kbd>
+            <span className="text-[10px] text-slate-300 dark:text-amber-900 font-light">+</span>
+            <kbd className="min-w-[22px] h-5 flex items-center justify-center px-1.5 text-[10px] font-mono font-bold rounded bg-slate-100 dark:bg-amber-500/10 border border-slate-300 dark:border-amber-500/40 shadow-sm dark:shadow-[0_0_10px_rgba(245,158,11,0.2)] text-slate-500 dark:text-amber-400 transition-colors">
+              Enter
+            </kbd>
+          </div>
+        </div>
         <RunButton />
         <ThemeToggleButton />
       </div>

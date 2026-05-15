@@ -3,14 +3,23 @@ import { useSnapshot } from 'valtio';
 import { Keyboard, ChevronDown, ChevronRight, Layers } from 'lucide-react';
 import { stdinState, setStdin, setActiveSlot } from '../../state/stdin';
 import { useStdinSync } from '../../hooks/useStdinSync';
+import { useExecution } from '../../hooks/useExecution';
 import clsx from 'clsx';
 
 export default function StdinInput() {
   const [isOpen, setIsOpen] = useState(false);
   const snap = useSnapshot(stdinState);
+  const { execute } = useExecution();
 
   // Ruby VM との状態同期を開始
   useStdinSync();
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      execute();
+    }
+  };
 
   const placeholders = [
     "Enter input for Slot 1...",
@@ -109,6 +118,7 @@ export default function StdinInput() {
             <textarea
               value={snap.slots[snap.activeSlot]}
               onChange={(e) => setStdin(snap.activeSlot, e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder={placeholders[snap.activeSlot]}
               className={clsx(
                 'w-full h-full resize-none p-4 text-sm leading-relaxed rounded-lg transition-all border outline-none',
