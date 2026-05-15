@@ -67,14 +67,15 @@ export const pick = async (code: string, line: number, col: number) => {
   return JSON.parse(raw);
 };
 
-export const inspect = async (code: string, expression: string, line: number, kind: 'variable' | 'assignment' | 'expression' | 'block_variable', endLine: number, receiver: string | null = null, blockDepth: number | null = null, blockOrder: number | null = null) => {
+export const inspect = async (code: string, expression: string, line: number, kind: 'variable' | 'assignment' | 'expression' | 'block_variable', endLine: number, receiver: string | null = null, blockDepth: number | null = null, blockOrder: number | null = null, blockStartLine: number | null = null) => {
   const encodedCode = encode(code);
   const encodedExpr = encode(expression);
   const encodedReceiver = receiver ? `Base64.decode64('${encode(receiver)}').force_encoding('UTF-8')` : 'nil';
   const blockDepthArg = blockDepth !== null ? blockDepth : 'nil';
   const blockOrderArg = blockOrder !== null ? blockOrder : 'nil';
+  const blockStartLineArg = blockStartLine !== null ? blockStartLine : 'nil';
 
-  const raw = await send(`require 'base64'; Inspector.run(Base64.decode64('${encodedCode}').force_encoding('UTF-8'), Base64.decode64('${encodedExpr}').force_encoding('UTF-8'), ${line}, ${JSON.stringify(kind)}, ${endLine}, ${encodedReceiver}, ${blockDepthArg}, ${blockOrderArg})`);
+  const raw = await send(`require 'base64'; Inspector.run(Base64.decode64('${encodedCode}').force_encoding('UTF-8'), Base64.decode64('${encodedExpr}').force_encoding('UTF-8'), ${line}, ${JSON.stringify(kind)}, ${endLine}, ${encodedReceiver}, ${blockDepthArg}, ${blockOrderArg}, ${blockStartLineArg})`);
   return JSON.parse(raw);
 };
 

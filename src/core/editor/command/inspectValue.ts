@@ -16,13 +16,14 @@ export const registerInspectValueCommand = () => {
     preExecutionTarget: string | null;
     blockDepth: number | null;
     blockOrder: number | null;
+    blockStartLine: number | null;
   }) => {
     if (!target) return;
 
     const model = monaco.editor.getModels()[0];
     const code = model.getValue();
 
-    const captured = await inspect(code, target.expression, target.line, target.kind, target.endLine, target.preExecutionTarget, target.blockDepth ?? null, target.blockOrder ?? null);
+    const captured = await inspect(code, target.expression, target.line, target.kind, target.endLine, target.preExecutionTarget, target.blockDepth ?? null, target.blockOrder ?? null, target.blockStartLine ?? null);
 
     addCapturedValue({
       line: target.line,
