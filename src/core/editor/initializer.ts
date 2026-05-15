@@ -1,5 +1,5 @@
 import * as monaco from 'monaco-editor';
-// @ts-ignore
+// @ts-expect-error: worker import
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import { loadWASM as loadOnigurumaEngine, OnigScanner, OnigString } from 'vscode-oniguruma';
 import { INITIAL, Registry, parseRawGrammar } from 'vscode-textmate';

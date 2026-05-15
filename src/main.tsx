@@ -8,11 +8,11 @@ import { loadTheme } from './core/persistence/app'
 import { loadCode } from './core/persistence/editor'
 import { DEFAULT_CODE } from './types/editor'
 import { decompressCode } from './core/share'
-// @ts-ignore
+// @ts-expect-error: worker import
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 
 self.MonacoEnvironment = {
-  getWorker: function (_moduleId: any, _label: string) {
+  getWorker: function () {
     return new editorWorker();
   },
 };

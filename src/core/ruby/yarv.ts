@@ -1,26 +1,26 @@
 import { DefaultRubyVM } from '@ruby/wasm-wasi/dist/browser';
 
-// @ts-ignore
+// @ts-expect-error: raw import
 import executor from './executor.rb?raw';
-// @ts-ignore
+// @ts-expect-error: raw import
 import stdin from './stdin.rb?raw';
-// @ts-ignore
+// @ts-expect-error: raw import
 import typeprof from './typeprof.rb?raw';
-// @ts-ignore
+// @ts-expect-error: raw import
 import diagnostics from './typeprof/diagnostics.rb?raw';
-// @ts-ignore
+// @ts-expect-error: raw import
 import analyzer from './typeprof/analyzer.rb?raw';
-// @ts-ignore
+// @ts-expect-error: raw import
 import selector from './picker/selector.rb?raw';
-// @ts-ignore
+// @ts-expect-error: raw import
 import picker from './picker.rb?raw';
-// @ts-ignore
+// @ts-expect-error: raw import
 import environment from './inspector/environment.rb?raw';
-// @ts-ignore
+// @ts-expect-error: raw import
 import inspector from './inspector.rb?raw';
-// @ts-ignore
+// @ts-expect-error: raw import
 import methodSearcher from './method_searcher.rb?raw';
-// @ts-ignore
+// @ts-expect-error: raw import
 import liveEvaluator from './live_evaluator.rb?raw';
 
 const scripts = [stdin, executor, typeprof, diagnostics, analyzer, selector, picker, environment, inspector, methodSearcher, liveEvaluator];

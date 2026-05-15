@@ -54,7 +54,7 @@ export const useHoverData = (pos: monaco.IPosition | null) => {
         }
 
         // --- メタデータ解決ロジック ---
-        let expression = target.label;
+        const expression = target.label;
         let referenceLabel = target.label;
         let reference = 'None';
         let type_info = 'ReturnType: Unknown';

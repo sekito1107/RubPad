@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useSnapshot } from 'valtio'
 import clsx from 'clsx'
 import { app } from './state/app'

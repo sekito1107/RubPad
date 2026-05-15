@@ -1,5 +1,5 @@
 import * as monaco from 'monaco-editor';
-// @ts-ignore
+// @ts-expect-error: worker import
 import YarvServer from './ruby/yarv?worker';
 import { lspToMonaco } from '../utils/lsp-to-monaco';
 import { MethodCall, VariableDefinition } from '../state/analysis';
