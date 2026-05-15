@@ -103,11 +103,22 @@ module Inspector
 
     # 既存のデフォルト Observer（block_variable 以外、または block_depth 未指定の場合）
     def create_default_observer
-      TracePoint.new(:line, :b_call, :return, :b_return, :c_return) do |tp|
+      TracePoint.new(:line, :call, :b_call, :c_call, :return, :b_return, :c_return) do |tp|
+        case tp.event
+        when :call, :b_call, :c_call
+          @current_depth += 1
+        when :return, :b_return, :c_return
+          @current_depth -= 1
+        end
+
         if initial_value_captured?
-          record_post_execution_result(tp) if capture_ready?(tp)
-        elsif reached_target_line?(tp)
+          if capture_ready?(tp)
+            record_post_execution_result(tp)
+            @entry_depth = nil
+          end
+        elsif reached_target_line?(tp) && @entry_depth.nil?
           @saved_binding = tp.binding
+          @entry_depth = @current_depth
           record_pre_execution_state(tp)
         end
       end
