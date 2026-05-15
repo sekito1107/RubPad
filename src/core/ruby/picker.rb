@@ -25,8 +25,10 @@ module Picker
 
     block_depth = nil
     block_order = nil
+    block_start_line = nil
     if kind == 'block_variable'
       block_depth, block_order = calculate_block_info(result.value, nodes[:path], target.location.start_line)
+      block_start_line = collect_block_start_line(result.value, nodes[:path])
     end
 
     {
@@ -45,7 +47,8 @@ module Picker
       receiver: (target.respond_to?(:receiver) && target.receiver) ? target.receiver.slice : nil,
       preExecutionTarget: pre_execution_target,
       blockDepth: block_depth,
-      blockOrder: block_order
+      blockOrder: block_order,
+      blockStartLine: block_start_line
     }.to_json
   end
 
@@ -90,13 +93,27 @@ module Picker
     [depth, order]
   end
 
-  # target_line 上の target_depth に位置する BlockNode/LambdaNode を DFS 順で収集する
+  # path 内の最も内側のブロックの開始行を返す
+  def self.collect_block_start_line(root, path)
+    enc = path.reverse.find { |n|
+      t = n.class.name.split('::').last
+      t == 'BlockNode' || t == 'LambdaNode'
+    }
+    enc&.location&.start_line
+  end
+
+  # target_line を含む範囲にある target_depth の BlockNode/LambdaNode を DFS 順で収集する
   def self.collect_blocks_at_depth(node, target_line, target_depth, cur_depth = 0, result = [])
     return result unless node
     t = node.class.name.split('::').last
     if t == 'BlockNode' || t == 'LambdaNode'
       nd = cur_depth + 1
-      result << node if node.location.start_line == target_line && nd == target_depth
+      # 修正: start_line 一致ではなく、target_line を含む範囲で検索
+      if nd == target_depth &&
+         node.location.start_line <= target_line &&
+         node.location.end_line >= target_line
+        result << node
+      end
       node.child_nodes.compact.each { |c| collect_blocks_at_depth(c, target_line, target_depth, nd, result) }
     else
       node.child_nodes.compact.each { |c| collect_blocks_at_depth(c, target_line, target_depth, cur_depth, result) }
