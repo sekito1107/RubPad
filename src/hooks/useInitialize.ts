@@ -28,6 +28,9 @@ function initEditor(): monaco.editor.IStandaloneCodeEditor {
     'vs-dark'
   );
 
+  // @ts-ignore: expose editor for testing
+  window.editor = instance;
+
   app.status.editorReady = true;
 
   instance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, async () => {

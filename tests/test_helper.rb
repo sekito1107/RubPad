@@ -36,6 +36,44 @@ class SystemTest < Minitest::Test
     find("[data-testid='status-ruby'][data-ready='true']", wait: 30)
   end
 
+  def type_code(code)
+    find(".monaco-editor").click
+    send_keys([:control, "a"], :backspace)
+    send_keys(code)
+    wait_analyzer_ready
+  end
+
+  # 指定した行・列の位置をホバーする
+  # Monaco の座標計算 API を利用し、正確な位置にマウスを移動させる
+  def hover_monaco_position(line:, column:)
+    # ブラウザ側で座標を取得
+    coords = page.evaluate_script(<<~JS)
+      (function() {
+        const editor = window.editor;
+        if (!editor) return null;
+        
+        // 指定位置の画面上の相対座標を取得
+        const pos = { lineNumber: #{line}, column: #{column} };
+        const scrolledPos = editor.getScrolledVisiblePosition(pos);
+        if (!scrolledPos) return null;
+        
+        // エディタコンテナの絶対座標を取得して加算
+        const rect = document.getElementById('monaco-editor').getBoundingClientRect();
+        return {
+          x: rect.left + scrolledPos.left,
+          y: rect.top + scrolledPos.top
+        };
+      })()
+    JS
+
+    raise "Could not get Monaco coordinates for line #{line}, column #{column}" unless coords
+
+    # Capybara でマウスを移動
+    # offset は要素の左上からの相対位置として扱われることがあるため、
+    # window 全体に対する絶対座標として移動させるために native ドライバの action を使用
+    page.driver.browser.action.move_to_location(coords["x"].to_i, coords["y"].to_i).perform
+  end
+
   def teardown
     Capybara.current_session.driver.quit
     super
