@@ -7,8 +7,11 @@ import { updateOutput } from '../state/terminal'
 import { execute } from '../core/ruby'
 import { saveTheme } from '../core/persistence/app'
 
+const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
+
 function RunButton() {
   const { phase } = useSnapshot(yarv)
+  const modifierKey = isMac ? '⌘' : 'Ctrl'
 
   const handleRun = async () => {
     if (phase !== 'ready') return
@@ -31,6 +34,11 @@ function RunButton() {
     >
       <Play size={16} fill="currentColor" />
       <span>Run</span>
+      <div className="hidden sm:flex items-center gap-0.5 text-[10px] text-white/80 font-mono ml-1">
+        <kbd className="px-1 py-0.5 rounded bg-black/20 border border-black/10 dark:bg-black/30 dark:border-white/10">{modifierKey}</kbd>
+        <span>+</span>
+        <kbd className="px-1 py-0.5 rounded bg-black/20 border border-black/10 dark:bg-black/30 dark:border-white/10">Enter</kbd>
+      </div>
     </button>
   )
 }
