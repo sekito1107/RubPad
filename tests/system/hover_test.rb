@@ -6,13 +6,6 @@ class HoverTest < SystemTest
     wait_wasm_loading
   end
 
-  def type_code(code)
-    find(".monaco-editor").click
-    send_keys([:control, "a"], :backspace)
-    send_keys(code)
-    wait_analyzer_ready
-  end
-
   def test_ホバーでの値の履歴表示_描画しきれるケース
     type_code("[1, 2].each { |n| n }")
     find(".monaco-editor .view-line", text: "n }").all("span", text: "n").last.hover
@@ -107,5 +100,33 @@ class HoverTest < SystemTest
 
     line.find("span", text: "secondvar", exact_text: true).hover
     assert_selector("[data-testid='hover-widget']", text: "2")
+  end
+
+  def test_破壊的メソッド呼び出し行での変数ホバー
+    type_code("array = [1, 2]\nr = []\narray.each { |i| r << i * 2 }")
+
+    # 3行目の18列目 ('r') をホバー
+    # 期待値: 実行前の履歴 ([], [2])
+    hover_monaco_position(line: 3, column: 18)
+    within("[data-testid='hover-widget']") do
+      assert_equal "[], [2]", find("[data-testid='runtime-value']").text
+    end
+
+    # 3行目の20列目 ('<<') をホバー
+    # 期待値: 実行後の履歴 ([2], [2, 4])
+    hover_monaco_position(line: 3, column: 20)
+    within("[data-testid='hover-widget']") do
+      assert_equal "[2], [2, 4]", find("[data-testid='runtime-value']").text
+    end
+  end
+
+  def test_ループ末尾での代入式の値が全イテレーション分記録されること
+    type_code("array = [1, 2, 3]\n\narray.each do |i|\n  r = i * 2\nend")
+    # 4行目の3列目 ('r') をホバー
+    hover_monaco_position(line: 4, column: 3)
+    within("[data-testid='hover-widget']") do
+      assert_equal "r", find("[data-testid='expression']").text
+      assert_equal "2, 4, 6", find("[data-testid='runtime-value']").text
+    end
   end
 end
