@@ -28,6 +28,8 @@ module Inspector
       @last_value = nil
       @initial_value = UNDEFINED
       @saved_binding = nil
+      @current_depth = 0
+      @entry_depth = nil
     end
 
     def execute(code)
