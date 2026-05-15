@@ -89,3 +89,8 @@ export const checkAnalyzerReady = async (): Promise<boolean> => {
   );
   return result === 'ok';
 };
+
+export const fetchClassMethods = async (className: string): Promise<{name: string, owner: string}[]> => {
+  const raw = await send(`MethodSearcher.run('${className}')`);
+  return JSON.parse(raw);
+};

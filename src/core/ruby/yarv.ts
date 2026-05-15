@@ -18,8 +18,10 @@ import picker from './picker.rb?raw';
 import environment from './inspector/environment.rb?raw';
 // @ts-ignore
 import inspector from './inspector.rb?raw';
+// @ts-ignore
+import methodSearcher from './method_searcher.rb?raw';
 
-const scripts = [stdin, executor, typeprof, diagnostics, analyzer, selector, picker, environment, inspector];
+const scripts = [stdin, executor, typeprof, diagnostics, analyzer, selector, picker, environment, inspector, methodSearcher];
 
 const vmPromise = (async () => {
   const response = await fetch('/ruby/rubox.wasm');
