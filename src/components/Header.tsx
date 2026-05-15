@@ -83,7 +83,7 @@ export default function Header() {
     <>
     <header className={`
       h-14 border-b flex items-center justify-between px-4 shrink-0 transition-colors
-      bg-white border-slate-200
+      bg-[#C4B4A0] border-[#B2A28E]
       dark:bg-[#0D1117] dark:border-white/5
     `}>
       <div className="flex items-center gap-3">

@@ -8,10 +8,10 @@ export default function VariableExplorerPanel() {
   const varEntries = Object.entries(variables);
 
   return (
-    <div id="live-variables-panel" className="flex-1 flex flex-col min-h-0 bg-white dark:bg-[#0D1117]">
+    <div id="live-variables-panel" className="flex-1 flex flex-col min-h-0 bg-[#D6C5B0] dark:bg-[#0D1117]">
       <div className={clsx(
         'py-2 px-4 border-b transition-colors',
-        'bg-zinc-100 border-zinc-200',
+        'bg-[#C4B4A0] border-[#B2A28E]',
         'dark:bg-zinc-800/50 dark:border-zinc-700'
       )}>
         <h2 className={clsx(

@@ -109,7 +109,7 @@ export default function MethodSearchPanel() {
       {/* パネルヘッダー */}
       <div className={clsx(
         'py-2 px-4 flex items-center justify-between',
-        'bg-zinc-100',
+        'bg-[#C4B4A0]',
         'dark:bg-zinc-800/50'
       )}>
         <h2 className={clsx(
@@ -123,7 +123,7 @@ export default function MethodSearchPanel() {
       </div>
 
       {/* クラス選択プルダウン */}
-      <div className="p-3 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="p-3 border-b border-[#FAD9B5] dark:border-zinc-800">
         <div className="relative">
           <select
             value={searchSnap.selectedClass || ''}
@@ -132,8 +132,8 @@ export default function MethodSearchPanel() {
               setIsOpen(true);
             }}
             className={clsx(
-              'w-full px-3 py-1.5 text-xs font-mono rounded-md border outline-none appearance-none cursor-pointer',
-              'bg-zinc-50 border-zinc-200 text-zinc-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500',
+              'w-full px-3 py-1.5 text-xs font-mono rounded-md border outline-none appearance-none cursor-pointer transition-all',
+              'bg-[#E3D5C4] border-[#B2A28E] text-[#3E362E] focus:border-orange-700 focus:ring-1 focus:ring-orange-700',
               'dark:bg-[#0D1117] dark:border-zinc-700 dark:text-zinc-300 dark:focus:border-blue-400 dark:focus:ring-blue-400'
             )}
           >

@@ -11,7 +11,7 @@ export default function Sidebar() {
   return (
     <aside className={clsx(
       'w-80 flex flex-col border-l transition-colors',
-      'border-zinc-200 bg-zinc-50',
+      'border-[#B2A28E] bg-[#C4B4A0]',
       'dark:border-zinc-800 dark:bg-[#0D1117]'
     )}>
       {/* Tab Switcher */}
