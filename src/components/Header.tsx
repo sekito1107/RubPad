@@ -64,11 +64,14 @@ function RubyVersion() {
 
   return (
     <div className={`
-      text-[10px] font-mono px-1.5 py-0.5 rounded border transition-colors select-none
-      text-slate-400 bg-slate-100 border-slate-200
-      dark:text-slate-500 dark:bg-white/5 dark:border-white/10
+      text-[10px] font-mono px-2 py-0.5 rounded-full border transition-all select-none flex items-center gap-1.5
+      text-slate-500 bg-slate-100 border-slate-200
+      dark:text-slate-400 dark:bg-white/5 dark:border-white/10
     `}>
-      {phase === 'loading' ? 'Now loading...' : version}
+      <div className={`w-1.5 h-1.5 rounded-full ${phase === 'ready' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-amber-400'}`} />
+      <span className="opacity-80">
+        {phase === 'loading' ? 'WASM Initializing...' : `Ruby ${version} (WASM)`}
+      </span>
     </div>
   )
 }
