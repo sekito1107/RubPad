@@ -4,6 +4,7 @@
   "description": "This README would normally document whatever steps are necessary to get the application up and running.",
   "type": "module",
   "scripts": {
+    "setup": "npm install && bundle install",
     "dev": "vite",
     "build": "vite build",
     "test": "npm run build && npm run test:unit && npm run test:system",
