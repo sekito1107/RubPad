@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '4.0'
+        bundler-cache: true # runs bundle install and caches gems
+
+    - name: Install Node dependencies
+      run: npm install
+
+    - name: Run lint
+      run: npm run lint
+
+    - name: Build
+      run: npm run build
+
+    - name: Run tests (Unit & System)
+      run: npm test
