@@ -1,4 +1,5 @@
-import { Play, Sun, Moon } from 'lucide-react'
+import { Play, Sun, Moon, Share2 } from 'lucide-react'
+import { useState } from 'react'
 import { useSnapshot } from 'valtio'
 import { app, toggleTheme } from '../state/app'
 import { editor } from '../state/editor'
@@ -73,7 +74,10 @@ function RubyVersion() {
 }
 
 export default function Header() {
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+
   return (
+    <>
     <header className={`
       h-14 border-b flex items-center justify-between px-4 shrink-0 transition-colors
       bg-white border-slate-200
@@ -94,6 +98,19 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-4">
+        {/* Share Button */}
+        <button
+          onClick={() => setIsShareModalOpen(true)}
+          className={`
+            flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all active:scale-95
+            bg-indigo-500 text-white hover:bg-indigo-600
+            dark:bg-indigo-600 shadow-[0_0_15px_rgba(99,102,241,0.2)]
+          `}
+        >
+          <Share2 size={16} />
+          <span>Share</span>
+        </button>
+
         <div className="hidden md:flex items-center gap-3 select-none">
           <span className="text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em] italic ml-2">
             Quick Run
@@ -112,5 +129,8 @@ export default function Header() {
         <ThemeToggleButton />
       </div>
     </header>
+    {isShareModalOpen && <ShareModal onClose={() => setIsShareModalOpen(false)} />}
+    </>
   )
 }
+import ShareModal from './share/ShareModal'
