@@ -94,3 +94,8 @@ export const fetchClassMethods = async (className: string): Promise<{name: strin
   const raw = await send(`MethodSearcher.run('${className}')`);
   return JSON.parse(raw);
 };
+
+export const fetchLiveVariables = async (code: string): Promise<{ variables: Record<string, string>, status: 'ok' | 'timeout' | 'error' }> => {
+  const raw = await send(`require 'base64'; LiveEvaluator.run(Base64.decode64('${encode(code)}').force_encoding('UTF-8'))`);
+  return JSON.parse(raw);
+};
