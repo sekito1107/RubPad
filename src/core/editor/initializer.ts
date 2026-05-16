@@ -112,7 +112,9 @@ export function run(
     },
     inlayHints: {
       enabled: 'on'
-    }
+    },
+    tabSize: 2,
+    insertSpaces: true
   });
 
   // バックグラウンドでTextMateのセットアップを開始
