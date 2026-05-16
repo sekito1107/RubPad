@@ -96,7 +96,8 @@ class InlayHintsTest < SystemTest
     # (s) とすることで、s を確実に独立したスパンにする
     type_code("s = 'hi'\n[1].each { |i| (s).upcase! }")
     # 単独のスパンになった s をホバー
-    find(".monaco-editor .view-line", text: "upcase!").find("span", text: "s", exact_text: true).hover
+    # 2行目の17列目 ('s') をホバー
+    hover_monaco_position(line: 2, column: 17)
     find("[data-testid='pin-button']").click
     assert_text 's: "hi"'
   end
