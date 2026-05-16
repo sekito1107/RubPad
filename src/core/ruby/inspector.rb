@@ -28,6 +28,8 @@ module Inspector
       @last_value = nil
       @initial_value = UNDEFINED
       @saved_binding = nil
+      @current_depth = 0
+      @entry_depth = nil
     end
 
     def execute(code)
@@ -101,11 +103,22 @@ module Inspector
 
     # 既存のデフォルト Observer（block_variable 以外、または block_depth 未指定の場合）
     def create_default_observer
-      TracePoint.new(:line, :b_call, :return, :b_return, :c_return) do |tp|
+      TracePoint.new(:line, :call, :b_call, :c_call, :return, :b_return, :c_return) do |tp|
+        case tp.event
+        when :call, :b_call, :c_call
+          @current_depth += 1
+        when :return, :b_return, :c_return
+          @current_depth -= 1
+        end
+
         if initial_value_captured?
-          record_post_execution_result(tp) if capture_ready?(tp)
-        elsif reached_target_line?(tp)
+          if capture_ready?(tp)
+            record_post_execution_result(tp)
+            @entry_depth = nil
+          end
+        elsif reached_target_line?(tp) && @entry_depth.nil?
           @saved_binding = tp.binding
+          @entry_depth = @current_depth
           record_pre_execution_state(tp)
         end
       end
@@ -146,19 +159,22 @@ module Inspector
     end
 
     def capture_ready?(tp)
-      # 変数参照の場合は、ターゲット行に到達した時点ですでに準備完了
-      return true if ['variable', 'block_variable'].include?(@kind)
-
+      # メソッド呼び出しの場合は、そのメソッドの終了時が準備完了
       if target_method_name
-        # メソッド呼び出しの場合は、そのメソッドの終了時が準備完了
         return [:return, :c_return].include?(tp.event) && tp.method_id == target_method_name
       end
 
-      if @kind == 'assignment'
-        return (tp.event == :line && tp.lineno > @end_line) || (tp.event == :c_return && tp.method_id == :eval)
-      end
+      # 共通の終了判定:
+      # 1. 行番号が進んだ (tp.lineno > @end_line)
+      # 2. 現在のスコープを抜けた (@entry_depth があればチェック)
+      # 3. 全体の実行が終了した (eval の c_return)
+      finished = (tp.event == :line && tp.lineno > @end_line) ||
+                 (@entry_depth && @current_depth < @entry_depth) ||
+                 (tp.event == :c_return && tp.method_id == :eval)
 
-      [:return, :c_return, :b_return].include?(tp.event) || (tp.event == :line && tp.lineno > @end_line)
+      return true if finished
+
+      false
     end
 
     def target_method_name

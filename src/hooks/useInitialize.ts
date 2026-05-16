@@ -28,6 +28,11 @@ function initEditor(): monaco.editor.IStandaloneCodeEditor {
     'vs-dark'
   );
 
+  // テスト環境の場合のみ、テスト用にエディタインスタンスを公開
+  if (window.navigator.webdriver) {
+    (window as any).editor = instance;
+  }
+
   app.status.editorReady = true;
 
   instance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, async () => {
