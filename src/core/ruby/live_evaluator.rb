@@ -39,7 +39,9 @@ module LiveEvaluator
     begin
       original_stdout = $stdout
       original_stderr = $stderr
+      original_stdin = $stdin
       $stdout = $stderr = StringIO.new
+      $stdin = StringIO.new($rubox_stdin || "")
 
       begin
         tp.enable { b.eval(code) }
@@ -51,6 +53,7 @@ module LiveEvaluator
         tp.disable if tp.enabled?
         $stdout = original_stdout
         $stderr = original_stderr
+        $stdin = original_stdin
       end
 
       # 評価が成功したか、タイムアウトした場合に変数を取得する
