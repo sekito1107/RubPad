@@ -28,8 +28,10 @@ function initEditor(): monaco.editor.IStandaloneCodeEditor {
     'vs-dark'
   );
 
-  // @ts-ignore: expose editor for testing
-  window.editor = instance;
+  // テスト環境の場合のみ、テスト用にエディタインスタンスを公開
+  if (window.navigator.webdriver) {
+    (window as any).editor = instance;
+  }
 
   app.status.editorReady = true;
 
