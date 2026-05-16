@@ -53,29 +53,33 @@ module LiveEvaluator
         $stderr = original_stderr
       end
 
-      # ローカル変数を取得
-      b.local_variables.each do |var|
-        begin
-          val = b.local_variable_get(var)
-          variables[var.to_s] = val.inspect
-        rescue; end
-      end
+      # 評価が成功した場合のみ変数を取得する
+      # タイピング中の不正な構文による負荷を防ぐ
+      if status == "ok"
+        # ローカル変数を取得
+        b.local_variables.each do |var|
+          begin
+            val = b.local_variable_get(var)
+            variables[var.to_s] = val.inspect
+          rescue; end
+        end
 
-      # インスタンス変数を取得 (Sandbox内の @変数)
-      b.eval("instance_variables").each do |var|
-        begin
-          val = b.eval(var.to_s)
-          variables[var.to_s] = val.inspect
-        rescue; end
-      end
+        # インスタンス変数を取得
+        b.eval("instance_variables").each do |var|
+          begin
+            val = b.eval(var.to_s)
+            variables[var.to_s] = val.inspect
+          rescue; end
+        end
 
-      # グローバル変数を取得 (実行後に増えたもの、かつシステム変数でないもの)
-      (global_variables - @initial_globals).each do |var|
-        next if SYSTEM_GLOBALS.include?(var)
-        begin
-          val = eval(var.to_s)
-          variables[var.to_s] = val.inspect
-        rescue; end
+        # グローバル変数を取得
+        (global_variables - @initial_globals).each do |var|
+          next if SYSTEM_GLOBALS.include?(var)
+          begin
+            val = eval(var.to_s)
+            variables[var.to_s] = val.inspect
+          rescue; end
+        end
       end
 
     rescue Exception
