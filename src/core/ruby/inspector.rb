@@ -159,16 +159,8 @@ module Inspector
     end
 
     def capture_ready?(tp)
-      # 変数参照の場合は、最初のイベント（次の命令など）でキャプチャしてよいが、
-      # 同同一行内の別スコープ（ブロック等）への進入で誤認されないよう、
-      # 基本的には depth が変わらないイベントを待つ。
-      # ただし、Reachedで処理した直後の :line イベント自身では終了させない。
-      if ['variable', 'block_variable'].include?(@kind)
-        return tp.event != :line
-      end
-
+      # メソッド呼び出しの場合は、そのメソッドの終了時が準備完了
       if target_method_name
-        # メソッド呼び出しの場合は、そのメソッドの終了時が準備完了
         return [:return, :c_return].include?(tp.event) && tp.method_id == target_method_name
       end
 
