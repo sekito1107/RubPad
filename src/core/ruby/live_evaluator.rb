@@ -53,9 +53,9 @@ module LiveEvaluator
         $stderr = original_stderr
       end
 
-      # 評価が成功した場合のみ変数を取得する
-      # タイピング中の不正な構文による負荷を防ぐ
-      if status == "ok"
+      # 評価が成功したか、タイムアウトした場合に変数を取得する
+      # タイピング中の不正な構文（error）による負荷は防ぐ
+      if status == "ok" || status == "timeout"
         # ローカル変数を取得
         b.local_variables.each do |var|
           begin
