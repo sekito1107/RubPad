@@ -40,7 +40,12 @@ const vmPromise = (async () => {
 })();
 
 self.onmessage = async event => {
-  const vm = await vmPromise;
-  const result = vm.eval(event.data);
-  postMessage(result.toString());
+  try {
+    const vm = await vmPromise;
+    const result = vm.eval(event.data);
+    postMessage(result.toString());
+  } catch (e) {
+    console.error("Worker evaluation error:", e);
+    postMessage(JSON.stringify({ status: "error", error_class: "WorkerError", error_message: String(e) }));
+  }
 };

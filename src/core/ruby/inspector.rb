@@ -132,8 +132,8 @@ module Inspector
         clean_binding = Object.new.instance_eval { binding }
         Environment.prepare(code, clean_binding)
         observer.enable { clean_binding.eval(code) }
-      rescue
-        # 実行時エラーはここでは捕捉しない
+      rescue Exception
+        # 実行時エラーや SyntaxError などの例外を安全に捕捉してスルーする
       ensure
         $stdout, $stderr = original_stdout, original_stderr
         observer.disable if observer.enabled?
@@ -235,6 +235,10 @@ module Inspector
   end
 
   def self.run(code, expression, target_line, kind, end_line, pre_execution_target, block_depth = nil, block_order = nil, block_start_line = nil)
-    Session.new(expression, target_line, kind, end_line, pre_execution_target, block_depth, block_order, block_start_line).execute(code).to_json
+    begin
+      Session.new(expression, target_line, kind, end_line, pre_execution_target, block_depth, block_order, block_start_line).execute(code).to_json
+    rescue Exception
+      { history: [], lastValue: "(error)" }.to_json
+    end
   end
 end

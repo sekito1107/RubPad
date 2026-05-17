@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { editor } from '../state/editor';
 import { app } from '../state/app';
-import { updateLiveVariables } from '../state/live-variables';
+import { liveVariablesState, updateLiveVariables } from '../state/live-variables';
 import { fetchLiveVariables } from '../core/ruby';
 
 export const useLiveVariables = () => {
@@ -19,11 +19,20 @@ export const useLiveVariables = () => {
       }
 
       try {
-        const result = await fetchLiveVariables(code);
-        updateLiveVariables(result.variables, result.status);
+        const result = await fetchLiveVariables(code) as any;
+        if (result.status === 'error') {
+          const hasNewVars = Object.keys(result.variables || {}).length > 0;
+          updateLiveVariables(
+            hasNewVars ? result.variables : liveVariablesState.variables,
+            'error',
+            result.error_class ? { name: result.error_class, message: result.error_message } : null
+          );
+        } else {
+          updateLiveVariables(result.variables, result.status);
+        }
       } catch (e) {
         console.error('Failed to fetch live variables:', e);
-        updateLiveVariables({}, 'error');
+        updateLiveVariables(liveVariablesState.variables, 'error', { name: 'WorkerError', message: String(e) });
       }
     }, 500);
 
