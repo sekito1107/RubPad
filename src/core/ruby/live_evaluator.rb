@@ -4,11 +4,15 @@ require "stringio"
 module LiveEvaluator
   class TimeoutError < StandardError; end
 
-  # 評価環境を隔離するためのサンドボックスクラス
-  class Sandbox
-    def get_binding
-      binding
-    end
+  # 評価環境を隔離するための無名クラスのバインディングを生成する
+  def self.create_sandbox_binding
+    sandbox_class = Class.new
+    sandbox_class.class_eval(<<~RUBY)
+      def get_binding
+        binding
+      end
+    RUBY
+    sandbox_class.new.get_binding
   end
 
   # 実行ステップ数の上限（無限ループ対策）
@@ -25,7 +29,7 @@ module LiveEvaluator
     status = "ok"
     
     # 完全に隔離されたバインディングを生成
-    b = Sandbox.new.get_binding
+    b = create_sandbox_binding
     
     # 実行ステップ数を監視するTracePoint
     count = 0
@@ -56,9 +60,9 @@ module LiveEvaluator
         $stdin = original_stdin
       end
 
-      # 評価が成功したか、タイムアウトした場合に変数を取得する
-      # タイピング中の不正な構文（error）による負荷は防ぐ
-      if status == "ok" || status == "timeout"
+      # 評価が成功したか、タイムアウトしたか、あるいは実行時エラーが発生した場合に変数を取得する
+      # タイピング中の不正な構文によるエラーでも、そこまでに定義された変数を可能な限り表示するようにする
+      if status == "ok" || status == "timeout" || status == "error"
         # ローカル変数を取得
         b.local_variables.each do |var|
           begin
@@ -72,6 +76,14 @@ module LiveEvaluator
           begin
             val = b.eval(var.to_s)
             variables[var.to_s] = val.inspect
+          rescue; end
+        end
+
+        # 定数を取得
+        b.eval("self.class.constants").each do |const_sym|
+          begin
+            val = b.eval(const_sym.to_s)
+            variables[const_sym.to_s] = val.inspect
           rescue; end
         end
 

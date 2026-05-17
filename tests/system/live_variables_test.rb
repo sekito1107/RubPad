@@ -47,4 +47,50 @@ class LiveVariablesTest < SystemTest
       assert_text "100"
     end
   end
+
+  def test_定数を定義したコード入力時に定数もライブ変数としてパネルに表示されること
+    visit "/"
+    wait_wasm_loading
+
+    # SidebarのVariablesタブをクリック (CSSのuppercaseを考慮して大文字小文字を区別しない)
+    find("button", text: /Variables/i).click
+
+    # エディタにコードを入力
+    find(".monaco-editor").click
+    page.driver.browser.action.key_down(:control).send_keys("a").key_up(:control).send_keys(:backspace).perform
+    
+    # 定数定義を入力
+    send_keys("MY_CONST = 'hello'\n")
+
+    # 定数が表示されるのを待つ (自動評価の完了を待機)
+    within "#live-variables-panel" do
+      assert_text "MY_CONST"
+      assert_text '"hello"'
+    end
+  end
+
+  def test_コード実行中にエラーが発生した場合でもエラー手前までのライブ変数が表示されること
+    visit "/"
+    wait_wasm_loading
+
+    # SidebarのVariablesタブをクリック (CSSのuppercaseを考慮して大文字小文字を区別しない)
+    find("button", text: /Variables/i).click
+
+    # エディタにコードを入力
+    find(".monaco-editor").click
+    page.driver.browser.action.key_down(:control).send_keys("a").key_up(:control).send_keys(:backspace).perform
+    
+    # 途中で例外が発生するコードを入力
+    send_keys("err_var = 12345\n")
+    send_keys("raise 'intentional error'\n")
+    send_keys("after_var = 999\n")
+
+    # 例外発生前までの変数は表示されるが、例外発生以後の代入結果は反映されないことを検証
+    within "#live-variables-panel" do
+      assert_text "err_var"
+      assert_text "12345"
+      # after_var の代入行は実行されていないため、999 にはなっていないことを検証
+      refute_text "999"
+    end
+  end
 end
