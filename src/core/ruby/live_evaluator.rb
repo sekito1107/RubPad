@@ -40,6 +40,9 @@ module LiveEvaluator
       end
     end
 
+    error_class = nil
+    error_message = nil
+
     begin
       original_stdout = $stdout
       original_stderr = $stderr
@@ -51,8 +54,10 @@ module LiveEvaluator
         tp.enable { b.eval(code) }
       rescue TimeoutError
         status = "timeout"
-      rescue Exception
+      rescue Exception => e
         status = "error"
+        error_class = e.class.name
+        error_message = e.message
       ensure
         tp.disable if tp.enabled?
         $stdout = original_stdout
@@ -97,10 +102,12 @@ module LiveEvaluator
         end
       end
 
-    rescue Exception
+    rescue Exception => e
       status = "error"
+      error_class ||= e.class.name
+      error_message ||= e.message
     end
 
-    JSON.generate({ variables: variables, status: status })
+    JSON.generate({ variables: variables, status: status, error_class: error_class, error_message: error_message })
   end
 end

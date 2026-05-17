@@ -4,7 +4,7 @@ import { AlertCircle } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function VariableExplorerPanel() {
-  const { variables, status } = useSnapshot(liveVariablesState);
+  const { variables, status, error } = useSnapshot(liveVariablesState);
   const varEntries = Object.entries(variables);
 
   return (
@@ -29,6 +29,19 @@ export default function VariableExplorerPanel() {
             <AlertCircle size={16} className="mt-0.5 shrink-0" />
             <div className="text-xs">
               無限ループを検出したため中断しました。直前までの状態を表示しています。
+            </div>
+          </div>
+        )}
+
+        {status === 'error' && error && (
+          <div id="live-eval-error-alert" className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/50 flex items-start gap-2 text-rose-700 dark:text-rose-400">
+            <AlertCircle size={16} className="mt-0.5 shrink-0" />
+            <div className="text-xs">
+              <div className="font-bold mb-0.5">{error.name}</div>
+              <div className="font-mono text-[11px] leading-relaxed break-words">{error.message}</div>
+              <div className="mt-1 text-[10px] opacity-75">
+                コードにエラーがあります。直前までの正常な状態を表示しています。
+              </div>
             </div>
           </div>
         )}

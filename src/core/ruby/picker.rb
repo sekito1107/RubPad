@@ -7,49 +7,53 @@ module Picker
   ASSIGNMENT_KEYWORDS = ["WriteNode", "TargetNode"]
 
   def self.run(code, line, col)
-    result = Prism.parse(code)
-    nodes = Selector.find_node(result.value, line, col)
-    return {}.to_json if !nodes || nodes[:target].nil?
+    begin
+      result = Prism.parse(code)
+      nodes = Selector.find_node(result.value, line, col)
+      return {}.to_json if !nodes || nodes[:target].nil?
 
-    target = nodes[:target]
+      target = nodes[:target]
 
-    # パラメータ宣言ノード（|b|など）の場合はホバーを無効化する
-    node_type = target.class.name.split('::').last
-    return {}.to_json if BLOCK_VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) }
-    statement = nodes[:statement]
-    label_loc = target.respond_to?(:message_loc) ? target.message_loc : nil
+      # パラメータ宣言ノード（|b|など）の場合はホバーを無効化する
+      node_type = target.class.name.split('::').last
+      return {}.to_json if BLOCK_VARIABLE_KEYWORDS.any? { |kw| node_type.include?(kw) }
+      statement = nodes[:statement]
+      label_loc = target.respond_to?(:message_loc) ? target.message_loc : nil
 
-    kind = determine_kind(target.class.name.split('::').last, nodes[:path])
-    label = kind == 'expression' ? target.slice : target.name.to_s
-    pre_execution_target = determine_pre_execution_target(target, kind)
+      kind = determine_kind(target.class.name.split('::').last, nodes[:path])
+      label = kind == 'expression' ? target.slice : target.name.to_s
+      pre_execution_target = determine_pre_execution_target(target, kind)
 
-    block_depth = nil
-    block_order = nil
-    block_start_line = nil
-    if kind == 'block_variable'
-      block_depth, block_order = calculate_block_info(result.value, nodes[:path], target.location.start_line)
-      block_start_line = collect_block_start_line(result.value, nodes[:path])
+      block_depth = nil
+      block_order = nil
+      block_start_line = nil
+      if kind == 'block_variable'
+        block_depth, block_order = calculate_block_info(result.value, nodes[:path], target.location.start_line)
+        block_start_line = collect_block_start_line(result.value, nodes[:path])
+      end
+
+      {
+        label: label,
+        content: statement.slice,
+        line: target.location.start_line,
+        col: target.location.start_column,
+        labelLine: label_loc&.start_line,
+        labelCol: label_loc&.start_column,
+        contentLine: statement.location.start_line,
+        contentCol: statement.location.start_column,
+        endLine: statement.location.end_line,
+        endCol: statement.location.end_column,
+        kind: kind,
+        expression: target.slice,
+        receiver: (target.respond_to?(:receiver) && target.receiver) ? target.receiver.slice : nil,
+        preExecutionTarget: pre_execution_target,
+        blockDepth: block_depth,
+        blockOrder: block_order,
+        blockStartLine: block_start_line
+      }.to_json
+    rescue Exception
+      {}.to_json
     end
-
-    {
-      label: label,
-      content: statement.slice,
-      line: target.location.start_line,
-      col: target.location.start_column,
-      labelLine: label_loc&.start_line,
-      labelCol: label_loc&.start_column,
-      contentLine: statement.location.start_line,
-      contentCol: statement.location.start_column,
-      endLine: statement.location.end_line,
-      endCol: statement.location.end_column,
-      kind: kind,
-      expression: target.slice,
-      receiver: (target.respond_to?(:receiver) && target.receiver) ? target.receiver.slice : nil,
-      preExecutionTarget: pre_execution_target,
-      blockDepth: block_depth,
-      blockOrder: block_order,
-      blockStartLine: block_start_line
-    }.to_json
   end
 
   private
