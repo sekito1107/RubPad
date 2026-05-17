@@ -46,4 +46,25 @@ class CodeExecutionTest < SystemTest
       assert_text "Shortcut Worked"
     end
   end
+
+  def test_定数を定義したコードを複数回実行しても警告が出力されないこと
+    visit "/"
+    wait_wasm_loading
+
+    find(".monaco-editor").click
+    send_keys([:control, "a"], :backspace)
+    send_keys("LIMIT = 100\nputs LIMIT")
+
+    # 1回目の実行
+    click_on "run-button"
+    within "#terminal-panel" do
+      assert_text "100"
+    end
+
+    # 2回目の実行
+    click_on "run-button"
+    within "#terminal-panel" do
+      refute_text "already initialized constant"
+    end
+  end
 end

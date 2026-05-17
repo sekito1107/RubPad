@@ -4,11 +4,15 @@ require "stringio"
 module LiveEvaluator
   class TimeoutError < StandardError; end
 
-  # 評価環境を隔離するためのサンドボックスクラス
-  class Sandbox
-    def get_binding
-      binding
-    end
+  # 評価環境を隔離するための無名クラスのバインディングを生成する
+  def self.create_sandbox_binding
+    sandbox_class = Class.new
+    sandbox_class.class_eval(<<~RUBY)
+      def get_binding
+        binding
+      end
+    RUBY
+    sandbox_class.new.get_binding
   end
 
   # 実行ステップ数の上限（無限ループ対策）
@@ -25,7 +29,7 @@ module LiveEvaluator
     status = "ok"
     
     # 完全に隔離されたバインディングを生成
-    b = Sandbox.new.get_binding
+    b = create_sandbox_binding
     
     # 実行ステップ数を監視するTracePoint
     count = 0
