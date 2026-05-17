@@ -47,4 +47,25 @@ class LiveVariablesTest < SystemTest
       assert_text "100"
     end
   end
+
+  def test_定数を定義したコード入力時に定数もライブ変数としてパネルに表示されること
+    visit "/"
+    wait_wasm_loading
+
+    # SidebarのVariablesタブをクリック (CSSのuppercaseを考慮して大文字小文字を区別しない)
+    find("button", text: /Variables/i).click
+
+    # エディタにコードを入力
+    find(".monaco-editor").click
+    page.driver.browser.action.key_down(:control).send_keys("a").key_up(:control).send_keys(:backspace).perform
+    
+    # 定数定義を入力
+    send_keys("MY_CONST = 'hello'\n")
+
+    # 定数が表示されるのを待つ (自動評価の完了を待機)
+    within "#live-variables-panel" do
+      assert_text "MY_CONST"
+      assert_text '"hello"'
+    end
+  end
 end

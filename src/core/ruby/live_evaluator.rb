@@ -79,6 +79,14 @@ module LiveEvaluator
           rescue; end
         end
 
+        # 定数を取得
+        b.eval("self.class.constants").each do |const_sym|
+          begin
+            val = b.eval(const_sym.to_s)
+            variables[const_sym.to_s] = val.inspect
+          rescue; end
+        end
+
         # グローバル変数を取得
         (global_variables - @initial_globals).each do |var|
           next if SYSTEM_GLOBALS.include?(var)
