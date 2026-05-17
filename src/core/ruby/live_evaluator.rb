@@ -60,9 +60,9 @@ module LiveEvaluator
         $stdin = original_stdin
       end
 
-      # 評価が成功したか、タイムアウトした場合に変数を取得する
-      # タイピング中の不正な構文（error）による負荷は防ぐ
-      if status == "ok" || status == "timeout"
+      # 評価が成功したか、タイムアウトしたか、あるいは実行時エラーが発生した場合に変数を取得する
+      # タイピング中の不正な構文によるエラーでも、そこまでに定義された変数を可能な限り表示するようにする
+      if status == "ok" || status == "timeout" || status == "error"
         # ローカル変数を取得
         b.local_variables.each do |var|
           begin
